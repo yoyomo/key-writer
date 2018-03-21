@@ -1,13 +1,78 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import {calculateNotes} from './calculate-notes.js';
 
 const notes = calculateNotes();
+let currentlyPlayingKeys = '';
+
+export class LeftMargin extends React.Component {
+  render() {
+    return (
+      <View style={[styles.whiteKey, styles.whiteTopKeyLeftMargin]}/>
+    );
+  }
+}
+
+export class RightMargin extends React.Component {
+  render() {
+    return (
+      <View style={[styles.whiteKey, styles.whiteTopKeyRightMargin, styles.br]}/>
+    );
+  }
+}
+
+playNote = (id,frequency)=>{
+  currentlyPlayingKeys = id;
+  console.log(currentlyPlayingKeys,frequency);
+};
+
+export class D_G_A_Key extends React.Component {
+  render() {
+    return (
+      <TouchableOpacity onPress={()=>playNote(this.props.id,this.props.frequency)}
+       style={[styles.whiteKey, styles.whiteTopKeyD_G_A]}/>
+    );
+  }
+}
+
+export class BlackKey extends React.Component {
+  render() {
+    return (
+      <TouchableOpacity onPress={()=>playNote(this.props.id,this.props.frequency)}
+       style={[styles.blackTopKey]}/>
+    );
+  }
+}
+
+export class F_B_Key extends React.Component {
+  render() {
+    return (
+      <TouchableOpacity onPress={()=>playNote(this.props.id,this.props.frequency)}
+       style={[
+        styles.whiteKey,
+        styles.whiteTopKeyF_B,
+        this.props.br && styles.br]} />
+    );
+  }
+}
+
+export class C_E_Key extends React.Component {
+  render() {
+    return (
+      <TouchableOpacity onPress={()=>playNote(this.props.id,this.props.frequency)}
+       style={[
+        styles.whiteKey,
+        styles.whiteTopKeyC_E,
+        this.props.br && styles.br]}/>
+    );
+  }
+}
 
 export class WhiteBottomKey extends React.Component {
   render() {
     return (
-      <View style={[styles.whiteKey, styles.whiteBottomKey, styles.br]}/>
+      <TouchableOpacity onPress={()=>playNote(this.props.id, this.props.frequency)}
+       style={[styles.whiteKey, styles.whiteBottomKey, styles.br]}/>
     );
   }
 }
@@ -16,18 +81,30 @@ export class TopKeys extends React.Component {
   render() {
     return (
       <View style={styles.topKeys}>
-        <View style={[styles.whiteKey, styles.whiteTopKeyC_E]}/>
-        <View style={[styles.blackTopKey]}/>
-        <View style={[styles.whiteKey, styles.whiteTopKeyD_G_A]}/>
-        <View style={[styles.blackTopKey]}/>
-        <View style={[styles.whiteKey, styles.whiteTopKeyC_E, styles.br]}/>
-        <View style={[styles.whiteKey, styles.whiteTopKeyF_B]}/>
-        <View style={[styles.blackTopKey]}/>
-        <View style={[styles.whiteKey, styles.whiteTopKeyD_G_A]}/>
-        <View style={[styles.blackTopKey]}/>
-        <View style={[styles.whiteKey, styles.whiteTopKeyD_G_A]}/>
-        <View style={[styles.blackTopKey]}/>
-        <View style={[styles.whiteKey, styles.whiteTopKeyF_B, styles.br]}/>
+        <LeftMargin/>
+        {notes.map( (note) => {
+          let id = note.key+note.octave;
+          if (note.key.slice(-1) === "#"){
+            return <BlackKey frequency={note.frequency} id={id} key={id}/>;
+          }
+          switch (note.key) {
+            case 'A':
+              return <D_G_A_Key frequency={note.frequency} id={id} key={id}/>;
+            case 'B':
+              return <F_B_Key frequency={note.frequency} br={true} id={id} key={id}/>;
+            case 'C':
+              return <C_E_Key frequency={note.frequency} id={id} key={id}/>;
+            case 'D':
+              return <D_G_A_Key frequency={note.frequency} id={id} key={id}/>;
+            case 'E':
+              return <C_E_Key br={true} frequency={note.frequency} id={id} key={id}/>;
+            case 'F':
+              return <F_B_Key frequency={note.frequency} id={id} key={id}/>;
+            case 'G':
+              return <D_G_A_Key frequency={note.frequency} id={id} key={id}/>;
+          }
+        })}
+        <RightMargin/>
       </View>
     );
   }
@@ -37,13 +114,16 @@ export class BottomKeys extends React.Component {
   render() {
     return (
       <View style={styles.bottomKeys}>
-        <WhiteBottomKey />
-        <WhiteBottomKey />
-        <WhiteBottomKey />
-        <WhiteBottomKey />
-        <WhiteBottomKey />
-        <WhiteBottomKey />
-        <WhiteBottomKey />
+        {notes.filter((note)=>{
+          if (note.key.slice(-1) === "#"){
+            return false;
+          }
+          return true;
+        }).map( (note) => {
+          let id = note.key+note.octave;
+          return <WhiteBottomKey frequency={note.frequency} id={id} key={id}/>;
+        })}
+
       </View>
     );
   }
@@ -69,7 +149,7 @@ export class Sheet extends React.Component {
     return (
       <View style={styles.sheet}>
         <ScrollView vertical={true}>
-          <Text>{notes[0].key}</Text>
+          <Text>{currentlyPlayingKeys}</Text>
         </ScrollView>
       </View>
     );
@@ -89,17 +169,18 @@ export default class App extends React.Component {
 
 let zoom = 1.5;
 
+const shadow = '#333';
 const styles = StyleSheet.create({
   container: {
-    flex: 10,
+    flex: 1,
   },
   sheet: {
-    flex: 8,
+    height: '80%',
     backgroundColor: 'steelblue',
   },
   keyboard:{
-    flex: 2,
-    backgroundColor: 'skyblue',
+    height: '20%',
+    backgroundColor: shadow,
   },
   topKeys: {
     height: '60%',
@@ -124,9 +205,15 @@ const styles = StyleSheet.create({
   whiteTopKeyF_B: {
     width: 13*zoom,
   },
+  whiteTopKeyLeftMargin: {
+    width: 7*zoom,
+  },
+  whiteTopKeyRightMargin: {
+    width: 9*zoom,
+  },
   br: {
     borderRightWidth: 1,
-    borderColor: '#333',
+    borderColor: shadow,
   },
   blackTopKey: {
     width: 14*zoom,

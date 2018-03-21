@@ -1,20 +1,24 @@
 export function calculateNotes() {
-	let notes = [
-		{key: 'A0', 	alt: '', 	frequency: 27.5000},
-		{key: 'A#0', 	alt: 'Bb0', frequency: 29.1352}
-	];
-	let keys = ['C','D','E','F','G','A','B'];
-	let minimumOctave = 1;
-	let maximumOctave = 7;
+	let notes = [];
+	const keys = ['A','A#','B','C','C#','D','D#','E','F','F#','G','G#'];
+	const numOfKeys = 88;
+	const newOctaveIndex = 3;
+	const baseKeyPosition = 49;
 
-	for(let i=minimumOctave; i <= maximumOctave; i++){
-		for(let j=0; j < keys.length; j++){
-			let key = keys[j] + i;
-			let frequency = 440;
-			notes.push({key: key, frequency: frequency})
-		}
+	let baseFrequency = 440;
+	let octave = 0;
+	let keyIndex = 0;
+
+	let n = 1;
+	while(n <= numOfKeys){
+		let frequency = Math.pow(2,((n-baseKeyPosition)/12)) * baseFrequency;
+		let key = keys[keyIndex];
+		octave = octave + (keyIndex === newOctaveIndex);
+		let alt = key.slice(-1) === "#" ? key[0] + 'b' : '';
+		notes.push({key: key, 	octave: octave,	alt: alt,	frequency: frequency});
+
+		keyIndex = (keyIndex + 1) % keys.length;
+		n++;
 	}
-
-	notes.push({key: 'C8', frequency: 4186.01});
 	return notes;
 }
