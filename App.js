@@ -1,163 +1,145 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity} from 'react-native';
 import {calculateNotes} from './calculate-notes.js';
-
-const notes = calculateNotes();
-let currentlyPlayingKeys = '';
-
-export class LeftMargin extends React.Component {
-  render() {
-    return (
-      <View style={[styles.whiteKey, styles.whiteTopKeyLeftMargin]}/>
-    );
-  }
-}
-
-export class RightMargin extends React.Component {
-  render() {
-    return (
-      <View style={[styles.whiteKey, styles.whiteTopKeyRightMargin, styles.br]}/>
-    );
-  }
-}
-
-playNote = (id,frequency)=>{
-  currentlyPlayingKeys = id;
-  console.log(currentlyPlayingKeys,frequency);
-};
-
-export class D_G_A_Key extends React.Component {
-  render() {
-    return (
-      <TouchableOpacity onPress={()=>playNote(this.props.id,this.props.frequency)}
-       style={[styles.whiteKey, styles.whiteTopKeyD_G_A]}/>
-    );
-  }
-}
-
-export class BlackKey extends React.Component {
-  render() {
-    return (
-      <TouchableOpacity onPress={()=>playNote(this.props.id,this.props.frequency)}
-       style={[styles.blackTopKey]}/>
-    );
-  }
-}
-
-export class F_B_Key extends React.Component {
-  render() {
-    return (
-      <TouchableOpacity onPress={()=>playNote(this.props.id,this.props.frequency)}
-       style={[
-        styles.whiteKey,
-        styles.whiteTopKeyF_B,
-        this.props.br && styles.br]} />
-    );
-  }
-}
-
-export class C_E_Key extends React.Component {
-  render() {
-    return (
-      <TouchableOpacity onPress={()=>playNote(this.props.id,this.props.frequency)}
-       style={[
-        styles.whiteKey,
-        styles.whiteTopKeyC_E,
-        this.props.br && styles.br]}/>
-    );
-  }
-}
-
-export class WhiteBottomKey extends React.Component {
-  render() {
-    return (
-      <TouchableOpacity onPress={()=>playNote(this.props.id, this.props.frequency)}
-       style={[styles.whiteKey, styles.whiteBottomKey, styles.br]}/>
-    );
-  }
-}
-
-export class TopKeys extends React.Component {
-  render() {
-    return (
-      <View style={styles.topKeys}>
-        <LeftMargin/>
-        {notes.map( (note) => {
-          let id = note.key+note.octave;
-          if (note.key.slice(-1) === "#"){
-            return <BlackKey frequency={note.frequency} id={id} key={id}/>;
-          }
-          switch (note.key) {
-            case 'A':
-              return <D_G_A_Key frequency={note.frequency} id={id} key={id}/>;
-            case 'B':
-              return <F_B_Key frequency={note.frequency} br={true} id={id} key={id}/>;
-            case 'C':
-              return <C_E_Key frequency={note.frequency} id={id} key={id}/>;
-            case 'D':
-              return <D_G_A_Key frequency={note.frequency} id={id} key={id}/>;
-            case 'E':
-              return <C_E_Key br={true} frequency={note.frequency} id={id} key={id}/>;
-            case 'F':
-              return <F_B_Key frequency={note.frequency} id={id} key={id}/>;
-            case 'G':
-              return <D_G_A_Key frequency={note.frequency} id={id} key={id}/>;
-          }
-        })}
-        <RightMargin/>
-      </View>
-    );
-  }
-}
-
-export class BottomKeys extends React.Component {
-  render() {
-    return (
-      <View style={styles.bottomKeys}>
-        {notes.filter((note)=>{
-          if (note.key.slice(-1) === "#"){
-            return false;
-          }
-          return true;
-        }).map( (note) => {
-          let id = note.key+note.octave;
-          return <WhiteBottomKey frequency={note.frequency} id={id} key={id}/>;
-        })}
-
-      </View>
-    );
-  }
-}
-
-export class Keyboard extends React.Component {
-  render() {
-    return (
-      <View style={styles.keyboard}>
-        <ScrollView horizontal={true} vertical={false}>
-          <View style={{flexDirection: 'column'}}>
-            <TopKeys/>
-            <BottomKeys/>
-          </View>
-        </ScrollView>
-      </View>
-    );
-  }
-}
-
-export class Sheet extends React.Component {
-  render() {
-    return (
-      <View style={styles.sheet}>
-        <ScrollView vertical={true}>
-          <Text>{currentlyPlayingKeys}</Text>
-        </ScrollView>
-      </View>
-    );
-  }
-}
 
 export default class App extends React.Component {
   render() {
+    let state = {
+      notes: calculateNotes(),
+      currentlyPlayingKeys: 'AAAA',
+    };
+    function LeftMargin() {
+      return (
+        <View style={[styles.whiteKey, styles.whiteTopKeyLeftMargin]}/>
+      );
+    }
+
+    function RightMargin() {
+      return (
+        <View style={[styles.whiteKey, styles.whiteTopKeyRightMargin, styles.br]}/>
+      );
+    }
+
+    function playNote(id,frequency){
+      state = {...state};
+      console.log(state.currentlyPlayingKeys);
+      state.currentlyPlayingKeys = id;
+      console.log(state.currentlyPlayingKeys,frequency);
+      return state;
+    };
+
+    function D_G_A_Key (props){
+      return (
+        <TouchableOpacity onPress={()=>playNote(props.id,props.frequency)}
+         style={[styles.whiteKey, styles.whiteTopKeyD_G_A]}/>
+      );
+    }
+
+    function BlackKey(props){
+      return (
+        <TouchableOpacity onPress={()=>playNote(props.id,props.frequency)}
+         style={[styles.blackTopKey]}/>
+      );
+    }
+
+    function F_B_Key(props){
+      return (
+        <TouchableOpacity onPress={()=>playNote(props.id,props.frequency)}
+         style={[
+          styles.whiteKey,
+          styles.whiteTopKeyF_B,
+          props.br && styles.br]} />
+      );
+    }
+
+    function C_E_Key(props) {
+      return (
+        <TouchableOpacity onPress={()=>playNote(props.id,props.frequency)}
+         style={[
+          styles.whiteKey,
+          styles.whiteTopKeyC_E,
+          props.br && styles.br]}/>
+      );
+    }
+
+    function WhiteBottomKey(props){
+      return (
+        <TouchableOpacity onPress={()=>playNote(props.id, props.frequency)}
+         style={[styles.whiteKey, styles.whiteBottomKey, styles.br]}/>
+      );
+    }
+
+    function TopKeys(){
+      return (
+        <View style={styles.topKeys}>
+          <LeftMargin/>
+          {state.notes.map( (note) => {
+            let id = note.key+note.octave;
+            if (note.key.slice(-1) === "#"){
+              return <BlackKey frequency={note.frequency} id={id} key={id}/>;
+            }
+            switch (note.key) {
+              case 'A':
+                return <D_G_A_Key frequency={note.frequency} id={id} key={id}/>;
+              case 'B':
+                return <F_B_Key frequency={note.frequency} br={true} id={id} key={id}/>;
+              case 'C':
+                return <C_E_Key frequency={note.frequency} id={id} key={id}/>;
+              case 'D':
+                return <D_G_A_Key frequency={note.frequency} id={id} key={id}/>;
+              case 'E':
+                return <C_E_Key br={true} frequency={note.frequency} id={id} key={id}/>;
+              case 'F':
+                return <F_B_Key frequency={note.frequency} id={id} key={id}/>;
+              case 'G':
+                return <D_G_A_Key frequency={note.frequency} id={id} key={id}/>;
+            }
+          })}
+          <RightMargin/>
+        </View>
+      );
+    }
+
+    function BottomKeys() {
+      return (
+        <View style={styles.bottomKeys}>
+          {state.notes.filter((note)=>{
+            if (note.key.slice(-1) === "#"){
+              return false;
+            }
+            return true;
+          }).map( (note) => {
+            let id = note.key+note.octave;
+            return <WhiteBottomKey frequency={note.frequency} id={id} key={id}/>;
+          })}
+
+        </View>
+      );
+    }
+
+    function Keyboard() {
+      return (
+        <View style={styles.keyboard}>
+          <ScrollView horizontal={true} vertical={false}>
+            <View style={{flexDirection: 'column'}}>
+              <TopKeys/>
+              <BottomKeys/>
+            </View>
+          </ScrollView>
+        </View>
+      );
+    }
+
+    function Sheet(state) {
+      return (
+        <View style={styles.sheet}>
+          <ScrollView vertical={true}>
+            <Text>currently playing keys: {state.currentlyPlayingKeys}</Text>
+          </ScrollView>
+        </View>
+      );
+    }
+
     return (
       <View style={styles.container}>
         <Sheet/>
