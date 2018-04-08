@@ -15,7 +15,7 @@ export function calculateNotes() {
 		let key = keys[keyIndex];
 		octave = octave + (keyIndex === newOctaveIndex);
 		let alt = key.slice(-1) === "#" ? key[0] + 'b' : '';
-		notes.push({key: key, 	octave: octave,	alt: alt,	frequency: frequency});
+		notes.push({id: n, key: key, 	octave: octave,	alt: alt,	frequency: frequency});
 
 		keyIndex = (keyIndex + 1) % keys.length;
 		n++;
