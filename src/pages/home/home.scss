@@ -1,7 +1,17 @@
 page-home {
   $zoom: 1px;
+
+  .screen{
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex: 0 0 100%;
+    flex-direction: column;
+    display: flex;
+  }
+
   .sheet {
-    height: 80%;
+    flex: 0 0 80%;
+    flex-direction: column;
     background-color: #555;
     display: block;
   }
@@ -9,27 +19,29 @@ page-home {
   .note-segment {
     height: 64px;
     background-color: #555;
+    flex-direction: row;
     display: inline-block;
   }
 
   .keyboard {
-    height: 20%;
+    flex: 0 0 20%;
     background-color: #555;
     display: block;
   }
 
   .top-keys {
-    height: 60%;
+    flex: 0 0 60%;
     display: inline-block;
   }
 
   .bottom-keys {
-    height: 40%;
+    flex: 0 0 40%;
     display: inline-block;
   }
 
-  ion-scroll {
+  ion-row {
     white-space: nowrap;
+    overflow-x: auto !important;
   }
 
   @mixin white-key {

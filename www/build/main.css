@@ -25678,8 +25678,34 @@ ion-navbar.toolbar {
   min-height: calc(46px + env(safe-area-inset-bottom));
 }
 
+page-home .screen {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 100%;
+  -ms-flex: 0 0 100%;
+  flex: 0 0 100%;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
 page-home .sheet {
-  height: 80%;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 80%;
+  -ms-flex: 0 0 80%;
+  flex: 0 0 80%;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   background-color: #555;
   display: block;
 }
@@ -25687,27 +25713,42 @@ page-home .sheet {
 page-home .note-segment {
   height: 64px;
   background-color: #555;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
   display: inline-block;
 }
 
 page-home .keyboard {
-  height: 20%;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 20%;
+  -ms-flex: 0 0 20%;
+  flex: 0 0 20%;
   background-color: #555;
   display: block;
 }
 
 page-home .top-keys {
-  height: 60%;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 60%;
+  -ms-flex: 0 0 60%;
+  flex: 0 0 60%;
   display: inline-block;
 }
 
 page-home .bottom-keys {
-  height: 40%;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 40%;
+  -ms-flex: 0 0 40%;
+  flex: 0 0 40%;
   display: inline-block;
 }
 
-page-home ion-scroll {
+page-home ion-row {
   white-space: nowrap;
+  overflow-x: auto !important;
 }
 
 page-home .bottom-key {
