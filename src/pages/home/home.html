@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Key Writer
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <div class="screen">
+  	<ion-grid class="sheet">
+  		<ion-row *ngFor="let segment of segments.slice().reverse(); let segmentIndex = index"
+               [ngClass]="'note-segment '+(currentSegmentIndex === (segments.length - 1 - segmentIndex) ? 'selected-segment' : '')"
+               (click)="selectSegment(segments.length - 1 - segmentIndex)">
+        <ion-col [ngClass]="'left-margin ' + (segment.noteToggles[0] ? 'on' : 'off')"></ion-col>
+        <ion-col *ngFor="let noteOfSegment of segment.noteToggles; let i = index"
+                 [ngClass]="(noteOfSegment ? 'on' : 'off') + ' '+
+                  (notes[i].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[i].key) + (i !== notes.length-1 ? ' br' : '')">
+  				<!--{{notes[i].key}}-->
+  			</ion-col>
+        <ion-col [ngClass]="'right-margin ' + (segment.noteToggles[segment.noteToggles.length-1] ? 'on' : 'off')"></ion-col>
+      </ion-row>
+  	</ion-grid>
+
+  	<div class="keyboard">
+  		<ion-grid class="top-keys">
+  			<ion-col class="white-key left-margin" (click)="playNote(notes[0])" ></ion-col>
+  			<ion-col *ngFor="let note of notes"
+                 [ngClass]="(note.key.slice(-1) === '#') ? 'black-top-key' : 'white-top-key-'+note.key"
+                 (click)="playNote(note)">
+  				<!--{{note.key + note.octave}}-->
+  			</ion-col>
+  			<ion-col class="white-key right-margin br" (click)="playNote(notes[notes.length-1])"></ion-col>
+  		</ion-grid>
+
+  		<ion-grid class="bottom-keys">
+  			<ion-col class="bottom-key" *ngFor="let whiteBottomKey of whiteBottomKeys" (click)="playNote(whiteBottomKey)">
+  				<!--{{whiteBottomKey.key + whiteBottomKey.octave}}-->
+  			</ion-col>
+  		</ion-grid>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,160 @@
+page-home {
+  $zoom: 1px;
+  .sheet {
+    height: 80%;
+    background-color: #555;
+    display: block;
+  }
+
+  .note-segment {
+    height: 64px;
+    background-color: #555;
+    display: inline-block;
+  }
+
+  .keyboard {
+    height: 20%;
+    background-color: #555;
+    display: block;
+  }
+
+  .top-keys {
+    height: 60%;
+    display: inline-block;
+  }
+
+  .bottom-keys {
+    height: 40%;
+    display: inline-block;
+  }
+
+  ion-scroll {
+    white-space: nowrap;
+  }
+
+  @mixin white-key {
+    background-color: #fff;
+  }
+
+  @mixin br {
+    border-right: 1px solid #555;
+  }
+
+  .bottom-key {
+    @include white-key;
+    @include br;
+    width: 24 * $zoom;
+  }
+
+  @mixin C_E {
+    width: 15 * $zoom;
+  }
+
+  @mixin D_G_A {
+    width: 14 * $zoom;
+  }
+
+  @mixin F_B {
+    width: 13 * $zoom;
+  }
+
+  .left-margin {
+    width: 7 * $zoom;
+  }
+
+  .right-margin {
+    width: 9 * $zoom;
+  }
+
+  .on {
+    background-color: darkorange;
+  }
+  .off {
+    background-color: gray;
+  }
+  .selected-segment {
+    background-color: darkgray;
+  }
+
+  .white-key {
+    @include white-key;
+  }
+
+  .br {
+    @include br;
+  }
+
+  .w-C {
+    @include C_E;
+  }
+  .w-E {
+    @include C_E;
+  }
+
+  .w-D {
+    @include D_G_A;
+  }
+  .w-G {
+    @include D_G_A;
+  }
+  .w-A {
+    @include D_G_A;
+  }
+
+  .w-F {
+    @include F_B;
+  }
+  .w-B {
+    @include F_B;
+  }
+
+  @mixin w-black {
+    width: 14 * $zoom;
+  }
+
+  .w-black {
+    @include w-black;
+  }
+
+  .black-top-key {
+    @include w-black;
+    background-color: #444;
+  }
+
+  .white-top-key-C {
+    @include white-key;
+    @include C_E;
+  }
+
+  .white-top-key-E {
+    @include white-key;
+    @include C_E;
+    @include br;
+  }
+
+  .white-top-key-D {
+    @include white-key;
+    @include D_G_A;
+  }
+  .white-top-key-G {
+    @include white-key;
+    @include D_G_A;
+  }
+  .white-top-key-A {
+    @include white-key;
+    @include D_G_A;
+  }
+
+  .white-top-key-F {
+    @include white-key;
+    @include F_B;
+  }
+
+  .white-top-key-B {
+    @include white-key;
+    @include F_B;
+    @include br;
+  }
+
+}
+
