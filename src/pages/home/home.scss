@@ -3,45 +3,42 @@ page-home {
 
   .screen{
     overflow-x: auto;
-    overflow-y: hidden;
+    height: 100%;
     flex: 0 0 100%;
     flex-direction: column;
     display: flex;
+    background-color: #555;
   }
 
   .sheet {
     flex: 0 0 80%;
     flex-direction: column;
-    background-color: #555;
-    display: block;
+    display: flex;
   }
 
   .note-segment {
     height: 64px;
-    background-color: #555;
+    flex: 0 0 64px;
     flex-direction: row;
-    display: inline-block;
+    display: flex;
   }
 
   .keyboard {
     flex: 0 0 20%;
-    background-color: #555;
-    display: block;
+    flex-direction: column;
+    display: flex;
   }
 
   .top-keys {
     flex: 0 0 60%;
-    display: inline-block;
+    flex-direction: row;
+    display: flex;
   }
 
   .bottom-keys {
     flex: 0 0 40%;
-    display: inline-block;
-  }
-
-  ion-row {
-    white-space: nowrap;
-    overflow-x: auto !important;
+    flex-direction: row;
+    display: flex;
   }
 
   @mixin white-key {
@@ -55,26 +52,32 @@ page-home {
   .bottom-key {
     @include white-key;
     @include br;
+    flex: 0 0 (24 * $zoom);
     width: 24 * $zoom;
   }
 
   @mixin C_E {
+    flex: 0 0 (15 * $zoom);
     width: 15 * $zoom;
   }
 
   @mixin D_G_A {
+    flex: 0 0 (14 * $zoom);
     width: 14 * $zoom;
   }
 
   @mixin F_B {
+    flex: 0 0 (13 * $zoom);
     width: 13 * $zoom;
   }
 
   .left-margin {
+    flex: 0 0 (7 * $zoom);
     width: 7 * $zoom;
   }
 
   .right-margin {
+    flex: 0 0 (9 * $zoom);
     width: 9 * $zoom;
   }
 
@@ -121,6 +124,7 @@ page-home {
   }
 
   @mixin w-black {
+    flex: 0 0 (14 * $zoom);
     width: 14 * $zoom;
   }
 

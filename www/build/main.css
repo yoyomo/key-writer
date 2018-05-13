@@ -25680,7 +25680,7 @@ ion-navbar.toolbar {
 
 page-home .screen {
   overflow-x: auto;
-  overflow-y: hidden;
+  height: 100%;
   -webkit-box-flex: 0;
   -webkit-flex: 0 0 100%;
   -ms-flex: 0 0 100%;
@@ -25694,6 +25694,7 @@ page-home .screen {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  background-color: #555;
 }
 
 page-home .sheet {
@@ -25706,19 +25707,27 @@ page-home .sheet {
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
-  background-color: #555;
-  display: block;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 page-home .note-segment {
   height: 64px;
-  background-color: #555;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 64px;
+  -ms-flex: 0 0 64px;
+  flex: 0 0 64px;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
   -webkit-flex-direction: row;
   -ms-flex-direction: row;
   flex-direction: row;
-  display: inline-block;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 page-home .keyboard {
@@ -25726,8 +25735,15 @@ page-home .keyboard {
   -webkit-flex: 0 0 20%;
   -ms-flex: 0 0 20%;
   flex: 0 0 20%;
-  background-color: #555;
-  display: block;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 page-home .top-keys {
@@ -25735,7 +25751,15 @@ page-home .top-keys {
   -webkit-flex: 0 0 60%;
   -ms-flex: 0 0 60%;
   flex: 0 0 60%;
-  display: inline-block;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 page-home .bottom-keys {
@@ -25743,25 +25767,40 @@ page-home .bottom-keys {
   -webkit-flex: 0 0 40%;
   -ms-flex: 0 0 40%;
   flex: 0 0 40%;
-  display: inline-block;
-}
-
-page-home ion-row {
-  white-space: nowrap;
-  overflow-x: auto !important;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 page-home .bottom-key {
   background-color: #fff;
   border-right: 1px solid #555;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 24px;
+  -ms-flex: 0 0 24px;
+  flex: 0 0 24px;
   width: 24px;
 }
 
 page-home .left-margin {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 7px;
+  -ms-flex: 0 0 7px;
+  flex: 0 0 7px;
   width: 7px;
 }
 
 page-home .right-margin {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 9px;
+  -ms-flex: 0 0 9px;
+  flex: 0 0 9px;
   width: 9px;
 }
 
@@ -25786,75 +25825,139 @@ page-home .br {
 }
 
 page-home .w-C {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 15px;
+  -ms-flex: 0 0 15px;
+  flex: 0 0 15px;
   width: 15px;
 }
 
 page-home .w-E {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 15px;
+  -ms-flex: 0 0 15px;
+  flex: 0 0 15px;
   width: 15px;
 }
 
 page-home .w-D {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 14px;
+  -ms-flex: 0 0 14px;
+  flex: 0 0 14px;
   width: 14px;
 }
 
 page-home .w-G {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 14px;
+  -ms-flex: 0 0 14px;
+  flex: 0 0 14px;
   width: 14px;
 }
 
 page-home .w-A {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 14px;
+  -ms-flex: 0 0 14px;
+  flex: 0 0 14px;
   width: 14px;
 }
 
 page-home .w-F {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 13px;
+  -ms-flex: 0 0 13px;
+  flex: 0 0 13px;
   width: 13px;
 }
 
 page-home .w-B {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 13px;
+  -ms-flex: 0 0 13px;
+  flex: 0 0 13px;
   width: 13px;
 }
 
 page-home .w-black {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 14px;
+  -ms-flex: 0 0 14px;
+  flex: 0 0 14px;
   width: 14px;
 }
 
 page-home .black-top-key {
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 14px;
+  -ms-flex: 0 0 14px;
+  flex: 0 0 14px;
   width: 14px;
   background-color: #444;
 }
 
 page-home .white-top-key-C {
   background-color: #fff;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 15px;
+  -ms-flex: 0 0 15px;
+  flex: 0 0 15px;
   width: 15px;
 }
 
 page-home .white-top-key-E {
   background-color: #fff;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 15px;
+  -ms-flex: 0 0 15px;
+  flex: 0 0 15px;
   width: 15px;
   border-right: 1px solid #555;
 }
 
 page-home .white-top-key-D {
   background-color: #fff;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 14px;
+  -ms-flex: 0 0 14px;
+  flex: 0 0 14px;
   width: 14px;
 }
 
 page-home .white-top-key-G {
   background-color: #fff;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 14px;
+  -ms-flex: 0 0 14px;
+  flex: 0 0 14px;
   width: 14px;
 }
 
 page-home .white-top-key-A {
   background-color: #fff;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 14px;
+  -ms-flex: 0 0 14px;
+  flex: 0 0 14px;
   width: 14px;
 }
 
 page-home .white-top-key-F {
   background-color: #fff;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 13px;
+  -ms-flex: 0 0 13px;
+  flex: 0 0 13px;
   width: 13px;
 }
 
 page-home .white-top-key-B {
   background-color: #fff;
+  -webkit-box-flex: 0;
+  -webkit-flex: 0 0 13px;
+  -ms-flex: 0 0 13px;
+  flex: 0 0 13px;
   width: 13px;
   border-right: 1px solid #555;
 }
