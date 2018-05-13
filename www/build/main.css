@@ -25679,7 +25679,7 @@ ion-navbar.toolbar {
 }
 
 page-home .screen {
-  overflow-x: auto;
+  overflow: auto;
   height: 100%;
   -webkit-box-flex: 0;
   -webkit-flex: 0 0 100%;
@@ -25695,6 +25695,15 @@ page-home .screen {
   display: -ms-flexbox;
   display: flex;
   background-color: #555;
+  bottom: 0;
+}
+
+page-home .book {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
 page-home .sheet {
@@ -25703,10 +25712,10 @@ page-home .sheet {
   -ms-flex: 0 0 80%;
   flex: 0 0 80%;
   -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
+  -webkit-box-direction: reverse;
+  -webkit-flex-direction: column-reverse;
+  -ms-flex-direction: column-reverse;
+  flex-direction: column-reverse;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;

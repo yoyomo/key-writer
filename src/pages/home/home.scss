@@ -2,17 +2,23 @@ page-home {
   $zoom: 1px;
 
   .screen{
-    overflow-x: auto;
+    overflow: auto;
+    //overflow-y: hidden;
     height: 100%;
     flex: 0 0 100%;
     flex-direction: column;
     display: flex;
     background-color: #555;
+    bottom: 0;
+  }
+
+  .book {
+    flex-direction: column;
   }
 
   .sheet {
     flex: 0 0 80%;
-    flex-direction: column;
+    flex-direction: column-reverse;
     display: flex;
   }
 
