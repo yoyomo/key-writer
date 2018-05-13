@@ -1,0 +1,176 @@
+page-home {
+  $zoom: 1px;
+
+  .screen{
+    overflow-x: auto;
+    height: 100%;
+    flex: 0 0 100%;
+    flex-direction: column;
+    display: flex;
+    background-color: #555;
+  }
+
+  .sheet {
+    flex: 0 0 80%;
+    flex-direction: column;
+    display: flex;
+  }
+
+  .note-segment {
+    height: 64px;
+    flex: 0 0 64px;
+    flex-direction: row;
+    display: flex;
+  }
+
+  .keyboard {
+    flex: 0 0 20%;
+    flex-direction: column;
+    display: flex;
+  }
+
+  .top-keys {
+    flex: 0 0 60%;
+    flex-direction: row;
+    display: flex;
+  }
+
+  .bottom-keys {
+    flex: 0 0 40%;
+    flex-direction: row;
+    display: flex;
+  }
+
+  @mixin white-key {
+    background-color: #fff;
+  }
+
+  @mixin br {
+    border-right: 1px solid #555;
+  }
+
+  .bottom-key {
+    @include white-key;
+    @include br;
+    flex: 0 0 (24 * $zoom);
+    width: 24 * $zoom;
+  }
+
+  @mixin C_E {
+    flex: 0 0 (15 * $zoom);
+    width: 15 * $zoom;
+  }
+
+  @mixin D_G_A {
+    flex: 0 0 (14 * $zoom);
+    width: 14 * $zoom;
+  }
+
+  @mixin F_B {
+    flex: 0 0 (13 * $zoom);
+    width: 13 * $zoom;
+  }
+
+  .left-margin {
+    flex: 0 0 (7 * $zoom);
+    width: 7 * $zoom;
+  }
+
+  .right-margin {
+    flex: 0 0 (9 * $zoom);
+    width: 9 * $zoom;
+  }
+
+  .on {
+    background-color: darkorange;
+  }
+  .off {
+    background-color: gray;
+  }
+  .selected-segment {
+    background-color: darkgray;
+  }
+
+  .white-key {
+    @include white-key;
+  }
+
+  .br {
+    @include br;
+  }
+
+  .w-C {
+    @include C_E;
+  }
+  .w-E {
+    @include C_E;
+  }
+
+  .w-D {
+    @include D_G_A;
+  }
+  .w-G {
+    @include D_G_A;
+  }
+  .w-A {
+    @include D_G_A;
+  }
+
+  .w-F {
+    @include F_B;
+  }
+  .w-B {
+    @include F_B;
+  }
+
+  @mixin w-black {
+    flex: 0 0 (14 * $zoom);
+    width: 14 * $zoom;
+  }
+
+  .w-black {
+    @include w-black;
+  }
+
+  .black-top-key {
+    @include w-black;
+    background-color: #444;
+  }
+
+  .white-top-key-C {
+    @include white-key;
+    @include C_E;
+  }
+
+  .white-top-key-E {
+    @include white-key;
+    @include C_E;
+    @include br;
+  }
+
+  .white-top-key-D {
+    @include white-key;
+    @include D_G_A;
+  }
+  .white-top-key-G {
+    @include white-key;
+    @include D_G_A;
+  }
+  .white-top-key-A {
+    @include white-key;
+    @include D_G_A;
+  }
+
+  .white-top-key-F {
+    @include white-key;
+    @include F_B;
+  }
+
+  .white-top-key-B {
+    @include white-key;
+    @include F_B;
+    @include br;
+  }
+
+}
+

@@ -1,0 +1,8 @@
+{
+  "name": "key-writer",
+  "app_id": "a49647f3",
+  "type": "ionic-angular",
+  "integrations": {
+    "cordova": {}
+  }
+}
