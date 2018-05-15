@@ -15,12 +15,17 @@
              (click)="selectSegment(segmentIndex)">
           <div [ngClass]="'left-margin ' + (segment.noteToggles[0] ? 'on' : 'off')"></div>
           <div *ngFor="let noteOfSegment of segment.noteToggles; let i = index"
-               [ngClass]="(noteOfSegment ? 'on' : 'off') + ' '+
+               [ngClass]="'note-of-segment ' + (noteOfSegment ? 'on' : 'off') + ' '+
                   (notes[i].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[i].key) + (i !== notes.length-1 ? ' br' : '')">
             <!--{{notes[i].key}}-->
           </div>
           <div
               [ngClass]="'right-margin ' + (segment.noteToggles[segment.noteToggles.length-1] ? 'on' : 'off')"></div>
+          <div class="note-segment-control">
+            <div class="duration">{{segment.duration}}</div>
+            <div class="add-note-segment">+</div>
+          </div>
+          <div class="control-offset"></div>
         </div>
       </div>
     </div>

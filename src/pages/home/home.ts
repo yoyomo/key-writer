@@ -17,6 +17,7 @@ export class HomePage {
     let screen = document.getElementById("screen");
     if (screen) {
       screen.scrollTop = screen.scrollHeight;
+      screen.scrollLeft = (screen.scrollWidth - screen.clientWidth) / 2;
     }
   }
 

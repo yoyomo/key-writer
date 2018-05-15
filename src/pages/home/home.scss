@@ -1,5 +1,6 @@
 page-home {
   $zoom: 1px;
+  $width-note-segment-control: 64px;
 
   .screen{
     overflow: auto;
@@ -13,11 +14,13 @@ page-home {
   }
 
   .book {
+    flex: 0 0 80%;
     flex-direction: column;
+    display: flex;
   }
 
   .sheet {
-    flex: 0 0 80%;
+    flex: 0 0 100%;
     flex-direction: column-reverse;
     display: flex;
   }
@@ -27,6 +30,33 @@ page-home {
     flex: 0 0 64px;
     flex-direction: row;
     display: flex;
+  }
+
+  .note-segment-control{
+    background-color: black;
+    color: white;
+    position:absolute;
+    right: 0;
+    height: inherit;
+    width: $width-note-segment-control;
+    flex: 0 0 $width-note-segment-control;
+    flex-direction: column;
+    display: flex;
+  }
+
+  .control-offset {
+    $width-note-segment-control: 64px;
+  }
+
+  .duration {
+  }
+
+  .add-note-segment {
+
+  }
+
+  .control-offset {
+    padding-right: $width-note-segment-control;
   }
 
   .keyboard {
