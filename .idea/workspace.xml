@@ -6,9 +6,6 @@
       <change beforePath="$PROJECT_DIR$/.sourcemaps/main.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/.sourcemaps/main.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/home/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/home/home.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/home/home.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/home/home.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/home/home.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/home/home.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/www/build/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/www/build/main.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/www/build/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/build/main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/build/vendor.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/www/build/vendor.js.map" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
@@ -23,11 +20,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="home.ts" pinned="false" current-in-tab="true">
+      <file leaf-file-name="home.ts" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/pages/home/home.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="19" column="71" selection-start-line="19" selection-start-column="71" selection-end-line="19" selection-end-column="71" />
+            <state relative-caret-position="15">
+              <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
             </state>
           </provider>
         </entry>
@@ -35,17 +32,20 @@
       <file leaf-file-name="home.scss" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/pages/home/home.scss">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="19" lean-forward="true" selection-start-line="8" selection-start-column="19" selection-end-line="8" selection-end-column="19" />
+            <state relative-caret-position="375">
+              <caret line="36" column="16" selection-start-line="36" selection-start-column="16" selection-end-line="36" selection-end-column="16" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="home.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="home.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/pages/home/home.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="32" column="19" selection-start-line="32" selection-start-column="19" selection-end-line="32" selection-end-column="19" />
+            <state relative-caret-position="493">
+              <caret line="40" column="83" selection-start-line="40" selection-start-column="83" selection-end-line="40" selection-end-column="83" />
+              <folding>
+                <element signature="n#style#0;n#svg#0;n#button#0;n#div#3;n#div#0;n#div#0;n#div#0;n#div#0;n#ion-content#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -67,9 +67,9 @@
         <option value="$PROJECT_DIR$/src/app/app.component.ts" />
         <option value="$PROJECT_DIR$/node_modules/ionic-angular/css/ionic.min.css" />
         <option value="$PROJECT_DIR$/node_modules/ionic-angular/components/content/content.metadata.json" />
+        <option value="$PROJECT_DIR$/src/pages/home/home.ts" />
         <option value="$PROJECT_DIR$/src/pages/home/home.scss" />
         <option value="$PROJECT_DIR$/src/pages/home/home.html" />
-        <option value="$PROJECT_DIR$/src/pages/home/home.ts" />
       </list>
     </option>
   </component>
@@ -188,12 +188,13 @@
       <workItem from="1526095922318" duration="3936000" />
       <workItem from="1526173729413" duration="5303000" />
       <workItem from="1526336896692" duration="471000" />
-      <workItem from="1526338309483" duration="2541000" />
+      <workItem from="1526338309483" duration="2657000" />
+      <workItem from="1526599511885" duration="3201000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="12251000" />
+    <option name="totallyTimeSpent" value="15568000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-114" y="32" width="1053" height="807" extended-state="0" />
@@ -205,8 +206,8 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info id="npm" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Run" order="2" />
+      <window_info id="npm" order="2" side_tool="true" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -247,6 +248,30 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/pages/home/home.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="24" lean-forward="true" selection-start-line="5" selection-start-column="24" selection-end-line="5" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/pages/home/home.scss">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="19" lean-forward="true" selection-start-line="8" selection-start-column="19" selection-end-line="8" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/pages/home/home.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="480">
+          <caret line="32" column="19" selection-start-line="32" selection-start-column="19" selection-end-line="32" selection-end-column="19" />
+          <folding>
+            <element signature="n#style#0;n#svg#0;n#button#0;n#div#3;n#div#0;n#div#0;n#div#0;n#div#0;n#ion-content#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/pages/home/home.scss">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="510">
@@ -327,24 +352,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/pages/home/home.html">
+    <entry file="file://$PROJECT_DIR$/src/pages/home/home.ts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="32" column="19" selection-start-line="32" selection-start-column="19" selection-end-line="32" selection-end-column="19" />
+        <state relative-caret-position="15">
+          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/pages/home/home.scss">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="19" lean-forward="true" selection-start-line="8" selection-start-column="19" selection-end-line="8" selection-end-column="19" />
+        <state relative-caret-position="375">
+          <caret line="36" column="16" selection-start-line="36" selection-start-column="16" selection-end-line="36" selection-end-column="16" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/pages/home/home.ts">
+    <entry file="file://$PROJECT_DIR$/src/pages/home/home.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="19" column="71" selection-start-line="19" selection-start-column="71" selection-end-line="19" selection-end-column="71" />
+        <state relative-caret-position="493">
+          <caret line="40" column="83" selection-start-line="40" selection-start-column="83" selection-end-line="40" selection-end-column="83" />
+          <folding>
+            <element signature="n#style#0;n#svg#0;n#button#0;n#div#3;n#div#0;n#div#0;n#div#0;n#div#0;n#ion-content#0;n#!!top" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
