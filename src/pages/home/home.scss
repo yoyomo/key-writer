@@ -32,21 +32,8 @@ page-home {
     display: flex;
   }
 
-  .note-segment-control{
-    background-color: black;
-    opacity: 0.7;
-    color: white;
-    position:absolute;
-    right: 0;
-    height: inherit;
-    width: $width-note-segment-control;
-    flex: 0 0 $width-note-segment-control;
-    flex-direction: column;
-    display: flex;
-  }
-
-  .control-offset {
-    $width-note-segment-control: 64px;
+  .note-of-segment{
+    border-radius: 10px;
   }
 
   .duration {
@@ -108,6 +95,11 @@ page-home {
     width: 13 * $zoom;
   }
 
+  @mixin w-black {
+    flex: 0 0 (14 * $zoom);
+    width: 14 * $zoom;
+  }
+
   .left-margin {
     flex: 0 0 (7 * $zoom);
     width: 7 * $zoom;
@@ -119,12 +111,15 @@ page-home {
   }
 
   .on {
+    background-color: orange;
+  }
+  .on.w-black{
     background-color: darkorange;
   }
   .off {
     background-color: gray;
   }
-  .selected-segment {
+  .note-segment.selected-segment {
     background-color: darkgray;
   }
 
@@ -158,11 +153,6 @@ page-home {
   }
   .w-B {
     @include F_B;
-  }
-
-  @mixin w-black {
-    flex: 0 0 (14 * $zoom);
-    width: 14 * $zoom;
   }
 
   .w-black {

@@ -25747,27 +25747,8 @@ page-home .note-segment {
   display: flex;
 }
 
-page-home .note-segment-control {
-  background-color: black;
-  opacity: 0.7;
-  color: white;
-  position: absolute;
-  right: 0;
-  height: inherit;
-  width: 64px;
-  -webkit-box-flex: 0;
-  -webkit-flex: 0 0 64px;
-  -ms-flex: 0 0 64px;
-  flex: 0 0 64px;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
+page-home .note-of-segment {
+  border-radius: 10px;
 }
 
 page-home .control-offset {
@@ -25849,6 +25830,10 @@ page-home .right-margin {
 }
 
 page-home .on {
+  background-color: orange;
+}
+
+page-home .on.w-black {
   background-color: darkorange;
 }
 
@@ -25856,7 +25841,7 @@ page-home .off {
   background-color: gray;
 }
 
-page-home .selected-segment {
+page-home .note-segment.selected-segment {
   background-color: darkgray;
 }
 
