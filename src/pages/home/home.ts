@@ -13,7 +13,7 @@ export class HomePage {
   currentSegmentIndex: number;
 
   //scrolls to bottom whenever the page has loaded
-  ionViewDidEnter() {
+  static ionViewDidEnter() {
     let screen = document.getElementById("screen");
     if (screen) {
       screen.scrollTop = screen.scrollHeight;
@@ -47,6 +47,14 @@ export class HomePage {
     //play all note frequencies according to this.segments[segmentIndex].noteToggles
     // for a duration of this.segments[segmentIndex].duration according to defined BPM
     return segmentIndex;
+  }
+
+  decreaseDuration(segment: SegmentsInterface){
+    segment.duration = segment.duration / 2;
+  }
+
+  increaseDuration(segment: SegmentsInterface){
+    segment.duration = segment.duration * 2;
   }
 
 }

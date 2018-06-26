@@ -1,11 +1,11 @@
 <ion-header>
   <ion-navbar align="center">
     <ion-buttons left>
-    <button ion-button icon-only class="add-note-segment">
-      <ion-icon name="remove"></ion-icon>
-    </button>
+      <button ion-button icon-only class="add-note-segment">
+        <ion-icon name="remove"></ion-icon>
+      </button>
     </ion-buttons>
-    <ion-title >
+    <ion-title>
       Key Writer
     </ion-title>
     <ion-buttons right>
@@ -23,7 +23,7 @@
 <ion-content>
   <div class="screen" id="screen">
     <div class="book">
-      <div class="sheet" >
+      <div class="sheet">
         <div *ngFor="let segment of segments; let segmentIndex = index"
              [ngClass]="'note-segment '+(currentSegmentIndex === segmentIndex ? 'selected-segment' : '')"
              (click)="selectSegment(segmentIndex)">
@@ -35,10 +35,42 @@
           </div>
           <div
               [ngClass]="'right-margin br ' + (segment.noteToggles[segment.noteToggles.length-1] ? 'on' : 'off')"></div>
-              <button ion-button icon-only color="light" class="duration" (click)="changeDuration(segment)">
-                <img src="../../assets/imgs/negra.svg" width="16px" height="16px">
-              </button>
+          <div>
+            <button ion-button icon-only color="light" class="duration" (click)="decreaseDuration(segment)">
+              -
+            </button>
           </div>
+          <div *ngIf="(segment.duration === 0.25)">
+            <button ion-button icon-only color="light" class="duration">
+              <img src="../../assets/imgs/semicorchea.svg" width="16px" height="16px">
+            </button>
+          </div>
+          <div *ngIf="(segment.duration === 0.5)">
+            <button ion-button icon-only color="light" class="duration">
+              <img src="../../assets/imgs/corchea.svg" width="16px" height="16px">
+            </button>
+          </div>
+          <div *ngIf="(segment.duration === 1)">
+            <button ion-button icon-only color="light" class="duration">
+              <img src="../../assets/imgs/negra.svg" width="16px" height="16px">
+            </button>
+          </div>
+          <div *ngIf="(segment.duration === 2)">
+            <button ion-button icon-only color="light" class="duration" >
+              <img src="../../assets/imgs/blanca.svg" width="16px" height="16px">
+            </button>
+          </div>
+          <div *ngIf="(segment.duration === 4)">
+            <button ion-button icon-only color="light" class="duration">
+              <img src="../../assets/imgs/redonda.svg" width="16px" height="16px">
+            </button>
+          </div>
+          <div>
+            <button ion-button icon-only color="light" class="duration" (click)="increaseDuration(segment)">
+              +
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -48,7 +80,7 @@
         <div *ngFor="let note of notes" col-1
              [ngClass]="(note.key.slice(-1) === '#') ? 'black-top-key' : 'white-top-key-'+note.key"
              (click)="playNote(note)">
-          <!--{{note.key + note.octave}}-->
+          <!--<div class="absolute">{{note.key + note.octave}}</div>-->
         </div>
         <div class="white-key right-margin br" (click)="playNote(notes[notes.length-1])"></div>
       </div>
@@ -56,7 +88,7 @@
       <div class="bottom-keys">
         <div class="bottom-key" *ngFor="let whiteBottomKey of whiteBottomKeys"
              (click)="playNote(whiteBottomKey)">
-          <!--{{whiteBottomKey.key + whiteBottomKey.octave}}-->
+          <div class="absolute gray">{{whiteBottomKey.key + whiteBottomKey.octave}}</div>
         </div>
       </div>
     </div>

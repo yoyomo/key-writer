@@ -25678,6 +25678,14 @@ ion-navbar.toolbar {
   min-height: calc(46px + env(safe-area-inset-bottom));
 }
 
+.gray {
+  color: gray;
+}
+
+.darkgray {
+  color: darkgray;
+}
+
 page-home .screen {
   overflow: auto;
   height: 100%;
@@ -25749,10 +25757,6 @@ page-home .note-segment {
 
 page-home .note-of-segment {
   border-radius: 10px;
-}
-
-page-home .control-offset {
-  padding-right: 64px;
 }
 
 page-home .keyboard {

@@ -1,6 +1,6 @@
 page-home {
   $zoom: 1px;
-  $width-note-segment-control: 64px;
+  $width-note-segment-control: 1;
 
   .screen{
     overflow: auto;
@@ -26,8 +26,8 @@ page-home {
   }
 
   .note-segment {
-    height: 64px;
-    flex: 0 0 64px;
+    height: 64px * $width-note-segment-control;
+    flex: 0 0 64px * $width-note-segment-control;
     flex-direction: row;
     display: flex;
   }
@@ -41,10 +41,6 @@ page-home {
 
   .add-note-segment {
 
-  }
-
-  .control-offset {
-    padding-right: $width-note-segment-control;
   }
 
   .keyboard {
