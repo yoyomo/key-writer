@@ -23,7 +23,7 @@
 <ion-content>
   <div class="screen" id="screen">
     <div class="book">
-      <div class="sheet">
+      <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet">
         <div *ngFor="let segment of segments; let segmentIndex = index"
              [ngClass]="'note-segment '+(currentSegmentIndex === segmentIndex ? 'selected-segment' : '')"
              (click)="selectSegment(segmentIndex)">
@@ -35,46 +35,11 @@
           </div>
           <div
               [ngClass]="'right-margin br ' + (segment.noteToggles[segment.noteToggles.length-1] ? 'on' : 'off')"></div>
-          <div>
-            <button ion-button icon-only color="light" class="duration" (click)="decreaseDuration(segment)">
-              -
-            </button>
-          </div>
-          <div *ngIf="(segment.duration === 0.25)">
-            <button ion-button icon-only color="light" class="duration">
-              <img src="../../assets/imgs/semicorchea.svg" width="16px" height="16px">
-            </button>
-          </div>
-          <div *ngIf="(segment.duration === 0.5)">
-            <button ion-button icon-only color="light" class="duration">
-              <img src="../../assets/imgs/corchea.svg" width="16px" height="16px">
-            </button>
-          </div>
-          <div *ngIf="(segment.duration === 1)">
-            <button ion-button icon-only color="light" class="duration">
-              <img src="../../assets/imgs/negra.svg" width="16px" height="16px">
-            </button>
-          </div>
-          <div *ngIf="(segment.duration === 2)">
-            <button ion-button icon-only color="light" class="duration" >
-              <img src="../../assets/imgs/blanca.svg" width="16px" height="16px">
-            </button>
-          </div>
-          <div *ngIf="(segment.duration === 4)">
-            <button ion-button icon-only color="light" class="duration">
-              <img src="../../assets/imgs/redonda.svg" width="16px" height="16px">
-            </button>
-          </div>
-          <div>
-            <button ion-button icon-only color="light" class="duration" (click)="increaseDuration(segment)">
-              +
-            </button>
-          </div>
         </div>
       </div>
     </div>
 
-    <div class="keyboard">
+    <div class="keyboard" id="keyboard" (scroll)="handleKeyboardScroll($event)">
       <div class="top-keys">
         <div class="white-key left-margin" (click)="playNote(notes[0])"></div>
         <div *ngFor="let note of notes" col-1

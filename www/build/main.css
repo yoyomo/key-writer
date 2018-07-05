@@ -25687,7 +25687,6 @@ ion-navbar.toolbar {
 }
 
 page-home .screen {
-  overflow: auto;
   height: 100%;
   -webkit-box-flex: 0;
   -webkit-flex: 0 0 100%;
@@ -25704,6 +25703,8 @@ page-home .screen {
   display: flex;
   background-color: #555;
   bottom: 0;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
 page-home .book {
@@ -25736,6 +25737,7 @@ page-home .sheet {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  overflow: auto;
 }
 
 page-home .note-segment {
@@ -25773,6 +25775,7 @@ page-home .keyboard {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  overflow-x: auto;
 }
 
 page-home .top-keys {

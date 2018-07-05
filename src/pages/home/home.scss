@@ -3,7 +3,7 @@ page-home {
   $width-note-segment-control: 1;
 
   .screen{
-    overflow: auto;
+    //overflow: auto;
     //overflow-y: hidden;
     height: 100%;
     flex: 0 0 100%;
@@ -11,6 +11,7 @@ page-home {
     display: flex;
     background-color: #555;
     bottom: 0;
+    transform: translate3d(0,0,0);
   }
 
   .book {
@@ -23,6 +24,7 @@ page-home {
     flex: 0 0 100%;
     flex-direction: column-reverse;
     display: flex;
+    overflow: auto;
   }
 
   .note-segment {
@@ -47,6 +49,7 @@ page-home {
     flex: 0 0 20%;
     flex-direction: column;
     display: flex;
+    overflow-x: auto;
   }
 
   .top-keys {

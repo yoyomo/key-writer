@@ -15,9 +15,16 @@ export class HomePage {
   //scrolls to bottom whenever the page has loaded
   static ionViewDidEnter() {
     let screen = document.getElementById("screen");
+    let keyboard = document.getElementById("keyboard");
+    let sheet = document.getElementById("sheet");
+
     if (screen) {
       screen.scrollTop = screen.scrollHeight;
       screen.scrollLeft = (screen.scrollWidth - screen.clientWidth) / 2;
+      keyboard.scrollTop = keyboard.scrollHeight;
+      keyboard.scrollLeft = (keyboard.scrollWidth - keyboard.clientWidth) / 2;
+      sheet.scrollTop = sheet.scrollHeight;
+      sheet.scrollLeft = (sheet.scrollWidth - sheet.clientWidth) / 2;
     }
   }
 
@@ -26,6 +33,18 @@ export class HomePage {
     this.segments = initializeSegments(this.notes);
     this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
     this.currentSegmentIndex = 0;
+  }
+
+  handleSheetScroll(e){
+    e.preventDefault();
+    let keyboard = document.getElementById("keyboard");
+    keyboard.scrollLeft = e.target.scrollLeft;
+  }
+
+  handleKeyboardScroll(e){
+    e.preventDefault();
+    let sheet = document.getElementById("sheet");
+    sheet.scrollLeft = e.target.scrollLeft;
   }
 
   playNote(note: NotesInterface) {
