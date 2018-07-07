@@ -2,6 +2,10 @@ page-home {
   $zoom: 1px;
   $width-note-segment-control: 1;
 
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
   .screen{
     //overflow: auto;
     //overflow-y: hidden;

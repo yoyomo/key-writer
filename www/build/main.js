@@ -60,8 +60,23 @@ var HomePage = /** @class */ (function () {
         this.segments = Object(__WEBPACK_IMPORTED_MODULE_2__assets_data_note_segment__["a" /* initializeSegments */])(this.notes);
         this.whiteBottomKeys = this.notes.filter(function (n) { return n.key.slice(-1) !== '#'; });
         this.currentSegmentIndex = 0;
+        var AudioContext = window.AudioContext || webkitAudioContext ||
+            window.mozAudioContext ||
+            window.oAudioContext ||
+            window.msAudioContext;
+        this.audioContext = new AudioContext();
+        this.gain = this.audioContext.createGain();
+        this.oscillators = [];
+        for (var i = 0; i < this.notes.length; i++) {
+            var oscillator = this.audioContext.createOscillator();
+            oscillator.frequency.value = this.notes[i].frequency;
+            oscillator.type = 'sine';
+            oscillator.start();
+            this.oscillators.push(oscillator);
+        }
     }
     //scrolls to bottom whenever the page has loaded
+    // noinspection JSUnusedGlobalSymbols
     HomePage.ionViewDidEnter = function () {
         var screen = document.getElementById("screen");
         var keyboard = document.getElementById("keyboard");
@@ -90,6 +105,16 @@ var HomePage = /** @class */ (function () {
         this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = isPlaying;
         if (isPlaying) {
             //play frequency audio
+            this.oscillators[note.id - 1].connect(this.gain);
+            this.gain.connect(this.audioContext.destination);
+        }
+        else {
+            try {
+                this.oscillators[note.id - 1].disconnect(this.gain);
+            }
+            catch (e) {
+                console.log("Already disconnected oscillator #" + note.id);
+            }
         }
         return;
     };
@@ -102,12 +127,6 @@ var HomePage = /** @class */ (function () {
         //play all note frequencies according to this.segments[segmentIndex].noteToggles
         // for a duration of this.segments[segmentIndex].duration according to defined BPM
         return segmentIndex;
-    };
-    HomePage.prototype.decreaseDuration = function (segment) {
-        segment.duration = segment.duration / 2;
-    };
-    HomePage.prototype.increaseDuration = function (segment) {
-        segment.duration = segment.duration * 2;
     };
     HomePage = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({

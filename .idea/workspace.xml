@@ -3,12 +3,97 @@
   <component name="ChangeListManager">
     <list default="true" id="d0070d8b-0063-47b7-8179-b50171bb46f1" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/home/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/home/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.sourcemaps/main.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/.sourcemaps/main.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/node_modules/.bin/esparse" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/node_modules/.bin/esvalidate" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/node_modules/esprima/ChangeLog" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/node_modules/esprima/LICENSE.BSD" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/node_modules/esprima/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/node_modules/esprima/bin/esparse.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/node_modules/esprima/bin/esvalidate.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/node_modules/esprima/esprima.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/node_modules/esprima/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima-extract-comments/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima/ChangeLog" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima/LICENSE.BSD" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima/bin/esparse.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima/bin/esvalidate.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima/dist/esprima.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/esprima/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/lib/block.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/lib/comments.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/lib/context.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/lib/line.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/lib/utils.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/node_modules/define-property/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/node_modules/define-property/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/node_modules/define-property/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/node_modules/define-property/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/node_modules/extend-shallow/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/node_modules/extend-shallow/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/node_modules/extend-shallow/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/node_modules/extend-shallow/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/extract-comments/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/interval-iterator/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/interval-iterator/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/interval-iterator/lib/IntervalIterator.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/interval-iterator/lib/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/interval-iterator/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-emitter/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-emitter/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-emitter/lib/MMLEmitter.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-emitter/lib/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-emitter/lib/reverseOctave.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-emitter/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-iterator/lib/DefaultParams.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-iterator/lib/MMLIterator.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-iterator/lib/MMLParser.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-iterator/lib/Scanner.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-iterator/lib/Syntax.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-iterator/lib/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/mml-iterator/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/parse-code-context/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/parse-code-context/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/parse-code-context/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/parse-code-context/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/seq-emitter/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/seq-emitter/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/seq-emitter/lib/SeqEmitter.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/seq-emitter/lib/TrackIterator.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/seq-emitter/lib/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/seq-emitter/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/strip-comments/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/strip-comments/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/strip-comments/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/strip-comments/node_modules/extend-shallow/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/strip-comments/node_modules/extend-shallow/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/strip-comments/node_modules/extend-shallow/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/strip-comments/node_modules/extend-shallow/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/strip-comments/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/web-audio-scheduler/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/web-audio-scheduler/build/web-audio-scheduler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/web-audio-scheduler/build/web-audio-scheduler.min.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/web-audio-scheduler/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/web-audio-scheduler/lib/WebAudioScheduler.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/web-audio-scheduler/lib/defaultContext.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/web-audio-scheduler/lib/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/web-audio-scheduler/lib/utils/defaults.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/node_modules/web-audio-scheduler/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/home/home.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/home/home.scss" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/home/home.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/home/home.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/build/main.css" beforeDir="false" afterPath="$PROJECT_DIR$/www/build/main.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/build/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/www/build/main.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/www/build/main.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/www/build/main.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/www/build/vendor.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/www/build/vendor.js.map" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -22,11 +107,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="home.ts" pinned="false" current-in-tab="false">
+      <file leaf-file-name="home.ts" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/pages/home/home.ts">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="504">
-              <caret line="47" column="3" lean-forward="true" selection-start-line="47" selection-start-column="3" selection-end-line="47" selection-end-column="3" />
+            <state relative-caret-position="15">
+              <caret line="23" column="64" selection-start-line="23" selection-start-column="64" selection-end-line="23" selection-end-column="64" />
               <folding>
                 <element signature="e#0#40#0" expanded="true" />
               </folding>
@@ -43,11 +128,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="home.scss" pinned="false" current-in-tab="true">
+      <file leaf-file-name="home.scss" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/pages/home/home.scss">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="12" column="14" lean-forward="true" selection-start-line="12" selection-start-column="14" selection-end-line="12" selection-end-column="14" />
+            <state relative-caret-position="90">
+              <caret line="6" column="3" selection-start-line="6" selection-start-column="3" selection-end-line="6" selection-end-column="3" />
             </state>
           </provider>
         </entry>
@@ -64,7 +149,7 @@
       <file leaf-file-name="home.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/pages/home/home.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="378">
+            <state relative-caret-position="615">
               <caret line="41" column="77" selection-start-line="41" selection-start-column="77" selection-end-line="41" selection-end-column="77" />
             </state>
           </provider>
@@ -91,8 +176,9 @@
         <option value="$PROJECT_DIR$/node_modules/ionic-angular/components/content/content.metadata.json" />
         <option value="$PROJECT_DIR$/src/app/app.scss" />
         <option value="$PROJECT_DIR$/src/pages/home/home.html" />
-        <option value="$PROJECT_DIR$/src/pages/home/home.ts" />
+        <option value="$PROJECT_DIR$/tsconfig.json" />
         <option value="$PROJECT_DIR$/src/pages/home/home.scss" />
+        <option value="$PROJECT_DIR$/src/pages/home/home.ts" />
       </list>
     </option>
   </component>
@@ -113,8 +199,8 @@
     </packageJsonPaths>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="66" />
-    <option name="y" value="23" />
+    <option name="x" value="373" />
+    <option name="y" value="63" />
     <option name="width" value="1062" />
     <option name="height" value="809" />
   </component>
@@ -191,14 +277,15 @@
       <workItem from="1529623809300" duration="2235000" />
       <workItem from="1529968394737" duration="1271000" />
       <workItem from="1529969976741" duration="2152000" />
+      <workItem from="1530932889527" duration="4816000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="24719000" />
+    <option name="totallyTimeSpent" value="29751000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="291" y="23" width="1062" height="809" extended-state="0" />
+    <frame x="373" y="63" width="1062" height="809" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info anchor="bottom" id="TypeScript" order="7" />
@@ -213,25 +300,13 @@
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info id="npm" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18455744" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="TypeScript" order="7" />
-      <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Terminal" order="7" />
-      <window_info id="Favorites" order="2" side_tool="true" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -266,15 +341,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/node_modules/mml-emitter/index.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/mml-emitter/lib/index.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/node_modules/web-audio-scheduler/lib/WebAudioScheduler.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/node_modules/mml-iterator/lib/MMLParser.js">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -302,13 +368,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/assets/data/play-mml.ts">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="9" column="32" lean-forward="true" selection-start-line="9" selection-start-column="32" selection-end-line="9" selection-end-column="32" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/src/assets/data/play-mml.ts" />
     <entry file="file://$PROJECT_DIR$/src/pages/home/home.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
@@ -559,13 +619,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/package.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="2" selection-start-line="8" selection-start-column="2" selection-end-line="8" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/assets/data/note-segment.ts">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
@@ -589,25 +642,53 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/pages/home/home.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
+        <state relative-caret-position="615">
           <caret line="41" column="77" selection-start-line="41" selection-start-column="77" selection-end-line="41" selection-end-column="77" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/pages/home/home.ts">
+    <entry file="file://$PROJECT_DIR$/tsconfig.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="47" column="3" lean-forward="true" selection-start-line="47" selection-start-column="3" selection-end-line="47" selection-end-column="3" />
-          <folding>
-            <element signature="e#0#40#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="30">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/typescript/lib/lib.dom.d.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="275">
+          <caret line="1386" column="10" selection-start-line="1386" selection-start-column="10" selection-end-line="1386" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/node_modules/@types/webaudioapi/index.d.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="9" column="12" selection-start-line="9" selection-start-column="12" selection-end-line="9" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/package.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="8" column="2" selection-start-line="8" selection-start-column="2" selection-end-line="8" selection-end-column="2" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/pages/home/home.scss">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" column="14" lean-forward="true" selection-start-line="12" selection-start-column="14" selection-end-line="12" selection-end-column="14" />
+        <state relative-caret-position="90">
+          <caret line="6" column="3" selection-start-line="6" selection-start-column="3" selection-end-line="6" selection-end-column="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/pages/home/home.ts">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="23" column="64" selection-start-line="23" selection-start-column="64" selection-end-line="23" selection-end-column="64" />
+          <folding>
+            <element signature="e#0#40#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

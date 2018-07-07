@@ -25686,6 +25686,10 @@ ion-navbar.toolbar {
   color: darkgray;
 }
 
+page-home ::-webkit-scrollbar {
+  display: none;
+}
+
 page-home .screen {
   height: 100%;
   -webkit-box-flex: 0;
