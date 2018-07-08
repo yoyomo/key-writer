@@ -13,7 +13,6 @@ export class HomePage {
   whiteBottomKeys: NotesInterface[];
   currentSegmentIndex: number;
   audioContext: AudioContext;
-  oscillators: OscillatorNode[];
   gain: GainNode;
   bpm: number;
 
@@ -26,14 +25,6 @@ export class HomePage {
 
     this.audioContext = new AudioContext();
     this.gain = this.audioContext.createGain();
-    this.oscillators = [];
-    for (let i = 0; i < this.notes.length; i++) {
-      let oscillator = this.audioContext.createOscillator();
-      oscillator.frequency.value = this.notes[i].frequency;
-      oscillator.type = 'sine';
-      oscillator.start();
-      this.oscillators.push(oscillator);
-    }
     this.gain.connect(this.audioContext.destination);
   }
 
@@ -67,31 +58,24 @@ export class HomePage {
   };
 
   selectNote(note: NotesInterface) {
+    let now = this.audioContext.currentTime;
     if (this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]) {
-      this.playNote(note);
-    } else {
-      this.muteNote(note);
+      this.playNote(note, now);
     }
   }
 
-  private muteNote(note: NotesInterface) {
-    try {
-      this.oscillators[note.id - 1].disconnect(this.gain);
-    } catch (e) {
-      console.log("Already disconnected oscillator #" + note.id)
-    }
-  }
-
-  // 1 / ( (beats per minute / 60s) / 1000ms ) = ms per beats
-  private convertBPMToMilliseconds = () => {
-    return 60000 / this.bpm;
+  private convertDurationToSeconds = (duration: number) => {
+    return duration * 60 / this.bpm;
   };
 
-  private playNote(note: NotesInterface) {
-    this.oscillators[note.id - 1].connect(this.gain);
-    setTimeout(() => {
-      this.muteNote(note);
-    }, this.convertBPMToMilliseconds() * this.segments[this.currentSegmentIndex].duration)
+  private playNote(note: NotesInterface, time: number) {
+    let oscillator = this.audioContext.createOscillator();
+    oscillator.frequency.value = note.frequency;
+    oscillator.type = 'sine';
+
+    oscillator.connect(this.gain);
+    oscillator.start(time);
+    oscillator.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
   }
 
   selectSegment(index: number) {
@@ -100,9 +84,10 @@ export class HomePage {
   }
 
   playSegment = (segmentIndex: number) => {
+    let now = this.audioContext.currentTime;
     this.segments[segmentIndex].noteToggles.map((on, index) => {
-      if(on){
-        this.playNote(this.notes[index]);
+      if (on) {
+        this.playNote(this.notes[index], now);
       }
     });
     return segmentIndex;
@@ -110,33 +95,34 @@ export class HomePage {
 
   //use scheduler
   playSheet = () => {
+    let now = this.audioContext.currentTime;
+    let durationCount = 0;
     this.segments.map(segment => {
+      let segmentTime = now + this.convertDurationToSeconds(durationCount);
       segment.noteToggles.map((on, index) => {
-        if(on){
-          this.playNote(this.notes[index]);
+        if (on) {
+          this.playNote(this.notes[index], segmentTime);
         }
       });
+      durationCount += segment.duration;
     });
-  };
-
-  private setBPM = (bpm) => {
-    this.bpm = bpm;
   };
 
   changeBPM = () => {
     let alert = this.alertCtrl.create({
       title: 'Change Beats per Minute (bpm)',
-      inputs: [{name: 'bpm', value: `${this.bpm}`, type: "number",},],
+      inputs: [{name: 'bpm', value: `${this.bpm}`, type: "number"}],
       buttons: [
         {
           text: 'Cancel',
           role: 'cancel',
-          handler: () => {}
+          handler: () => {
+          }
         },
         {
           text: 'OK',
           handler: data => {
-            this.setBPM(data.bpm);
+            this.bpm = data.bpm;
           }
         }
       ]

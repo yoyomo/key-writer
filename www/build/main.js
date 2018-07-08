@@ -85,45 +85,47 @@ var HomePage = /** @class */ (function () {
             var sheet = document.getElementById("sheet");
             sheet.scrollLeft = e.target.scrollLeft;
         };
-        // 1 / ( (beats per minute / 60s) / 1000ms ) = ms per beats
-        this.convertBPMToMilliseconds = function () {
-            return 60000 / _this.bpm;
+        this.convertDurationToSeconds = function (duration) {
+            return duration * 60 / _this.bpm;
         };
         this.playSegment = function (segmentIndex) {
+            var now = _this.audioContext.currentTime;
             _this.segments[segmentIndex].noteToggles.map(function (on, index) {
                 if (on) {
-                    _this.playNote(_this.notes[index]);
+                    _this.playNote(_this.notes[index], now);
                 }
             });
             return segmentIndex;
         };
         //use scheduler
         this.playSheet = function () {
+            var now = _this.audioContext.currentTime;
+            var durationCount = 0;
             _this.segments.map(function (segment) {
+                var segmentTime = now + _this.convertDurationToSeconds(durationCount);
                 segment.noteToggles.map(function (on, index) {
                     if (on) {
-                        _this.playNote(_this.notes[index]);
+                        _this.playNote(_this.notes[index], segmentTime);
                     }
                 });
+                durationCount += segment.duration;
             });
-        };
-        this.setBPM = function (bpm) {
-            _this.bpm = bpm;
         };
         this.changeBPM = function () {
             var alert = _this.alertCtrl.create({
                 title: 'Change Beats per Minute (bpm)',
-                inputs: [{ name: 'bpm', value: "" + _this.bpm, type: "number", },],
+                inputs: [{ name: 'bpm', value: "" + _this.bpm, type: "number" }],
                 buttons: [
                     {
                         text: 'Cancel',
                         role: 'cancel',
-                        handler: function () { }
+                        handler: function () {
+                        }
                     },
                     {
                         text: 'OK',
                         handler: function (data) {
-                            _this.setBPM(data.bpm);
+                            _this.bpm = data.bpm;
                         }
                     }
                 ]
@@ -137,38 +139,21 @@ var HomePage = /** @class */ (function () {
         this.bpm = 120;
         this.audioContext = new AudioContext();
         this.gain = this.audioContext.createGain();
-        this.oscillators = [];
-        for (var i = 0; i < this.notes.length; i++) {
-            var oscillator = this.audioContext.createOscillator();
-            oscillator.frequency.value = this.notes[i].frequency;
-            oscillator.type = 'sine';
-            oscillator.start();
-            this.oscillators.push(oscillator);
-        }
         this.gain.connect(this.audioContext.destination);
     }
     HomePage.prototype.selectNote = function (note) {
+        var now = this.audioContext.currentTime;
         if (this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]) {
-            this.playNote(note);
-        }
-        else {
-            this.muteNote(note);
+            this.playNote(note, now);
         }
     };
-    HomePage.prototype.muteNote = function (note) {
-        try {
-            this.oscillators[note.id - 1].disconnect(this.gain);
-        }
-        catch (e) {
-            console.log("Already disconnected oscillator #" + note.id);
-        }
-    };
-    HomePage.prototype.playNote = function (note) {
-        var _this = this;
-        this.oscillators[note.id - 1].connect(this.gain);
-        setTimeout(function () {
-            _this.muteNote(note);
-        }, this.convertBPMToMilliseconds() * this.segments[this.currentSegmentIndex].duration);
+    HomePage.prototype.playNote = function (note, time) {
+        var oscillator = this.audioContext.createOscillator();
+        oscillator.frequency.value = note.frequency;
+        oscillator.type = 'sine';
+        oscillator.connect(this.gain);
+        oscillator.start(time);
+        oscillator.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
     };
     HomePage.prototype.selectSegment = function (index) {
         this.currentSegmentIndex = index;
