@@ -7,8 +7,11 @@
       <button ion-button icon-only (click)="changeBPM()">
         <span>{{bpm}}bpm</span>
       </button>
-      <button ion-button icon-only (click)="playSheet()">
+      <button *ngIf="!isPlaying" ion-button icon-only (click)="playSheet()">
         <ion-icon name="play"></ion-icon>
+      </button>
+      <button *ngIf="isPLaying" ion-button icon-only (click)="stopSheet()">
+        <ion-icon name="pause"></ion-icon>
       </button>
     </ion-buttons>
   </ion-navbar>

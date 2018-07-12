@@ -88,28 +88,39 @@ var HomePage = /** @class */ (function () {
         this.convertDurationToSeconds = function (duration) {
             return duration * 60 / _this.bpm;
         };
-        this.playSegment = function (segmentIndex) {
-            var now = _this.audioContext.currentTime;
-            _this.segments[segmentIndex].noteToggles.map(function (on, index) {
-                if (on) {
-                    _this.playNote(_this.notes[index], now);
-                }
-            });
-            return segmentIndex;
+        this.scrollPlay = function () {
+            var sheet = document.getElementById("sheet");
+            var time = _this.audioContext.currentTime;
+            if (!_this.startingScrollPosition)
+                _this.startingScrollPosition = sheet.scrollTop;
+            sheet.scrollTop = _this.startingScrollPosition - (64 * (60 / _this.bpm)) * (time - _this.startTime);
+            if (sheet.scrollTop > 0) {
+                setTimeout(_this.scrollPlay, (60 / _this.bpm) * 1000 / 64);
+            }
+            else {
+                _this.startingScrollPosition = null;
+                _this.startTime = null;
+            }
         };
-        //use scheduler
         this.playSheet = function () {
+            _this.isPLaying = true;
             var now = _this.audioContext.currentTime;
             var durationCount = 0;
             _this.segments.map(function (segment) {
                 var segmentTime = now + _this.convertDurationToSeconds(durationCount);
                 segment.noteToggles.map(function (on, index) {
                     if (on) {
+                        if (!_this.startTime)
+                            _this.startTime = _this.audioContext.currentTime;
                         _this.playNote(_this.notes[index], segmentTime);
                     }
                 });
                 durationCount += segment.duration;
             });
+            _this.scrollPlay();
+        };
+        this.stopSheet = function () {
+            _this.isPLaying = false;
         };
         this.changeBPM = function () {
             var alert = _this.alertCtrl.create({
@@ -137,6 +148,7 @@ var HomePage = /** @class */ (function () {
         this.whiteBottomKeys = this.notes.filter(function (n) { return n.key.slice(-1) !== '#'; });
         this.currentSegmentIndex = 0;
         this.bpm = 120;
+        this.isPLaying = false;
         this.audioContext = new AudioContext();
         this.gain = this.audioContext.createGain();
         this.gain.connect(this.audioContext.destination);
@@ -148,6 +160,7 @@ var HomePage = /** @class */ (function () {
         }
     };
     HomePage.prototype.playNote = function (note, time) {
+        if (time === void 0) { time = this.audioContext.currentTime; }
         var oscillator = this.audioContext.createOscillator();
         oscillator.frequency.value = note.frequency;
         oscillator.type = 'sine';
@@ -155,13 +168,19 @@ var HomePage = /** @class */ (function () {
         oscillator.start(time);
         oscillator.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
     };
-    HomePage.prototype.selectSegment = function (index) {
-        this.currentSegmentIndex = index;
-        this.playSegment(index);
+    HomePage.prototype.selectSegment = function (segmentIndex) {
+        var _this = this;
+        this.currentSegmentIndex = segmentIndex;
+        var now = this.audioContext.currentTime;
+        this.segments[segmentIndex].noteToggles.map(function (on, noteIndex) {
+            if (on) {
+                _this.playNote(_this.notes[noteIndex], now);
+            }
+        });
     };
     HomePage = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({
-            selector: 'page-home',template:/*ion-inline-start:"/Users/mando/Documents/code/key-writer/src/pages/home/home.html"*/'<ion-header>\n  <ion-navbar align="center">\n    <ion-title>\n      Key Writer\n    </ion-title>\n    <ion-buttons right>\n      <button ion-button icon-only (click)="changeBPM()">\n        <span>{{bpm}}bpm</span>\n      </button>\n      <button ion-button icon-only (click)="playSheet()">\n        <ion-icon name="play"></ion-icon>\n      </button>\n    </ion-buttons>\n  </ion-navbar>\n</ion-header>\n\n<ion-content>\n  <div class="screen" id="screen">\n    <div class="book">\n      <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet">\n        <div *ngFor="let segment of segments; let segmentIndex = index"\n             [ngClass]="\'note-segment \'+(currentSegmentIndex === segmentIndex ? \'selected-segment\' : \'\')"\n             (click)="selectSegment(segmentIndex)">\n          <div [ngClass]="\'left-margin \' + (segment.noteToggles[0] ? \'on\' : \'off\')"></div>\n          <div *ngFor="let noteOfSegment of segment.noteToggles; let i = index"\n               [ngClass]="\'note-of-segment \' + (noteOfSegment ? \'on\' : \'off\') + \' \'+\n                  (notes[i].key.slice(-1) === \'#\' ? \'w-black\' : \'w-\'+notes[i].key) + (i !== notes.length-1 ? \' br\' : \'\')">\n            <!--{{notes[i].key}}-->\n          </div>\n          <div\n              [ngClass]="\'right-margin br \' + (segment.noteToggles[segment.noteToggles.length-1] ? \'on\' : \'off\')"></div>\n        </div>\n      </div>\n    </div>\n\n    <div class="keyboard" id="keyboard" (scroll)="handleKeyboardScroll($event)">\n      <div class="top-keys">\n        <div class="white-key left-margin" (click)="playNote(notes[0])"></div>\n        <div *ngFor="let note of notes" col-1\n             [ngClass]="(note.key.slice(-1) === \'#\') ? \'black-top-key\' : \'white-top-key-\'+note.key"\n             (click)="selectNote(note)">\n          <!--<div class="absolute">{{note.key + note.octave}}</div>-->\n        </div>\n        <div class="white-key right-margin br" (click)="playNote(notes[notes.length-1])"></div>\n      </div>\n\n      <div class="bottom-keys">\n        <div class="bottom-key" *ngFor="let whiteBottomKey of whiteBottomKeys"\n             (click)="selectNote(whiteBottomKey)">\n          <div class="absolute gray">{{whiteBottomKey.key + whiteBottomKey.octave}}</div>\n        </div>\n      </div>\n    </div>\n  </div>\n</ion-content>\n'/*ion-inline-end:"/Users/mando/Documents/code/key-writer/src/pages/home/home.html"*/
+            selector: 'page-home',template:/*ion-inline-start:"/Users/mando/Documents/code/key-writer/src/pages/home/home.html"*/'<ion-header>\n  <ion-navbar align="center">\n    <ion-title>\n      Key Writer\n    </ion-title>\n    <ion-buttons right>\n      <button ion-button icon-only (click)="changeBPM()">\n        <span>{{bpm}}bpm</span>\n      </button>\n      <button *ngIf="!isPlaying" ion-button icon-only (click)="playSheet()">\n        <ion-icon name="play"></ion-icon>\n      </button>\n      <button *ngIf="isPLaying" ion-button icon-only (click)="stopSheet()">\n        <ion-icon name="pause"></ion-icon>\n      </button>\n    </ion-buttons>\n  </ion-navbar>\n</ion-header>\n\n<ion-content>\n  <div class="screen" id="screen">\n    <div class="book">\n      <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet">\n        <div *ngFor="let segment of segments; let segmentIndex = index"\n             [ngClass]="\'note-segment \'+(currentSegmentIndex === segmentIndex ? \'selected-segment\' : \'\')"\n             (click)="selectSegment(segmentIndex)">\n          <div [ngClass]="\'left-margin \' + (segment.noteToggles[0] ? \'on\' : \'off\')"></div>\n          <div *ngFor="let noteOfSegment of segment.noteToggles; let i = index"\n               [ngClass]="\'note-of-segment \' + (noteOfSegment ? \'on\' : \'off\') + \' \'+\n                  (notes[i].key.slice(-1) === \'#\' ? \'w-black\' : \'w-\'+notes[i].key) + (i !== notes.length-1 ? \' br\' : \'\')">\n            <!--{{notes[i].key}}-->\n          </div>\n          <div\n              [ngClass]="\'right-margin br \' + (segment.noteToggles[segment.noteToggles.length-1] ? \'on\' : \'off\')"></div>\n        </div>\n      </div>\n    </div>\n\n    <div class="keyboard" id="keyboard" (scroll)="handleKeyboardScroll($event)">\n      <div class="top-keys">\n        <div class="white-key left-margin" (click)="playNote(notes[0])"></div>\n        <div *ngFor="let note of notes" col-1\n             [ngClass]="(note.key.slice(-1) === \'#\') ? \'black-top-key\' : \'white-top-key-\'+note.key"\n             (click)="selectNote(note)">\n          <!--<div class="absolute">{{note.key + note.octave}}</div>-->\n        </div>\n        <div class="white-key right-margin br" (click)="playNote(notes[notes.length-1])"></div>\n      </div>\n\n      <div class="bottom-keys">\n        <div class="bottom-key" *ngFor="let whiteBottomKey of whiteBottomKeys"\n             (click)="selectNote(whiteBottomKey)">\n          <div class="absolute gray">{{whiteBottomKey.key + whiteBottomKey.octave}}</div>\n        </div>\n      </div>\n    </div>\n  </div>\n</ion-content>\n'/*ion-inline-end:"/Users/mando/Documents/code/key-writer/src/pages/home/home.html"*/
         }),
         __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_3_ionic_angular__["a" /* AlertController */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_3_ionic_angular__["a" /* AlertController */]) === "function" && _a || Object])
     ], HomePage);
@@ -253,9 +272,7 @@ var AppModule = /** @class */ (function () {
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MyApp; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__(0);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_ionic_angular__ = __webpack_require__(54);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__ = __webpack_require__(192);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__ = __webpack_require__(189);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pages_home_home__ = __webpack_require__(193);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pages_home_home__ = __webpack_require__(193);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -268,11 +285,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
-
 var MyApp = /** @class */ (function () {
-    function MyApp(platform, statusBar, splashScreen) {
-        this.rootPage = __WEBPACK_IMPORTED_MODULE_4__pages_home_home__["a" /* HomePage */];
+    function MyApp(platform) {
+        this.rootPage = __WEBPACK_IMPORTED_MODULE_2__pages_home_home__["a" /* HomePage */];
         platform.ready().then(function () {
             // Okay, so the platform is ready and our plugins are available.
             // Here you can do any higher level native things you might need.
@@ -283,9 +298,10 @@ var MyApp = /** @class */ (function () {
     MyApp = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({template:/*ion-inline-start:"/Users/mando/Documents/code/key-writer/src/app/app.html"*/'<ion-nav [root]="rootPage"></ion-nav>\n'/*ion-inline-end:"/Users/mando/Documents/code/key-writer/src/app/app.html"*/
         }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Platform */], __WEBPACK_IMPORTED_MODULE_2__ionic_native_status_bar__["a" /* StatusBar */], __WEBPACK_IMPORTED_MODULE_3__ionic_native_splash_screen__["a" /* SplashScreen */]])
+        __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Platform */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Platform */]) === "function" && _a || Object])
     ], MyApp);
     return MyApp;
+    var _a;
 }());
 
 //# sourceMappingURL=app.component.js.map

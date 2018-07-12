@@ -15,6 +15,7 @@ export class HomePage {
   audioContext: AudioContext;
   gain: GainNode;
   bpm: number;
+  isPLaying: boolean;
 
   constructor(private alertCtrl: AlertController) {
     this.notes = calculateNotes();
@@ -22,6 +23,7 @@ export class HomePage {
     this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
     this.currentSegmentIndex = 0;
     this.bpm = 120;
+    this.isPLaying = false;
 
     this.audioContext = new AudioContext();
     this.gain = this.audioContext.createGain();
@@ -68,7 +70,7 @@ export class HomePage {
     return duration * 60 / this.bpm;
   };
 
-  private playNote(note: NotesInterface, time: number) {
+  private playNote(note: NotesInterface, time: number = this.audioContext.currentTime) {
     let oscillator = this.audioContext.createOscillator();
     oscillator.frequency.value = note.frequency;
     oscillator.type = 'sine';
@@ -78,34 +80,52 @@ export class HomePage {
     oscillator.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
   }
 
-  selectSegment(index: number) {
-    this.currentSegmentIndex = index;
-    this.playSegment(index);
-  }
-
-  playSegment = (segmentIndex: number) => {
+  selectSegment(segmentIndex: number) {
+    this.currentSegmentIndex = segmentIndex;
     let now = this.audioContext.currentTime;
-    this.segments[segmentIndex].noteToggles.map((on, index) => {
+    this.segments[segmentIndex].noteToggles.map((on, noteIndex) => {
       if (on) {
-        this.playNote(this.notes[index], now);
+        this.playNote(this.notes[noteIndex], now);
       }
     });
-    return segmentIndex;
+  }
+
+  startTime: number;
+  startingScrollPosition: number;
+  scrollPlay = () => {
+    let sheet = document.getElementById("sheet");
+    let time = this.audioContext.currentTime;
+    if(!this.startingScrollPosition) this.startingScrollPosition = sheet.scrollTop;
+    sheet.scrollTop = this.startingScrollPosition - (64 * (60 / this.bpm)) * (time - this.startTime);
+    if(sheet.scrollTop > 0){
+      setTimeout(this.scrollPlay, (60/this.bpm) * 1000 / 64);
+    }
+    else{
+      this.startingScrollPosition = null;
+      this.startTime = null;
+    }
   };
 
-  //use scheduler
   playSheet = () => {
+    this.isPLaying = true;
     let now = this.audioContext.currentTime;
     let durationCount = 0;
     this.segments.map(segment => {
       let segmentTime = now + this.convertDurationToSeconds(durationCount);
       segment.noteToggles.map((on, index) => {
         if (on) {
+          if(!this.startTime) this.startTime = this.audioContext.currentTime;
           this.playNote(this.notes[index], segmentTime);
         }
       });
       durationCount += segment.duration;
     });
+
+    this.scrollPlay();
+  };
+
+  stopSheet = () => {
+    this.isPLaying = false;
   };
 
   changeBPM = () => {
