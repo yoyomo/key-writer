@@ -17,10 +17,20 @@ export class HomePage {
   bpm: number;
   isPLaying: boolean;
 
+  startTime: number;
+  initialScrollPosition: number;
+  scrollTimeout: number;
+
+  NOTE_SEGMENT_HEIGHT: number;
+
+  keyboard: HTMLElement;
+  sheet: HTMLElement;
+
   constructor(private alertCtrl: AlertController) {
     this.notes = calculateNotes();
     this.segments = initializeSegments(this.notes);
     this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
+
     this.currentSegmentIndex = 0;
     this.bpm = 120;
     this.isPLaying = false;
@@ -33,18 +43,17 @@ export class HomePage {
   //scrolls to bottom whenever the page has loaded
   // noinspection JSUnusedGlobalSymbols
   ionViewDidEnter = () => {
-    let screen = document.getElementById("screen");
-    let keyboard = document.getElementById("keyboard");
-    let sheet = document.getElementById("sheet");
+    this.keyboard = document.getElementById("keyboard");
+    this.sheet = document.getElementById("sheet");
 
-    if (screen) {
-      screen.scrollTop = screen.scrollHeight;
-      screen.scrollLeft = (screen.scrollWidth - screen.clientWidth) / 2;
-      keyboard.scrollTop = keyboard.scrollHeight;
-      keyboard.scrollLeft = (keyboard.scrollWidth - keyboard.clientWidth) / 2;
-      sheet.scrollTop = sheet.scrollHeight;
-      sheet.scrollLeft = (sheet.scrollWidth - sheet.clientWidth) / 2;
+    if (this.keyboard && this.sheet) {
+      this.keyboard.scrollTop = this.keyboard.scrollHeight;
+      this.keyboard.scrollLeft = (this.keyboard.scrollWidth - this.keyboard.clientWidth) / 2;
+      this.sheet.scrollTop = this.sheet.scrollHeight;
+      this.sheet.scrollLeft = (this.sheet.scrollWidth - this.sheet.clientWidth) / 2;
     }
+
+    this.NOTE_SEGMENT_HEIGHT = document.querySelector(".note-segment").clientHeight;
   };
 
   handleSheetScroll = (e) => {
@@ -60,9 +69,8 @@ export class HomePage {
   };
 
   selectNote(note: NotesInterface) {
-    let now = this.audioContext.currentTime;
     if (this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]) {
-      this.playNote(note, now);
+      this.playNote(note, this.audioContext.currentTime);
     }
   }
 
@@ -80,6 +88,12 @@ export class HomePage {
     oscillator.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
   }
 
+  selectNoteOfSegment = (segmentIndex: number, note: NotesInterface) => {
+    this.currentSegmentIndex = segmentIndex;
+    this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]
+    this.selectSegment(segmentIndex);
+  };
+
   selectSegment(segmentIndex: number) {
     this.currentSegmentIndex = segmentIndex;
     let now = this.audioContext.currentTime;
@@ -90,18 +104,15 @@ export class HomePage {
     });
   }
 
-  startTime: number;
-  startingScrollPosition: number;
   scrollPlay = () => {
-    let sheet = document.getElementById("sheet");
     let time = this.audioContext.currentTime;
-    if(!this.startingScrollPosition) this.startingScrollPosition = sheet.scrollTop;
-    sheet.scrollTop = this.startingScrollPosition - (64 * (60 / this.bpm)) * (time - this.startTime);
-    if(sheet.scrollTop > 0){
-      setTimeout(this.scrollPlay, (60/this.bpm) * 1000 / 64);
+    if(!this.initialScrollPosition) this.initialScrollPosition = this.sheet.scrollTop;
+    this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm  / 60) * (time - this.startTime));
+    if(this.sheet.scrollTop > 0){
+      this.scrollTimeout = setTimeout(this.scrollPlay, (1000 / this.NOTE_SEGMENT_HEIGHT) * (60/this.bpm));
     }
     else{
-      this.startingScrollPosition = null;
+      this.initialScrollPosition = null;
       this.startTime = null;
     }
   };
@@ -126,6 +137,13 @@ export class HomePage {
 
   stopSheet = () => {
     this.isPLaying = false;
+    this.gain.disconnect(this.audioContext.destination);
+    this.gain = this.audioContext.createGain();
+    this.gain.connect(this.audioContext.destination);
+
+    clearTimeout(this.scrollTimeout);
+    this.initialScrollPosition = null;
+    this.startTime = null;
   };
 
   changeBPM = () => {
@@ -133,21 +151,11 @@ export class HomePage {
       title: 'Change Beats per Minute (bpm)',
       inputs: [{name: 'bpm', value: `${this.bpm}`, type: "number"}],
       buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-          handler: () => {
-          }
-        },
-        {
-          text: 'OK',
-          handler: data => {
-            this.bpm = data.bpm;
-          }
-        }
+        {text: 'Cancel', role: 'cancel', handler: () => {}},
+        {text: 'OK', handler: data => {this.bpm = data.bpm;}}
       ]
     });
-    alert.present();
+    return alert.present();
   };
 
 }

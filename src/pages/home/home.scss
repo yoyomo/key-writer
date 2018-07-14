@@ -1,14 +1,12 @@
 page-home {
   $zoom: 1.5px;
-  $width-note-segment-control: 1;
+  $note-segment-height: 64px;
 
   ::-webkit-scrollbar {
     display: none;
   }
 
   .screen{
-    //overflow: auto;
-    //overflow-y: hidden;
     height: 100%;
     flex: 0 0 100%;
     flex-direction: column;
@@ -32,14 +30,14 @@ page-home {
   }
 
   .note-segment {
-    height: 64px * $width-note-segment-control;
-    flex: 0 0 64px * $width-note-segment-control;
+    height: $note-segment-height;
+    flex: 0 0 $note-segment-height;
     flex-direction: row;
     display: flex;
   }
 
   .note-of-segment{
-    border-radius: 10px;
+    border-top: 1px solid darkgray;
   }
 
   .duration {
@@ -73,7 +71,7 @@ page-home {
   }
 
   @mixin br {
-    border-right: 1px solid #555;
+    border-right: 1px solid gray;
   }
 
   .bottom-key {
@@ -120,10 +118,18 @@ page-home {
     background-color: darkorange;
   }
   .off {
-    background-color: gray;
+    background-color: #666;
   }
-  .note-segment.selected-segment {
-    background-color: darkgray;
+  .off.w-black {
+    background-color: #555;
+  }
+
+  .off-piano {
+    background-color: #fff;
+  }
+  .off-piano.w-black {
+    background-color: #444;
+    border-right: 0;
   }
 
   .white-key {

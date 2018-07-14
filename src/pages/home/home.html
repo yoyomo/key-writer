@@ -18,16 +18,16 @@
 </ion-header>
 
 <ion-content>
-  <div class="screen" id="screen">
+  <div class="screen">
     <div class="book">
       <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet">
         <div *ngFor="let segment of segments; let segmentIndex = index"
-             [ngClass]="'note-segment '+(currentSegmentIndex === segmentIndex ? 'selected-segment' : '')"
-             (click)="selectSegment(segmentIndex)">
+             [ngClass]="'note-segment'">
           <div [ngClass]="'left-margin ' + (segment.noteToggles[0] ? 'on' : 'off')"></div>
           <div *ngFor="let noteOfSegment of segment.noteToggles; let i = index"
                [ngClass]="'note-of-segment ' + (noteOfSegment ? 'on' : 'off') + ' '+
-                  (notes[i].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[i].key) + (i !== notes.length-1 ? ' br' : '')">
+                  (notes[i].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[i].key) + (i !== notes.length-1 ? ' br' : '')"
+                (click)="selectNoteOfSegment(segmentIndex, notes[i])">
             <!--{{notes[i].key}}-->
           </div>
           <div

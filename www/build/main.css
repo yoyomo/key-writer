@@ -25762,7 +25762,7 @@ page-home .note-segment {
 }
 
 page-home .note-of-segment {
-  border-radius: 10px;
+  border-top: 1px solid darkgray;
 }
 
 page-home .keyboard {
@@ -25816,7 +25816,7 @@ page-home .bottom-keys {
 
 page-home .bottom-key {
   background-color: #fff;
-  border-right: 1px solid #555;
+  border-right: 1px solid gray;
   -webkit-box-flex: 0;
   -webkit-flex: 0 0 36px;
   -ms-flex: 0 0 36px;
@@ -25849,11 +25849,20 @@ page-home .on.w-black {
 }
 
 page-home .off {
-  background-color: gray;
+  background-color: #666;
 }
 
-page-home .note-segment.selected-segment {
-  background-color: darkgray;
+page-home .off.w-black {
+  background-color: #555;
+}
+
+page-home .off-piano {
+  background-color: #fff;
+}
+
+page-home .off-piano.w-black {
+  background-color: #444;
+  border-right: 0;
 }
 
 page-home .white-key {
@@ -25861,7 +25870,7 @@ page-home .white-key {
 }
 
 page-home .br {
-  border-right: 1px solid #555;
+  border-right: 1px solid gray;
 }
 
 page-home .w-C {
@@ -25953,7 +25962,7 @@ page-home .white-top-key-E {
   -ms-flex: 0 0 22.5px;
   flex: 0 0 22.5px;
   width: 22.5px;
-  border-right: 1px solid #555;
+  border-right: 1px solid gray;
 }
 
 page-home .white-top-key-D {
@@ -25999,5 +26008,5 @@ page-home .white-top-key-B {
   -ms-flex: 0 0 19.5px;
   flex: 0 0 19.5px;
   width: 19.5px;
-  border-right: 1px solid #555;
+  border-right: 1px solid gray;
 }
