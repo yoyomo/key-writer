@@ -27,6 +27,7 @@ page-home {
     flex-direction: column-reverse;
     display: flex;
     overflow: auto;
+    -webkit-overflow-scrolling: auto;
   }
 
   .note-segment {
@@ -52,6 +53,7 @@ page-home {
     flex-direction: column;
     display: flex;
     overflow-x: auto;
+    -webkit-overflow-scrolling: auto;
   }
 
   .top-keys {

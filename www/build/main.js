@@ -60,6 +60,9 @@ var HomePage = /** @class */ (function () {
     function HomePage(alertCtrl) {
         var _this = this;
         this.alertCtrl = alertCtrl;
+        this.startTime = null;
+        this.initialScrollPosition = null;
+        this.scrollTimeout = null;
         //scrolls to bottom whenever the page has loaded
         // noinspection JSUnusedGlobalSymbols
         this.ionViewDidEnter = function () {
@@ -96,13 +99,7 @@ var HomePage = /** @class */ (function () {
             if (!_this.initialScrollPosition)
                 _this.initialScrollPosition = _this.sheet.scrollTop;
             _this.sheet.scrollTop = _this.initialScrollPosition - ((_this.NOTE_SEGMENT_HEIGHT * _this.bpm / 60) * (time - _this.startTime));
-            if (_this.sheet.scrollTop > 0) {
-                _this.scrollTimeout = setTimeout(_this.scrollPlay, (1000 / _this.NOTE_SEGMENT_HEIGHT) * (60 / _this.bpm));
-            }
-            else {
-                _this.initialScrollPosition = null;
-                _this.startTime = null;
-            }
+            _this.scrollTimeout = setTimeout(_this.scrollPlay, (1000 / _this.NOTE_SEGMENT_HEIGHT) * (60 / _this.bpm));
         };
         this.playSheet = function () {
             _this.isPLaying = true;
@@ -135,8 +132,15 @@ var HomePage = /** @class */ (function () {
                 title: 'Change Beats per Minute (bpm)',
                 inputs: [{ name: 'bpm', value: "" + _this.bpm, type: "number" }],
                 buttons: [
-                    { text: 'Cancel', role: 'cancel', handler: function () { } },
-                    { text: 'OK', handler: function (data) { _this.bpm = data.bpm; } }
+                    {
+                        text: 'Cancel', role: 'cancel', handler: function () {
+                        }
+                    },
+                    {
+                        text: 'OK', handler: function (data) {
+                            _this.bpm = data.bpm;
+                        }
+                    }
                 ]
             });
             return alert.present();
@@ -147,6 +151,9 @@ var HomePage = /** @class */ (function () {
         this.currentSegmentIndex = 0;
         this.bpm = 120;
         this.isPLaying = false;
+        var AudioContext = window["AudioContext"] // Default
+            || window["webkitAudioContext"] // Safari and old versions of Chrome
+            || false;
         this.audioContext = new AudioContext();
         this.gain = this.audioContext.createGain();
         this.gain.connect(this.audioContext.destination);
@@ -295,9 +302,10 @@ var MyApp = /** @class */ (function () {
     MyApp = __decorate([
         Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["m" /* Component */])({template:/*ion-inline-start:"/Users/mando/Documents/code/key-writer/src/app/app.html"*/'<ion-nav [root]="rootPage"></ion-nav>\n'/*ion-inline-end:"/Users/mando/Documents/code/key-writer/src/app/app.html"*/
         }),
-        __metadata("design:paramtypes", [__WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Platform */]])
+        __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Platform */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1_ionic_angular__["e" /* Platform */]) === "function" && _a || Object])
     ], MyApp);
     return MyApp;
+    var _a;
 }());
 
 //# sourceMappingURL=app.component.js.map

@@ -17,9 +17,9 @@ export class HomePage {
   bpm: number;
   isPLaying: boolean;
 
-  startTime: number;
-  initialScrollPosition: number;
-  scrollTimeout: number;
+  startTime: number = null;
+  initialScrollPosition: number = null;
+  scrollTimeout: number = null;
 
   NOTE_SEGMENT_HEIGHT: number;
 
@@ -34,6 +34,10 @@ export class HomePage {
     this.currentSegmentIndex = 0;
     this.bpm = 120;
     this.isPLaying = false;
+
+    let AudioContext = window["AudioContext"] // Default
+        || window["webkitAudioContext"] // Safari and old versions of Chrome
+        || false;
 
     this.audioContext = new AudioContext();
     this.gain = this.audioContext.createGain();
@@ -106,15 +110,9 @@ export class HomePage {
 
   scrollPlay = () => {
     let time = this.audioContext.currentTime;
-    if(!this.initialScrollPosition) this.initialScrollPosition = this.sheet.scrollTop;
-    this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm  / 60) * (time - this.startTime));
-    if(this.sheet.scrollTop > 0){
-      this.scrollTimeout = setTimeout(this.scrollPlay, (1000 / this.NOTE_SEGMENT_HEIGHT) * (60/this.bpm));
-    }
-    else{
-      this.initialScrollPosition = null;
-      this.startTime = null;
-    }
+    if (!this.initialScrollPosition) this.initialScrollPosition = this.sheet.scrollTop;
+    this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm / 60) * (time - this.startTime));
+    this.scrollTimeout = setTimeout(this.scrollPlay, (1000 / this.NOTE_SEGMENT_HEIGHT) * (60 / this.bpm));
   };
 
   playSheet = () => {
@@ -125,7 +123,7 @@ export class HomePage {
       let segmentTime = now + this.convertDurationToSeconds(durationCount);
       segment.noteToggles.map((on, index) => {
         if (on) {
-          if(!this.startTime) this.startTime = this.audioContext.currentTime;
+          if (!this.startTime) this.startTime = this.audioContext.currentTime;
           this.playNote(this.notes[index], segmentTime);
         }
       });
@@ -151,8 +149,15 @@ export class HomePage {
       title: 'Change Beats per Minute (bpm)',
       inputs: [{name: 'bpm', value: `${this.bpm}`, type: "number"}],
       buttons: [
-        {text: 'Cancel', role: 'cancel', handler: () => {}},
-        {text: 'OK', handler: data => {this.bpm = data.bpm;}}
+        {
+          text: 'Cancel', role: 'cancel', handler: () => {
+          }
+        },
+        {
+          text: 'OK', handler: data => {
+            this.bpm = data.bpm;
+          }
+        }
       ]
     });
     return alert.present();

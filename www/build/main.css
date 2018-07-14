@@ -25742,6 +25742,7 @@ page-home .sheet {
   display: -ms-flexbox;
   display: flex;
   overflow: auto;
+  -webkit-overflow-scrolling: auto;
 }
 
 page-home .note-segment {
@@ -25780,6 +25781,7 @@ page-home .keyboard {
   display: -ms-flexbox;
   display: flex;
   overflow-x: auto;
+  -webkit-overflow-scrolling: auto;
 }
 
 page-home .top-keys {
