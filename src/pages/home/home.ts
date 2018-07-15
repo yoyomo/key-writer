@@ -163,7 +163,7 @@ export class HomePage {
     return alert.present();
   };
 
-  backToBeginning = () => {
+  restart = () => {
     this.sheet.scrollTop = this.sheet.scrollHeight;
     let wasPlaying = this.isPLaying;
     this.stopSheet();
