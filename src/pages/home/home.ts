@@ -94,7 +94,7 @@ export class HomePage {
 
   selectNoteOfSegment = (segmentIndex: number, note: NotesInterface) => {
     this.currentSegmentIndex = segmentIndex;
-    this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]
+    this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1];
     this.selectSegment(segmentIndex);
   };
 
@@ -161,6 +161,13 @@ export class HomePage {
       ]
     });
     return alert.present();
+  };
+
+  backToBeginning = () => {
+    this.sheet.scrollTop = this.sheet.scrollHeight;
+    let wasPlaying = this.isPLaying;
+    this.stopSheet();
+    if(wasPlaying) this.playSheet()
   };
 
 }

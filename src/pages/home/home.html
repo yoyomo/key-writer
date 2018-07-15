@@ -1,9 +1,9 @@
 <ion-header>
   <ion-navbar align="center">
-    <ion-title>
-      Key Writer
-    </ion-title>
     <ion-buttons right>
+      <button ion-button icon-only (click)="backToBeginning()">
+        <ion-icon name="skip-backward"></ion-icon>
+      </button>
       <button ion-button icon-only (click)="changeBPM()">
         <span>{{bpm}}bpm</span>
       </button>
@@ -27,7 +27,7 @@
           <div *ngFor="let noteOfSegment of segment.noteToggles; let i = index"
                [ngClass]="'note-of-segment ' + (noteOfSegment ? 'on' : 'off') + ' '+
                   (notes[i].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[i].key) + (i !== notes.length-1 ? ' br' : '')"
-                (click)="selectNoteOfSegment(segmentIndex, notes[i])">
+               (click)="selectNoteOfSegment(segmentIndex, notes[i])">
             <!--{{notes[i].key}}-->
           </div>
           <div
