@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {calculateNotes, NotesInterface} from '../../assets/utils/calculate-notes';
 import {initializeSegments, SegmentsInterface} from '../../assets/utils/note-segment';
 import {AlertController} from "ionic-angular";
+import {playMML} from "../../assets/utils/mml";
 
 @Component({
   selector: 'page-home',
@@ -42,6 +43,8 @@ export class HomePage {
     this.audioContext = new AudioContext();
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
+
+    playMML("c d e f g a b");
   }
 
   //scrolls to bottom whenever the page has loaded
@@ -119,18 +122,34 @@ export class HomePage {
     this.isPLaying = true;
     let now = this.audioContext.currentTime;
     let durationCount = 0;
+    let endTime = 0;
     this.segments.map(segment => {
       let segmentTime = now + this.convertDurationToSeconds(durationCount);
+      let lastNote = false;
+
       segment.noteToggles.map((on, index) => {
         if (on) {
           if (!this.startTime) this.startTime = this.audioContext.currentTime;
           this.playNote(this.notes[index], segmentTime);
+          lastNote = true;
         }
       });
       durationCount += segment.duration;
+      if(lastNote) endTime = segmentTime + this.convertDurationToSeconds(segment.duration);
     });
 
+    setTimeout(()=>{this.endSheet(endTime)}, endTime);
+
     this.scrollPlay();
+  };
+
+  endSheet = (endTime: number) => {
+    if(this.audioContext.currentTime >= endTime){
+      this.stopSheet();
+      // this.restart();
+    }else{
+      setTimeout(()=>this.endSheet(endTime), 25);
+    }
   };
 
   stopSheet = () => {
