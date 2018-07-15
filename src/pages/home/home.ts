@@ -21,6 +21,7 @@ export class HomePage {
   startTime: number = null;
   initialScrollPosition: number = null;
   scrollTimeout: number = null;
+  endTimeout: number = null;
 
   NOTE_SEGMENT_HEIGHT: number;
 
@@ -44,7 +45,7 @@ export class HomePage {
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
 
-    playMML("c d e f g a b");
+    playMML("cdefgab< c o4c o3e c");
   }
 
   //scrolls to bottom whenever the page has loaded
@@ -138,7 +139,7 @@ export class HomePage {
       if(lastNote) endTime = segmentTime + this.convertDurationToSeconds(segment.duration);
     });
 
-    setTimeout(()=>{this.endSheet(endTime)}, endTime);
+    this.endTimeout = setTimeout(()=>{this.endSheet(endTime)}, endTime);
 
     this.scrollPlay();
   };
@@ -148,7 +149,7 @@ export class HomePage {
       this.stopSheet();
       // this.restart();
     }else{
-      setTimeout(()=>this.endSheet(endTime), 25);
+      this.endTimeout = setTimeout(()=>this.endSheet(endTime), 25);
     }
   };
 
@@ -161,6 +162,8 @@ export class HomePage {
     clearTimeout(this.scrollTimeout);
     this.initialScrollPosition = null;
     this.startTime = null;
+
+    clearTimeout(this.endTimeout);
   };
 
   changeBPM = () => {

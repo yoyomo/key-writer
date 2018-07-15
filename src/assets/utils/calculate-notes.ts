@@ -17,8 +17,7 @@ export function calculateNotes(): NotesInterface[] {
 	let octave = 0;
 	let keyIndex = 0;
 
-	let n = 1;
-	while(n <= numOfKeys){
+	for(let n = 1; n <= numOfKeys; n++){
 		let frequency = Math.pow(2,((n-baseKeyPosition)/12)) * baseFrequency;
 		let key = keys[keyIndex];
 		octave = octave + (keyIndex === newOctaveIndex ? 1 : 0);
@@ -26,7 +25,6 @@ export function calculateNotes(): NotesInterface[] {
 		notes.push({id: n, key: key, 	octave: octave,	alt: alt,	frequency: frequency});
 
 		keyIndex = (keyIndex + 1) % keys.length;
-		n++;
 	}
 	return notes;
 }
