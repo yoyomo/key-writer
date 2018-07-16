@@ -39,13 +39,16 @@ export class HomePage {
 
     let AudioContext = window["AudioContext"] // Default
         || window["webkitAudioContext"] // Safari and old versions of Chrome
+        || window["mozAudioContext"] // Safari and old versions of Chrome
+        || window["oAudioContext"] // Safari and old versions of Chrome
+        || window["msAudioContext"] // Safari and old versions of Chrome
         || false;
 
     this.audioContext = new AudioContext();
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
 
-    playMML("cdefgab< c o4c o3e c");
+    playMML("t120l8c16d16e16f8.............grarbr4........^4< c4. t500 o4cr o3er c r o er <<<e4.");
   }
 
   //scrolls to bottom whenever the page has loaded
