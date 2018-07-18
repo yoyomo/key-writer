@@ -48,7 +48,7 @@ export class HomePage {
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
 
-    playMML("t120l8c16d16e16f8.............grarbr4........^4< c4. t500 o4cr o3er c r o er <<<e4.");
+    playMML("t120l8c16d16e16 [fac o5c]8.............grarbr4........^4 /: t120o5 [ceg<C]4. t500 o4cr o3er c r o er <<<e1. :/4");
   }
 
   //scrolls to bottom whenever the page has loaded

@@ -32,30 +32,25 @@ let octave = 4;
 let duration = 4;
 let normalDuration = -1;
 let loopCount = -1;
-let loopIndex = -1;
-let infiniteLoop = false;
+let loopStartIndex = -1;
+let loopEndIndex = -1;
+let infiniteLoopStartIndex = -1;
+
+interface Chord {
+  noteIndexes: number[]
+  startTime: number
+}
+
+let chord: Chord = {
+  noteIndexes: [],
+  startTime: null
+};
 
 let mmlIndex = 0;
 let mml: string;
 let goToNext = false;
 
 let currentTime = 0;
-
-// 1 duration = 4beats
-let convertDurationToSeconds = (duration: number) => {
-  if (duration === 0) return 0;
-  return (4 / duration) * 60 / tempo;
-};
-
-let playNote = (noteIndex: number, time: number) => {
-  let oscillator = audioContext.createOscillator();
-  oscillator.frequency.value = frequencies[noteIndex];
-  oscillator.type = 'sine';
-  oscillator.connect(gain);
-
-  oscillator.start(time);
-  oscillator.stop(time + convertDurationToSeconds(duration));
-};
 
 let expect = (reg: RegExp) => {
   if (!reg.test(mml[mmlIndex])) {
@@ -126,6 +121,22 @@ let getDuration = () => {
   }
 };
 
+// 1 duration = 4beats
+let convertDurationToSeconds = (duration: number) => {
+  if (duration === 0) return 0;
+  return (4 / duration) * 60 / tempo;
+};
+
+let playNote = (noteIndex: number, time: number) => {
+  let oscillator = audioContext.createOscillator();
+  oscillator.frequency.value = frequencies[noteIndex];
+  oscillator.type = 'sine';
+  oscillator.connect(gain);
+
+  oscillator.start(time);
+  oscillator.stop(time + convertDurationToSeconds(duration));
+};
+
 let nextNote = () => {
   currentTime += convertDurationToSeconds(duration);
   if (normalDuration > 0) {
@@ -148,11 +159,16 @@ let getNote = (time: number) => {
         noteIndex++;
         break;
       default:
+        if(readingChord) break;
         getDuration();
         break;
     }
   }
 
+  if(readingChord){
+    chord.noteIndexes.push(noteIndex);
+    return;
+  }
   playNote(noteIndex, time);
   nextNote();
 };
@@ -206,8 +222,65 @@ let getRest = () => {
   nextNote();
 };
 
+let readingChord = false;
+let getChord = (time: number) => {
+  expect(/\[/);
+  readingChord = true;
+  chord = {noteIndexes: [], startTime: time};
+};
+
+let playChord = () => {
+  expect(/]/);
+  if (isNextValid(/[\d^.]/)) {
+    getDuration();
+  }
+  chord.noteIndexes.map(noteIndex => {
+    playNote(noteIndex, chord.startTime);
+  });
+  readingChord = false;
+  chord = {noteIndexes: [], startTime: null};
+  nextNote();
+};
+
+let setInfiniteLoop = () => {
+  expect(/$/);
+  infiniteLoopStartIndex = ++mmlIndex;
+};
+
+let startLoop = () => {
+  expect(/\//);
+  mmlIndex++;
+  expect(/:/);
+  loopStartIndex = ++mmlIndex;
+};
+
+let endLoop = () => {
+  expect(/:/);
+  mmlIndex++;
+  expect(/\//);
+  if(loopCount < 0){
+    loopCount = 0;
+    while(isNextValid(/\d/)){
+      loopCount = loopCount * 10 + parseInt(mml[mmlIndex]);
+    }
+    if (loopCount===0) loopCount = 2;
+    loopEndIndex = mmlIndex;
+  }
+
+  if(--loopCount === 0){
+    return breakLoop();
+  }
+  mmlIndex = loopStartIndex;
+};
+
+let breakLoop = () => {
+  loopCount = -1;
+  loopStartIndex = -1;
+  mmlIndex = loopEndIndex;
+};
+
 export const playMML = (mmlString: string) => {
-  mml = mmlString.toLowerCase();
+  mml = mmlString.toLowerCase().split(' ').join('');
 
   let startTime = audioContext.currentTime;
   mmlIndex = 0;
@@ -224,7 +297,10 @@ export const playMML = (mmlString: string) => {
         getNote(startTime + currentTime);
         break;
       case "[":
-        getChord();
+        getChord(startTime + currentTime);
+        break;
+      case "]":
+        playChord();
         break;
       case "r":
         getRest();
@@ -262,6 +338,9 @@ export const playMML = (mmlString: string) => {
     }
 
     if (goToNext || prevMMLIndex === mmlIndex) mmlIndex++;
+    if (infiniteLoopStartIndex >= 0 && mmlIndex >= mml.length - 1){
+      mmlIndex = infiniteLoopStartIndex;
+    }
   }
 
 
