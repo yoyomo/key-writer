@@ -2,7 +2,6 @@ import {Component} from '@angular/core';
 import {calculateNotes, NotesInterface} from '../../assets/utils/calculate-notes';
 import {initializeSegments, SegmentsInterface} from '../../assets/utils/note-segment';
 import {AlertController} from "ionic-angular";
-import {playMML} from "../../assets/utils/mml";
 
 @Component({
   selector: 'page-home',
@@ -47,8 +46,6 @@ export class HomePage {
     this.audioContext = new AudioContext();
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
-
-    playMML("t120l8c16d16e16f8.............grarbr4........^4< c4. t500 o4cr o3er c r o er <<<e4.");
   }
 
   //scrolls to bottom whenever the page has loaded
