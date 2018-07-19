@@ -292,18 +292,23 @@ export module MML {
     }
 
     if (--loopCount === 0) {
-      return breakLoop();
+      return exitLoop();
     }
     if (loopStartIndex < 0) return;
     restartLoopIndex(loopStartIndex);
   };
 
   let breakLoop = () => {
-    if (loopEndIndex < 0) return;
     if (loopCount !== 1) return;
+    exitLoop();
+  };
+
+  let exitLoop = () => {
+    if (loopEndIndex < 0) return;
     loopCount = -1;
     loopStartIndex = -1;
     mmlIndex = loopEndIndex;
+    loopEndIndex = -1;
   };
 
   export const playMML = (mmlString: string) => {
@@ -369,8 +374,11 @@ export module MML {
           break;
       }
 
-      if (goToNext || prevMMLIndex === mmlIndex) mmlIndex++;
-      if (infiniteLoopStartIndex >= 0 && mmlIndex >= mml.length - 1) {
+      if (goToNext || prevMMLIndex === mmlIndex){
+        mmlIndex++;
+        goToNext = false;
+      }
+      if (infiniteLoopStartIndex >= 0 && mmlIndex >= mml.length) {
         restartLoopIndex(infiniteLoopStartIndex);
       }
     }

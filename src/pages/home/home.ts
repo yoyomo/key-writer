@@ -21,7 +21,9 @@ export class HomePage {
 
   startTime: number = null;
   initialScrollPosition: number = null;
-  animationFrameRequest: number;
+  scrollFrameRequest: number;
+  scrollKeyBoardLeftFrameRequest: number;
+  scrollSheetLeftFrameRequest: number;
   endTimeout: number = null;
 
   NOTE_SEGMENT_HEIGHT: number;
@@ -49,7 +51,7 @@ export class HomePage {
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
 
-    playMML("$t120l8c16d16e16 /:f16a16|c16 o5c16:/4 o4[fac o5c]8.............grarbr4........^4 [ceg<C]4. t500 o4cr o3er c r o er <<<e1.");
+    playMML("$o3/:[egb]:/3 r /:[dg-ab]:/3");
   }
 
   // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
@@ -87,14 +89,14 @@ export class HomePage {
 
   handleSheetScroll = (e) => {
     e.preventDefault();
-    let keyboard = document.getElementById("keyboard");
-    keyboard.scrollLeft = e.target.scrollLeft;
+    this.cancelAnimationFrame(this.scrollSheetLeftFrameRequest);
+    this.scrollKeyBoardLeftFrameRequest = this.requestAnimationFrame(()=>this.keyboard.scrollLeft = e.target.scrollLeft);
   };
 
   handleKeyboardScroll = (e) => {
     e.preventDefault();
-    let sheet = document.getElementById("sheet");
-    sheet.scrollLeft = e.target.scrollLeft;
+    this.cancelAnimationFrame(this.scrollKeyBoardLeftFrameRequest);
+    this.scrollSheetLeftFrameRequest = this.requestAnimationFrame(()=>this.sheet.scrollLeft = e.target.scrollLeft);
   };
 
   selectNote(note: NotesInterface) {
@@ -137,7 +139,7 @@ export class HomePage {
     let time = this.audioContext.currentTime;
     if (!this.initialScrollPosition) this.initialScrollPosition = this.sheet.scrollTop;
     this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm / 60) * (time - this.startTime));
-    this.animationFrameRequest =  this.requestAnimationFrame(this.scrollPlay);
+    this.scrollFrameRequest =  this.requestAnimationFrame(this.scrollPlay);
   };
 
   playSheet = () => {
@@ -179,7 +181,7 @@ export class HomePage {
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
 
-    this.cancelAnimationFrame(this.animationFrameRequest);
+    this.cancelAnimationFrame(this.scrollFrameRequest);
     this.initialScrollPosition = null;
     this.startTime = null;
 
