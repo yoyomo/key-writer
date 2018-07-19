@@ -2,7 +2,8 @@ import {Component} from '@angular/core';
 import {calculateNotes, NotesInterface} from '../../assets/utils/calculate-notes';
 import {initializeSegments, SegmentsInterface} from '../../assets/utils/note-segment';
 import {AlertController} from "ionic-angular";
-import {playMML} from "../../assets/utils/mml";
+import {MML} from "../../assets/utils/mml";
+import playMML = MML.playMML;
 
 @Component({
   selector: 'page-home',
@@ -20,7 +21,7 @@ export class HomePage {
 
   startTime: number = null;
   initialScrollPosition: number = null;
-  scrollTimeout: number = null;
+  animationFrameRequest: number;
   endTimeout: number = null;
 
   NOTE_SEGMENT_HEIGHT: number;
@@ -48,8 +49,25 @@ export class HomePage {
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
 
-    playMML("t120l8c16d16e16 [fac o5c]8.............grarbr4........^4 /: t120o5 [ceg<C]4. t500 o4cr o3er c r o er <<<e1. :/4");
+    playMML("$t120l8c16d16e16 /:f16a16|c16 o5c16:/4 o4[fac o5c]8.............grarbr4........^4 [ceg<C]4. t500 o4cr o3er c r o er <<<e1.");
   }
+
+  // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
+  requestAnimationFrame = (function(){
+    return  window["requestAnimationFrame"] ||
+        window["webkitRequestAnimationFrame"] ||
+        window["mozRequestAnimationFrame"] ||
+        window["oRequestAnimationFrame"] ||
+        window["msRequestAnimationFrame"] ||
+        function( callback ){
+          window.setTimeout(callback, 1000 / 60);
+        };
+  })();
+
+  cancelAnimationFrame = window["cancelAnimationFrame"] ||
+      window["mozCancelAnimationFrame"] ||
+      window["webkitCancelAnimationFrame"] ||
+      window["msCancelAnimationFrame"];
 
   //scrolls to bottom whenever the page has loaded
   // noinspection JSUnusedGlobalSymbols
@@ -119,7 +137,7 @@ export class HomePage {
     let time = this.audioContext.currentTime;
     if (!this.initialScrollPosition) this.initialScrollPosition = this.sheet.scrollTop;
     this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm / 60) * (time - this.startTime));
-    this.scrollTimeout = setTimeout(this.scrollPlay, (1000 / this.NOTE_SEGMENT_HEIGHT) * (60 / this.bpm));
+    this.animationFrameRequest =  this.requestAnimationFrame(this.scrollPlay);
   };
 
   playSheet = () => {
@@ -150,7 +168,6 @@ export class HomePage {
   endSheet = (endTime: number) => {
     if(this.audioContext.currentTime >= endTime){
       this.stopSheet();
-      // this.restart();
     }else{
       this.endTimeout = setTimeout(()=>this.endSheet(endTime), 25);
     }
@@ -162,7 +179,7 @@ export class HomePage {
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
 
-    clearTimeout(this.scrollTimeout);
+    this.cancelAnimationFrame(this.animationFrameRequest);
     this.initialScrollPosition = null;
     this.startTime = null;
 
