@@ -319,7 +319,7 @@ export module MML {
       this.loopEndIndex = -1;
     };
 
-    parseMML = (startTime: number, relativeCurrentTime: number, scheduleTime: number) => {
+    parseMML = (relativeCurrentTime: number) => {
       while (this.relativeNextNoteTime < relativeCurrentTime + scheduleTime
       && this.mmlIndex < this.mml.length) {
         let prevMMLIndex = this.mmlIndex;
@@ -404,7 +404,7 @@ export module MML {
 
     let relativeCurrentTime = audioContext.currentTime;
     sequences.map(sequence => {
-      sequence.parseMML(startTime,relativeCurrentTime,scheduleTime);
+      sequence.parseMML(relativeCurrentTime);
     });
   };
 
