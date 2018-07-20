@@ -51,20 +51,19 @@ export class HomePage {
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
 
-    playMML("$o3/:[egb]:/3 r /:[dg-ab]:/3");
+    playMML(
+        "$o3/:e:/3 r /:d:/3;" +
+        "$o3/:g:/3 r /:g-:/3;" +
+        "$o3/:b:/3 r /:b:/3;" +
+        "$o3/:r:/3 r /:a:/3;");
   }
 
   // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
-  requestAnimationFrame = (function(){
-    return  window["requestAnimationFrame"] ||
+  requestAnimationFrame = window["requestAnimationFrame"] ||
         window["webkitRequestAnimationFrame"] ||
         window["mozRequestAnimationFrame"] ||
         window["oRequestAnimationFrame"] ||
-        window["msRequestAnimationFrame"] ||
-        function( callback ){
-          window.setTimeout(callback, 1000 / 60);
-        };
-  })();
+        window["msRequestAnimationFrame"];
 
   cancelAnimationFrame = window["cancelAnimationFrame"] ||
       window["mozCancelAnimationFrame"] ||
@@ -189,7 +188,7 @@ export class HomePage {
   };
 
   changeBPM = () => {
-    let alert = this.alertCtrl.create({
+    let bpmPopup = this.alertCtrl.create({
       title: 'Change Beats per Minute (bpm)',
       inputs: [{name: 'bpm', value: `${this.bpm}`, type: "number"}],
       buttons: [
@@ -199,12 +198,21 @@ export class HomePage {
         },
         {
           text: 'OK', handler: data => {
+            if(data.bpm <= 0){
+              let bpmError = this.alertCtrl.create({
+                title: 'BPM out of bounds',
+                subTitle: 'BPM have to be greater than 0',
+                buttons: ['OK']
+              });
+              bpmError.present();
+              return;
+            }
             this.bpm = data.bpm;
           }
         }
       ]
     });
-    return alert.present();
+    return bpmPopup.present();
   };
 
   restart = () => {
