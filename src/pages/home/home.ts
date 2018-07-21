@@ -4,6 +4,8 @@ import {initializeSegments, SegmentsInterface} from '../../assets/utils/note-seg
 import {AlertController} from "ionic-angular";
 import {MML} from "../../assets/utils/mml";
 import playMML = MML.playMML;
+import getNotesInQueue = MML.getNotesInQueue;
+import Note = MML.Note;
 
 @Component({
   selector: 'page-home',
@@ -56,6 +58,7 @@ export class HomePage {
         "$o3/:g:/3 r /:g-:/3;" +
         "$o3/:b:/3 r /:b:/3;" +
         "$o3/:r:/3 r /:a:/3;");
+
   }
 
   // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
@@ -66,8 +69,8 @@ export class HomePage {
         window["msRequestAnimationFrame"];
 
   cancelAnimationFrame = window["cancelAnimationFrame"] ||
-      window["mozCancelAnimationFrame"] ||
       window["webkitCancelAnimationFrame"] ||
+      window["mozCancelAnimationFrame"] ||
       window["msCancelAnimationFrame"];
 
   //scrolls to bottom whenever the page has loaded
@@ -84,6 +87,8 @@ export class HomePage {
     }
 
     this.NOTE_SEGMENT_HEIGHT = document.querySelector(".note-segment").clientHeight;
+
+    this.requestAnimationFrame(this.displayNotes);
   };
 
   handleSheetScroll = (e) => {
@@ -98,11 +103,17 @@ export class HomePage {
     this.scrollSheetLeftFrameRequest = this.requestAnimationFrame(()=>this.sheet.scrollLeft = e.target.scrollLeft);
   };
 
-  selectNote(note: NotesInterface) {
+  displayNotes = () => {
+    let notes: Note[][] = getNotesInQueue();
+    console.log(notes);
+    this.requestAnimationFrame(this.displayNotes);
+  };
+
+  selectNote = (note: NotesInterface) => {
     if (this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]) {
       this.playNote(note, this.audioContext.currentTime);
     }
-  }
+  };
 
   private convertDurationToSeconds = (duration: number) => {
     return duration * 60 / this.bpm;

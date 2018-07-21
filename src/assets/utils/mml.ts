@@ -39,6 +39,12 @@ export module MML {
     startTime: number
   }
 
+  export interface Note {
+    index: number,
+    duration: number,
+    tempo: number,
+  }
+
   class Sequence {
 
     tempo = 120;
@@ -66,6 +72,8 @@ export module MML {
     goToNext = false;
 
     relativeNextNoteTime = 0;
+
+    notesInQueue: Note[] = [];
 
     constructor(mml: string) {
       this.mml = mml;
@@ -140,7 +148,7 @@ export module MML {
       }
     };
 
-// 1 duration = 4beats
+    // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 duration
     convertDurationToSeconds = (duration: number) => {
       if (duration === 0) return 0;
       return (4 / duration) * 60 / this.tempo;
@@ -154,6 +162,12 @@ export module MML {
 
       oscillator.start(time);
       oscillator.stop(time + this.convertDurationToSeconds(this.duration));
+
+      this.notesInQueue.push({
+        index: noteIndex,
+        duration: this.duration,
+        tempo: this.tempo
+      });
     };
 
     nextNote = () => {
@@ -405,6 +419,12 @@ export module MML {
     let relativeCurrentTime = audioContext.currentTime;
     sequences.map(sequence => {
       sequence.parseMML(relativeCurrentTime);
+    });
+  };
+
+  export const getNotesInQueue = () => {
+    return sequences.map(sequence => {
+      return sequence.notesInQueue;
     });
   };
 
