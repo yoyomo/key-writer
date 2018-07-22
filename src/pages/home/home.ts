@@ -3,9 +3,6 @@ import {calculateNotes, NotesInterface} from '../../assets/utils/calculate-notes
 import {initializeSegments, SegmentsInterface} from '../../assets/utils/note-segment';
 import {AlertController} from "ionic-angular";
 import {MML} from "../../assets/utils/mml";
-import playMML = MML.playMML;
-import getNotesInQueue = MML.getNotesInQueue;
-import Note = MML.Note;
 
 @Component({
   selector: 'page-home',
@@ -33,6 +30,8 @@ export class HomePage {
   keyboard: HTMLElement;
   sheet: HTMLElement;
 
+  mml: MML;
+
   constructor(private alertCtrl: AlertController) {
     this.notes = calculateNotes();
     this.segments = initializeSegments(this.notes);
@@ -52,13 +51,13 @@ export class HomePage {
     this.audioContext = new AudioContext();
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
+    this.gain.gain.value = 0.25;
 
-    playMML(
-        "$o3/:e:/3 r /:d:/3;" +
-        "$o3/:g:/3 r /:g-:/3;" +
-        "$o3/:b:/3 r /:b:/3;" +
-        "$o3/:r:/3 r /:a:/3;");
-
+    this.mml = new MML("$o3/:e:/3 r /:d:/3;" +
+                            "$o3/:g:/3 r /:g-:/3;" +
+                            "$o3/:b:/3 r /:b:/3;" +
+                            "$o3/:r:/3 r /:a:/3;");
+    this.mml.play();
   }
 
   // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
@@ -104,8 +103,7 @@ export class HomePage {
   };
 
   displayNotes = () => {
-    let notes: Note[][] = getNotesInQueue();
-    console.log(notes);
+    console.log(this.mml.getNotesInQueue());
     this.requestAnimationFrame(this.displayNotes);
   };
 
