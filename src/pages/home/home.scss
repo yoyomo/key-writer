@@ -2,10 +2,6 @@ page-home {
   $zoom: 1.5px;
   $note-segment-height: 64px;
 
-  ::-webkit-scrollbar {
-    display: none;
-  }
-
   .screen{
     height: 100%;
     flex: 0 0 100%;
@@ -27,7 +23,7 @@ page-home {
     flex-direction: column-reverse;
     display: flex;
     overflow: auto;
-    -webkit-overflow-scrolling: auto;
+    //-webkit-overflow-scrolling: touch;
   }
 
   .note-segment {
@@ -41,19 +37,12 @@ page-home {
     border-top: 1px solid darkgray;
   }
 
-  .duration {
-  }
-
-  .add-note-segment {
-
-  }
-
   .keyboard {
     flex: 0 0 20%;
     flex-direction: column;
     display: flex;
     overflow-x: auto;
-    -webkit-overflow-scrolling: auto;
+    //-webkit-overflow-scrolling: touch;
   }
 
   .top-keys {

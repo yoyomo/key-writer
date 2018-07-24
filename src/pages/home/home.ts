@@ -20,9 +20,8 @@ export class HomePage {
 
   startTime: number = null;
   initialScrollPosition: number = null;
-  scrollFrameRequest: number;
-  scrollKeyBoardLeftFrameRequest: number;
-  scrollSheetLeftFrameRequest: number;
+  scrollTopFrameRequest: number;
+  scrollLeftFrameRequest: number;
   endTimeout: number = null;
 
   NOTE_SEGMENT_HEIGHT: number;
@@ -87,24 +86,41 @@ export class HomePage {
 
     this.NOTE_SEGMENT_HEIGHT = document.querySelector(".note-segment").clientHeight;
 
-    this.requestAnimationFrame(this.displayNotes);
+    // this.requestAnimationFrame(this.displayNotes);
+    this.displayNotes();
   };
 
   handleSheetScroll = (e) => {
     e.preventDefault();
-    this.cancelAnimationFrame(this.scrollSheetLeftFrameRequest);
-    this.scrollKeyBoardLeftFrameRequest = this.requestAnimationFrame(()=>this.keyboard.scrollLeft = e.target.scrollLeft);
+    this.cancelAnimationFrame(this.scrollLeftFrameRequest);
+    this.scrollLeftFrameRequest = this.requestAnimationFrame(()=>this.keyboard.scrollLeft = e.target.scrollLeft);
   };
 
   handleKeyboardScroll = (e) => {
     e.preventDefault();
-    this.cancelAnimationFrame(this.scrollKeyBoardLeftFrameRequest);
-    this.scrollSheetLeftFrameRequest = this.requestAnimationFrame(()=>this.sheet.scrollLeft = e.target.scrollLeft);
+    this.cancelAnimationFrame(this.scrollLeftFrameRequest);
+    this.scrollLeftFrameRequest = this.requestAnimationFrame(()=>this.sheet.scrollLeft = e.target.scrollLeft);
   };
 
   displayNotes = () => {
-    console.log(this.mml.getNotesInQueue());
-    this.requestAnimationFrame(this.displayNotes);
+    let sequences = this.mml.getNotesInQueue();
+    console.log(sequences);
+    sequences.map(sequence => {
+      sequence.map(note=> {
+        switch(note.type){
+          case "note":
+            let noteDiv = document.createElement("div");
+            noteDiv.className = "on";
+            noteDiv.style.height = ""+this.NOTE_SEGMENT_HEIGHT * (4/note.duration);
+              // make note segments be 0-87 (for all keys)
+              // find which note-segment with note.value
+              //make this function in angular for better performance (not have to delete each div and recreate)
+            this.sheet.appendChild(noteDiv);
+            break;
+        }
+      });
+    });
+    // this.requestAnimationFrame(this.displayNotes);
   };
 
   selectNote = (note: NotesInterface) => {
@@ -147,7 +163,7 @@ export class HomePage {
     let time = this.audioContext.currentTime;
     if (!this.initialScrollPosition) this.initialScrollPosition = this.sheet.scrollTop;
     this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm / 60) * (time - this.startTime));
-    this.scrollFrameRequest =  this.requestAnimationFrame(this.scrollPlay);
+    this.scrollTopFrameRequest =  this.requestAnimationFrame(this.scrollPlay);
   };
 
   playSheet = () => {
@@ -189,7 +205,7 @@ export class HomePage {
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
 
-    this.cancelAnimationFrame(this.scrollFrameRequest);
+    this.cancelAnimationFrame(this.scrollTopFrameRequest);
     this.initialScrollPosition = null;
     this.startTime = null;
 

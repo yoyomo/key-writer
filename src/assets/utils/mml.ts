@@ -14,6 +14,8 @@ export interface StartChord{
 }
 export interface EndChord {
   type: "end-chord",
+  duration: number,
+  tempo: number
 }
 
 export interface Rest {
@@ -82,6 +84,7 @@ export class MML {
     this.audioContext = new AudioContext();
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
+    this.gain.gain.value = 0.25;
 
     this.parseMML();
   }
@@ -331,7 +334,7 @@ class Sequence {
     });
     this.readingChord = false;
     this.chordNoteIndexes = [];
-    this.notesInQueue.push({type: "end-chord"});
+    this.notesInQueue.push({type: "end-chord", duration: this.duration, tempo: this.tempo});
     this.nextNote();
   };
 
@@ -472,6 +475,7 @@ class Sequence {
           break;
         case "end-chord":
           this.playState.chord = false;
+          this.playState.nextNoteTime += this.convertDurationToSeconds(note.duration, note.tempo);
           break;
         case "rest":
           this.playState.nextNoteTime += this.convertDurationToSeconds(note.duration, note.tempo);

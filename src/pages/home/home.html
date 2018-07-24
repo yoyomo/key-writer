@@ -20,7 +20,7 @@
 <ion-content>
   <div class="screen">
     <div class="book">
-      <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet">
+      <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet gpu">
         <div *ngFor="let segment of segments; let segmentIndex = index"
              [ngClass]="'note-segment'">
           <div [ngClass]="'left-margin ' + (segment.noteToggles[0] ? 'on' : 'off')"></div>
@@ -36,7 +36,7 @@
       </div>
     </div>
 
-    <div class="keyboard" id="keyboard" (scroll)="handleKeyboardScroll($event)">
+    <div class="keyboard gpu" id="keyboard" (scroll)="handleKeyboardScroll($event)">
       <div class="top-keys">
         <div class="white-key left-margin" (click)="playNote(notes[0])"></div>
         <div *ngFor="let note of notes"
