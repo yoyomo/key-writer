@@ -1,60 +1,48 @@
+import Timer = NodeJS.Timer;
 
 export const C_BASE_KEY_INDEX = 39; // 0...n
 export const NOTE_INDEXES = {c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11};
 
 export interface Note {
-  type: "note",
+  type: 'note',
   value: number,
   duration: number,
   tempo: number,
 }
 
-export interface StartChord{
-  type: "start-chord"
+export interface StartChord {
+  type: 'start-chord'
 }
 export interface EndChord {
-  type: "end-chord",
+  type: 'end-chord',
   duration: number,
   tempo: number
 }
 
 export interface Rest {
-  type: "rest",
+  type: 'rest',
   duration: number,
   tempo: number,
 }
 
-export interface StartLoop{
-  type: "start-loop"
+export interface StartLoop {
+  type: 'start-loop'
 }
 export interface BreakLoop {
-  type: "break-loop"
+  type: 'break-loop'
 }
 export interface EndLoop {
-  type: "end-loop",
+  type: 'end-loop',
   times: number
 }
 export interface InfiniteLoop {
-  type: "infinite-loop"
+  type: 'infinite-loop'
 }
 export type SequenceNote = Note | StartLoop | BreakLoop | EndLoop | InfiniteLoop | StartChord | EndChord | Rest;
 
 export class MML {
 
-  getNoteFrequencies = () => {
-    let frequencies: number[] = [];
-    const numOfKeys = 88;
-    const baseKeyPosition = 49;
-    const baseFrequency = 440;
-
-    for (let n = 1; n <= numOfKeys; n++) {
-      let frequency = Math.pow(2, ((n - baseKeyPosition) / 12)) * baseFrequency;
-      frequencies.push(frequency);
-    }
-    return frequencies;
-  };
-
-  frequencies = this.getNoteFrequencies();
+  frequencies: number[];
 
   audioContext: AudioContext;
   gain: GainNode;
@@ -66,19 +54,23 @@ export class MML {
 
   sequences: Sequence[] = [];
 
-  constructor(mmlString: string){
-    let mmls = mmlString.toLowerCase().replace(/\s/g, '').split(';');
+  playInterval: Timer;
+
+  constructor(mmlString: string) {
+    const mmls = mmlString.toLowerCase().replace(/\s/g, '').split(';');
 
     mmls.map(mml => {
-      if (!mml) return;
+      if (!mml) { return; }
       this.sequences.push(new Sequence(mml));
     });
 
-    let AudioContext = window["AudioContext"] // Default
-        || window["webkitAudioContext"] // Safari and old versions of Chrome
-        || window["mozAudioContext"] // Safari and old versions of Chrome
-        || window["oAudioContext"] // Safari and old versions of Chrome
-        || window["msAudioContext"] // Safari and old versions of Chrome
+    this.frequencies = this.getNoteFrequencies();
+
+    const AudioContext = window['AudioContext'] // Default
+        || window['webkitAudioContext'] // Safari and old versions of Chrome
+        || window['mozAudioContext'] // Safari and old versions of Chrome
+        || window['oAudioContext'] // Safari and old versions of Chrome
+        || window['msAudioContext'] // Safari and old versions of Chrome
         || false;
 
     this.audioContext = new AudioContext();
@@ -89,7 +81,18 @@ export class MML {
     this.parseMML();
   }
 
-  playInterval: number;
+  getNoteFrequencies = () => {
+    const frequencies: number[] = [];
+    const numOfKeys = 88;
+    const baseKeyPosition = 49;
+    const baseFrequency = 440;
+
+    for (let n = 1; n <= numOfKeys; n++) {
+      const frequency = Math.pow(2, ((n - baseKeyPosition) / 12)) * baseFrequency;
+      frequencies.push(frequency);
+    }
+    return frequencies;
+  };
 
   stop = () => {
     clearInterval(this.playInterval);
@@ -110,9 +113,9 @@ export class MML {
   };
 
   private playMML = () => {
-    if (!this.startTime) this.startTime = this.audioContext.currentTime;
+    if (!this.startTime) { this.startTime = this.audioContext.currentTime; }
 
-    let relativeScheduleTime = this.audioContext.currentTime + this.scheduleTime;
+    const relativeScheduleTime = this.audioContext.currentTime + this.scheduleTime;
     this.sequences.map(sequence => {
       sequence.playMML(this.startTime, relativeScheduleTime, this.audioContext, this.gain, this.frequencies);
     })
@@ -156,8 +159,8 @@ class Sequence {
 
   expect = (reg: RegExp) => {
     if (!reg.test(this.mml[this.mmlIndex])) {
-      throw new Error("Invalid MML syntax.\n" +
-          "Expected: " + reg + ", Got: " + this.mml[this.mmlIndex]);
+      throw new Error('Invalid MML syntax.\n' +
+          'Expected: ' + reg + ', Got: ' + this.mml[this.mmlIndex]);
     }
   };
 
@@ -186,7 +189,7 @@ class Sequence {
 
     while (this.isThisValid(/[\dl^.]/)) {
       switch (this.mml[this.mmlIndex]) {
-        case "l":
+        case 'l':
           this.normalDuration = -1;
           let length = 0;
           while (this.isNextValid(/\d/)) {
@@ -194,17 +197,17 @@ class Sequence {
             this.duration = length;
           }
           break;
-        case "^":
+        case '^':
           while (this.isThisValid(/\^/)) {
             let extension = 0;
             while (this.isNextValid(/\d/)) {
               extension = extension * 10 + parseInt(this.mml[this.mmlIndex]);
             }
-            if (extension === 0) extension = this.duration;
+            if (extension === 0) { extension = this.duration; }
             this.duration = (this.duration * extension) / (this.duration + extension);
           }
           break;
-        case ".":
+        case '.':
           let extension = this.duration;
           do {
             extension *= 2;
@@ -225,7 +228,7 @@ class Sequence {
 
   saveNote = (noteIndex: number) => {
     this.notesInQueue.push({
-      type: "note",
+      type: 'note',
       value: noteIndex,
       duration: this.duration,
       tempo: this.tempo,
@@ -245,15 +248,15 @@ class Sequence {
 
     if (this.isNextValid(/[-+#\d^.]/)) {
       switch (this.mml[this.mmlIndex]) {
-        case "-":
+        case '-':
           noteIndex--;
           break;
-        case "+":
-        case "#":
+        case '+':
+        case '#':
           noteIndex++;
           break;
         default:
-          if (this.readingChord) break;
+          if (this.readingChord) { break; }
           this.getDuration();
           break;
       }
@@ -279,8 +282,7 @@ class Sequence {
 
     if (this.isNextValid(/\d/)) {
       this.octave -= parseInt(this.mml[this.mmlIndex]);
-    }
-    else {
+    } else {
       this.octave--;
     }
   };
@@ -290,8 +292,7 @@ class Sequence {
 
     if (this.isNextValid(/\d/)) {
       this.octave += parseInt(this.mml[this.mmlIndex]);
-    }
-    else {
+    } else {
       this.octave++;
     }
   };
@@ -312,7 +313,7 @@ class Sequence {
     if (this.isNextValid(/[\d^.]/)) {
       this.getDuration();
     }
-    this.notesInQueue.push({type: "rest", duration: this.duration, tempo: this.tempo});
+    this.notesInQueue.push({type: 'rest', duration: this.duration, tempo: this.tempo});
 
     this.nextNote();
   };
@@ -321,7 +322,7 @@ class Sequence {
     this.expect(/\[/);
     this.readingChord = true;
     this.chordNoteIndexes = [];
-    this.notesInQueue.push({type: "start-chord"});
+    this.notesInQueue.push({type: 'start-chord'});
   };
 
   playChord = () => {
@@ -334,14 +335,14 @@ class Sequence {
     });
     this.readingChord = false;
     this.chordNoteIndexes = [];
-    this.notesInQueue.push({type: "end-chord", duration: this.duration, tempo: this.tempo});
+    this.notesInQueue.push({type: 'end-chord', duration: this.duration, tempo: this.tempo});
     this.nextNote();
   };
 
   setInfiniteLoop = () => {
     this.expect(/$/);
     this.mmlIndex++;
-    this.notesInQueue.push({type: "infinite-loop"});
+    this.notesInQueue.push({type: 'infinite-loop'});
   };
 
   startLoop = () => {
@@ -349,7 +350,7 @@ class Sequence {
     this.mmlIndex++;
     this.expect(/:/);
     this.mmlIndex++;
-    this.notesInQueue.push({type: "start-loop"});
+    this.notesInQueue.push({type: 'start-loop'});
   };
 
   endLoop = () => {
@@ -360,62 +361,62 @@ class Sequence {
     while (this.isNextValid(/\d/)) {
       loopTimes = loopTimes * 10 + parseInt(this.mml[this.mmlIndex]);
     }
-    if (loopTimes === 0) loopTimes = 2;
+    if (loopTimes === 0) { loopTimes = 2; }
 
-    this.notesInQueue.push({type: "end-loop", times: loopTimes});
+    this.notesInQueue.push({type: 'end-loop', times: loopTimes});
   };
 
   breakLoop = () => {
-    this.notesInQueue.push({type: "break-loop"});
+    this.notesInQueue.push({type: 'break-loop'});
   };
 
   parseMML = () => {
     while (this.mmlIndex < this.mml.length) {
-      let prevMMLIndex = this.mmlIndex;
+      const prevMMLIndex = this.mmlIndex;
       switch (this.mml[this.mmlIndex]) {
-        case "c":
-        case "d":
-        case "e":
-        case "f":
-        case "g":
-        case "a":
-        case "b":
+        case 'c':
+        case 'd':
+        case 'e':
+        case 'f':
+        case 'g':
+        case 'a':
+        case 'b':
           this.getNote();
           break;
-        case "[":
+        case '[':
           this.getChord();
           break;
-        case "]":
+        case ']':
           this.playChord();
           break;
-        case "r":
+        case 'r':
           this.getRest();
           break;
-        case "l":
+        case 'l':
           this.getDuration();
           break;
-        case "o":
+        case 'o':
           this.getOctave();
           break;
-        case ">":
+        case '>':
           this.decreaseOctave();
           break;
-        case "<":
+        case '<':
           this.increaseOctave();
           break;
-        case "t":
+        case 't':
           this.getTempo();
           break;
-        case "$":
+        case '$':
           this.setInfiniteLoop();
           break;
-        case "/":
+        case '/':
           this.startLoop();
           break;
-        case ":":
+        case ':':
           this.endLoop();
           break;
-        case "|":
+        case '|':
           this.breakLoop();
           break;
         default:
@@ -432,56 +433,55 @@ class Sequence {
 
   // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 duration
   convertDurationToSeconds = (duration: number, tempo: number) => {
-    if (duration === 0) return 0;
+    if (duration === 0) { return 0; }
     return (4 / duration) * 60 / tempo;
   };
 
   playMML = (startTime: number, relativeScheduleTime: number, audioContext: AudioContext, gain: GainNode, frequencies: number[]) => {
-    while(this.playState.nextNoteTime < relativeScheduleTime
-    && this.playState.index < this.notesInQueue.length){
-      let note = this.notesInQueue[this.playState.index];
-      switch(note.type){
-        case "start-loop":
+    while (this.playState.nextNoteTime < relativeScheduleTime
+    && this.playState.index < this.notesInQueue.length) {
+      const note = this.notesInQueue[this.playState.index];
+      switch (note.type) {
+        case 'start-loop':
           this.playState.loopStartIndex = this.playState.index;
           break;
-        case "end-loop":
-          if(this.playState.loopCount < 0){
+        case 'end-loop':
+          if (this.playState.loopCount < 0) {
             this.playState.loopEndIndex = this.playState.index;
             this.playState.loopCount = note.times;
           }
           this.playState.loopCount--;
-          if (this.playState.loopCount > 0){
+          if (this.playState.loopCount > 0) {
             this.playState.index = this.playState.loopStartIndex;
-          }
-          else{
+          } else {
             this.playState.loopCount = -1;
             this.playState.loopStartIndex = -1;
             this.playState.loopEndIndex = -1;
           }
           break;
-        case "break-loop":
-          if (this.playState.loopCount === 1){
+        case 'break-loop':
+          if (this.playState.loopCount === 1) {
             this.playState.index = this.playState.loopEndIndex;
             this.playState.loopCount = -1;
             this.playState.loopStartIndex = -1;
             this.playState.loopEndIndex = -1;
           }
           break;
-        case "infinite-loop":
+        case 'infinite-loop':
           this.playState.infiniteLoopIndex = this.playState.index;
           break;
-        case "start-chord":
+        case 'start-chord':
           this.playState.chord = true;
           break;
-        case "end-chord":
+        case 'end-chord':
           this.playState.chord = false;
           this.playState.nextNoteTime += this.convertDurationToSeconds(note.duration, note.tempo);
           break;
-        case "rest":
+        case 'rest':
           this.playState.nextNoteTime += this.convertDurationToSeconds(note.duration, note.tempo);
           break;
-        case "note":
-          let oscillator = audioContext.createOscillator();
+        case 'note':
+          const oscillator = audioContext.createOscillator();
           oscillator.frequency.value = frequencies[note.value];
           oscillator.type = 'sine';
           oscillator.connect(gain);
@@ -490,12 +490,12 @@ class Sequence {
 
           oscillator.stop(startTime + this.playState.nextNoteTime + this.convertDurationToSeconds(note.duration, note.tempo));
 
-          if(this.playState.chord) break;
+          if (this.playState.chord) { break; }
           this.playState.nextNoteTime += this.convertDurationToSeconds(note.duration, note.tempo);
           break;
       }
 
-      if(this.playState.infiniteLoopIndex >= 0 && this.playState.index >= this.notesInQueue.length - 1){
+      if (this.playState.infiniteLoopIndex >= 0 && this.playState.index >= this.notesInQueue.length - 1) {
         this.playState.index = this.playState.infiniteLoopIndex;
       }
 

@@ -1,20 +1,20 @@
 <ion-header>
-  <ion-navbar align="center">
-    <ion-buttons right>
-      <button ion-button icon-only (click)="restart()">
+  <ion-toolbar align="center">
+    <ion-buttons slot="end">
+      <ion-button (click)="restart()">
         <ion-icon name="skip-backward"></ion-icon>
-      </button>
-      <button ion-button icon-only (click)="changeBPM()">
+      </ion-button>
+      <ion-button (click)="changeBPM()">
         <span>{{bpm}}bpm</span>
-      </button>
-      <button *ngIf="!isPlaying" ion-button icon-only (click)="playSheet()">
+      </ion-button>
+      <ion-button *ngIf="!isPlaying" (click)="playSheet()">
         <ion-icon name="play"></ion-icon>
-      </button>
-      <button *ngIf="isPLaying" ion-button icon-only (click)="stopSheet()">
+      </ion-button>
+      <ion-button *ngIf="isPLaying" (click)="stopSheet()">
         <ion-icon name="pause"></ion-icon>
-      </button>
+      </ion-button>
     </ion-buttons>
-  </ion-navbar>
+  </ion-toolbar>
 </ion-header>
 
 <ion-content>
