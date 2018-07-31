@@ -40,6 +40,16 @@ export interface InfiniteLoop {
 }
 export type SequenceNote = Note | StartLoop | BreakLoop | EndLoop | InfiniteLoop | StartChord | EndChord | Rest;
 
+export interface PlayState {
+  index: number,
+  nextNoteTime: number,
+  chord: boolean,
+  loopStartIndex: number,
+  loopCount: number,
+  loopEndIndex: number,
+  infiniteLoopIndex: number,
+}
+
 export class MML {
 
   frequencies: number[];
@@ -64,7 +74,6 @@ export class MML {
       this.sequences.push(new Sequence(mml));
     });
 
-    this.frequencies = this.getNoteFrequencies();
 
     const AudioContext = window['AudioContext'] // Default
         || window['webkitAudioContext'] // Safari and old versions of Chrome
@@ -78,35 +87,45 @@ export class MML {
     this.gain.connect(this.audioContext.destination);
     this.gain.gain.value = 0.25;
 
+    this.calculateNoteFrequencies();
     this.parseMML();
   }
 
-  getNoteFrequencies = () => {
-    const frequencies: number[] = [];
+  calculateNoteFrequencies = () => {
+    this.frequencies = [];
     const numOfKeys = 88;
     const baseKeyPosition = 49;
     const baseFrequency = 440;
 
     for (let n = 1; n <= numOfKeys; n++) {
       const frequency = Math.pow(2, ((n - baseKeyPosition) / 12)) * baseFrequency;
-      frequencies.push(frequency);
+      this.frequencies.push(frequency);
     }
-    return frequencies;
+  };
+
+  getFrequencies = () => {
+    return this.frequencies;
   };
 
   stop = () => {
     clearInterval(this.playInterval);
     this.gain.disconnect(this.audioContext.destination);
+    this.startTime = null;
+    this.sequences.map(sequence => {
+      sequence.resetPlayState();
+    });
+
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);
   };
 
   play = () => {
+    this.stop();
     this.parseMML();
     this.playInterval = setInterval(this.playMML, this.lookahead);
   };
 
-  private parseMML = () => {
+  parseMML = () => {
     this.sequences.map(sequence => {
       sequence.parseMML();
     });
@@ -143,19 +162,24 @@ class Sequence {
   goToNext = false;
 
   notesInQueue: SequenceNote[] = [];
-  playState = {
-    index: 0,
-    nextNoteTime: 0,
-    chord: false,
-    loopStartIndex: -1,
-    loopCount: -1,
-    loopEndIndex: -1,
-    infiniteLoopIndex: -1,
-  };
+  playState: PlayState;
 
   constructor(mml: string) {
     this.mml = mml;
+    this.resetPlayState();
   }
+
+  resetPlayState = () => {
+    this.playState = {
+      index: 0,
+      nextNoteTime: 0,
+      chord: false,
+      loopStartIndex: -1,
+      loopCount: -1,
+      loopEndIndex: -1,
+      infiniteLoopIndex: -1,
+    };
+  };
 
   expect = (reg: RegExp) => {
     if (!reg.test(this.mml[this.mmlIndex])) {

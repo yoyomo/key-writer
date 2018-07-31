@@ -1,9 +1,13 @@
 import {Component} from '@angular/core';
 import {calculateNotes, NotesInterface} from '../../assets/utils/calculate-notes';
-import {initializeSegments, SegmentsInterface} from '../../assets/utils/note-segment';
 import {MML} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
+
+interface NoteSegment {
+  isRest: boolean
+  height: number
+}
 
 @Component({
   selector: 'app-home',
@@ -12,8 +16,9 @@ import Timer = NodeJS.Timer;
 })
 export class HomePage {
   notes: NotesInterface[];
-  segments: SegmentsInterface[];
   whiteBottomKeys: NotesInterface[];
+
+  segments: NoteSegment[][];
   currentSegmentIndex: number;
   audioContext: AudioContext;
   gain: GainNode;
@@ -26,27 +31,51 @@ export class HomePage {
   scrollLeftFrameRequest: number;
   endTimeout: Timer = null;
 
-  NOTE_SEGMENT_HEIGHT: number;
+  NOTE_SEGMENT_HEIGHT: 64;
 
   keyboard: HTMLElement;
   sheet: HTMLElement;
 
   mml: MML;
 
+  readTextFile = (file) => {
+    let rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = () => {
+      if(rawFile.readyState === 4)
+      {
+        if(rawFile.status === 200 || rawFile.status == 0)
+        {
+          let allText = rawFile.responseText;
+          this.mml = new MML(allText.replace(/[\n ]/g,''));
+          this.mml.parseMML();
+        }
+      }
+    };
+    rawFile.send(null);
+  };
+
+  resetSegments = () => {
+    this.segments = [];
+    for(let i = 0; i < this.notes.length; i++){
+      this.segments[i] = [];
+    }
+  };
+
   constructor(private alertCtrl: AlertController) {
     this.notes = calculateNotes();
-    this.segments = initializeSegments(this.notes);
+    this.resetSegments();
     this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
 
     this.currentSegmentIndex = 0;
     this.bpm = 120;
     this.isPLaying = false;
 
-    const AudioContext = window['AudioContext'] // Default
-        || window['webkitAudioContext'] // Safari and old versions of Chrome
-        || window['mozAudioContext'] // Safari and old versions of Chrome
-        || window['oAudioContext'] // Safari and old versions of Chrome
-        || window['msAudioContext'] // Safari and old versions of Chrome
+    const AudioContext = window['AudioContext']
+        || window['webkitAudioContext']
+        || window['mozAudioContext']
+        || window['oAudioContext']
+        || window['msAudioContext']
         || false;
 
     this.audioContext = new AudioContext();
@@ -54,11 +83,7 @@ export class HomePage {
     this.gain.connect(this.audioContext.destination);
     this.gain.gain.value = 0.25;
 
-    this.mml = new MML('$o3/:e:/3 r /:d:/3;' +
-        '$o3/:g:/3 r /:g-:/3;' +
-        '$o3/:b:/3 r /:b:/3;' +
-        '$o3/:r:/3 r /:a:/3;');
-    this.mml.play();
+    this.readTextFile('../../assets/mml-files/cool-loop.txt'); // read from database
   }
 
   // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
@@ -86,8 +111,6 @@ export class HomePage {
       this.sheet.scrollLeft = (this.sheet.scrollWidth - this.sheet.clientWidth) / 2;
     }
 
-    this.NOTE_SEGMENT_HEIGHT = document.querySelector('.note-segment').clientHeight;
-
     // this.requestAnimationFrame(this.displayNotes);
     this.displayNotes();
   };
@@ -104,20 +127,25 @@ export class HomePage {
     this.scrollLeftFrameRequest = this.requestAnimationFrame(() => this.sheet.scrollLeft = e.target.scrollLeft);
   };
 
+  expect = (expected, actual) => {
+    if(actual !== expected){
+      console.error(`Expected note length to be: ${expected}, but got: ${actual}`);
+    }
+  };
+
   displayNotes = () => {
     const sequences = this.mml.getNotesInQueue();
-    console.log(sequences);
-    sequences.map(sequence => {
+    this.expect(88,sequences.length);
+    this.resetSegments();
+    sequences.map((sequence, keyIndex) => {
       sequence.map(note => {
+        let isRest = note.type === "rest";
         switch (note.type) {
+          case 'rest':
           case 'note':
-            const noteDiv = document.createElement('div');
-            noteDiv.className = 'on';
-            noteDiv.style.height = '' + this.NOTE_SEGMENT_HEIGHT * (4 / note.duration);
-            // make note segments be 0-87 (for all keys)
-            // find which note-segment with note.value
-            // make this function in angular for better performance (not have to delete each div and recreate)
-            this.sheet.appendChild(noteDiv);
+            this.segments[keyIndex].unshift({
+              isRest: isRest, height: this.NOTE_SEGMENT_HEIGHT * (4 / note.duration)
+            });
             break;
         }
       });
@@ -137,13 +165,23 @@ export class HomePage {
   };
 
   private playNote(note: NotesInterface, time: number = this.audioContext.currentTime) {
-    const oscillator = this.audioContext.createOscillator();
-    oscillator.frequency.value = note.frequency;
-    oscillator.type = 'sine';
+    let osc = this.audioContext.createOscillator();
+    osc.frequency.value = note.frequency;
+    osc.type = 'sawtooth';
+    osc.detune.value = -5;
 
-    oscillator.connect(this.gain);
-    oscillator.start(time);
-    oscillator.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
+    osc.connect(this.gain);
+    osc.start(time);
+    osc.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
+
+    let osc2 = this.audioContext.createOscillator();
+    osc2.frequency.value = note.frequency;
+    osc2.type = 'triangle';
+    osc2.detune.value = 5;
+
+    osc2.connect(this.gain);
+    osc2.start(time);
+    osc2.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
   }
 
   selectNoteOfSegment = (segmentIndex: number, note: NotesInterface) => {
@@ -171,26 +209,7 @@ export class HomePage {
 
   playSheet = () => {
     this.isPLaying = true;
-    const now = this.audioContext.currentTime;
-    let durationCount = 0;
-    let endTime = 0;
-    this.segments.map(segment => {
-      const segmentTime = now + this.convertDurationToSeconds(durationCount);
-      let lastNote = false;
-
-      segment.noteToggles.map((on, index) => {
-        if (on) {
-          if (!this.startTime) { this.startTime = this.audioContext.currentTime; }
-          this.playNote(this.notes[index], segmentTime);
-          lastNote = true;
-        }
-      });
-      durationCount += segment.duration;
-      if (lastNote) { endTime = segmentTime + this.convertDurationToSeconds(segment.duration); }
-    });
-
-    this.endTimeout = setTimeout(() => {this.endSheet(endTime); }, endTime);
-
+    this.mml.play();
     this.scrollPlay();
   };
 
@@ -204,6 +223,7 @@ export class HomePage {
 
   stopSheet = () => {
     this.isPLaying = false;
+    this.mml.stop();
     this.gain.disconnect(this.audioContext.destination);
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);

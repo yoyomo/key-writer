@@ -1,3 +1,4 @@
+<!--suppress HtmlUnknownAttribute -->
 <ion-header>
   <ion-toolbar align="center">
     <ion-buttons slot="end">
@@ -21,17 +22,17 @@
   <div class="screen">
     <div class="book">
       <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet gpu">
-        <div *ngFor="let segment of segments; let segmentIndex = index"
+        <div *ngFor="let segment of segments; let keyIndex = index"
              [ngClass]="'note-segment'">
-          <div [ngClass]="'left-margin ' + (segment.noteToggles[0] ? 'on' : 'off')"></div>
-          <div *ngFor="let noteOfSegment of segment.noteToggles; let i = index"
-               [ngClass]="'note-of-segment ' + (noteOfSegment ? 'on' : 'off') + ' '+
-                  (notes[i].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[i].key) + (i !== notes.length-1 ? ' br' : '')"
-               (click)="selectNoteOfSegment(segmentIndex, notes[i])">
+          <div [ngClass]="'left-margin ' + (segment[0].isRest ? 'off' : 'on')"></div>
+          <div *ngFor="let noteOfSegment of segment"
+               [ngClass]="'note-of-segment ' + (noteOfSegment.isRest ? 'off' : 'on') + ' '+
+                  (notes[keyIndex].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[keyIndex].key) + (keyIndex !== notes.length-1 ? ' br' : '')"
+               (click)="selectNoteOfSegment(keyIndex, notes[keyIndex])">
             <!--{{notes[i].key}}-->
           </div>
           <div
-              [ngClass]="'right-margin br ' + (segment.noteToggles[segment.noteToggles.length-1] ? 'on' : 'off')"></div>
+              [ngClass]="'right-margin br ' + (segment[segment.length-1].isRest ? 'off' : 'on')"></div>
         </div>
       </div>
     </div>
@@ -42,7 +43,6 @@
         <div *ngFor="let note of notes"
              [ngClass]="(note.key.slice(-1) === '#') ? 'black-top-key' : 'white-top-key-'+note.key"
              (click)="selectNote(note)">
-          <!--<div class="absolute">{{note.key + note.octave}}</div>-->
         </div>
         <div class="white-key right-margin br" (click)="playNote(notes[notes.length-1])"></div>
       </div>

@@ -19,16 +19,16 @@ $note-segment-height: 64px;
 
 .sheet {
   flex: 0 0 100%;
-  flex-direction: column-reverse;
+  flex-direction: row;
   display: flex;
   overflow: auto;
   //-webkit-overflow-scrolling: touch;
 }
 
 .note-segment {
-  height: $note-segment-height;
-  flex: 0 0 $note-segment-height;
-  flex-direction: row;
+  //height: $note-segment-height;
+  //flex: 0 0 $note-segment-height;
+  flex-direction: column;
   display: flex;
 }
 
