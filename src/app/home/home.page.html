@@ -22,29 +22,32 @@
   <div class="screen">
     <div class="book">
       <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet gpu">
+        <div [ngClass]="'left-margin'"></div>
         <div *ngFor="let segment of segments; let keyIndex = index"
-             [ngClass]="'note-segment'">
-          <div [ngClass]="'left-margin ' + (segment[0].isRest ? 'off' : 'on')"></div>
+             [ngClass]="'note-segment ' +
+        (notes[keyIndex].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[keyIndex].key) + (keyIndex !== notes.length-1 ? ' br' : '')">
+          <div *ngFor="let emptySpace of emptySpaces"
+               [ngClass]="'note-of-segment'"
+               [style.height]="NOTE_SEGMENT_HEIGHT + 'px'"
+          ></div>
           <div *ngFor="let noteOfSegment of segment"
-               [ngClass]="'note-of-segment ' + (noteOfSegment.isRest ? 'off' : 'on') + ' '+
-                  (notes[keyIndex].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[keyIndex].key) + (keyIndex !== notes.length-1 ? ' br' : '')"
+               [ngClass]="'note-of-segment ' + (noteOfSegment.isRest ? 'off' : 'on')"
+               [style.height]="noteOfSegment.height + 'px'"
                (click)="selectNoteOfSegment(keyIndex, notes[keyIndex])">
-            <!--{{notes[i].key}}-->
           </div>
-          <div
-              [ngClass]="'right-margin br ' + (segment[segment.length-1].isRest ? 'off' : 'on')"></div>
         </div>
+        <div [ngClass]="'right-margin br '"></div>
       </div>
     </div>
 
     <div class="keyboard gpu" id="keyboard" (scroll)="handleKeyboardScroll($event)">
       <div class="top-keys">
-        <div class="white-key left-margin" (click)="playNote(notes[0])"></div>
+        <div class="white-key left-margin" (click)="selectNote(notes[0])"></div>
         <div *ngFor="let note of notes"
              [ngClass]="(note.key.slice(-1) === '#') ? 'black-top-key' : 'white-top-key-'+note.key"
              (click)="selectNote(note)">
         </div>
-        <div class="white-key right-margin br" (click)="playNote(notes[notes.length-1])"></div>
+        <div class="white-key right-margin br" (click)="selectNote(notes[notes.length-1])"></div>
       </div>
 
       <div class="bottom-keys">

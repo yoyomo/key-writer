@@ -50,30 +50,29 @@ export interface PlayState {
   infiniteLoopIndex: number,
 }
 
-export class MML {
+export module MML {
 
-  frequencies: number[];
+  let frequencies: number[];
 
-  audioContext: AudioContext;
-  gain: GainNode;
+  let audioContext: AudioContext;
+  let gain: GainNode;
 
-  scheduleTime = 0.1;
-  lookahead = 25;
+  let scheduleTime = 0.1;
+  let lookahead = 25;
 
-  startTime = 0;
+  let startTime = 0;
 
-  sequences: Sequence[] = [];
+  let sequences: Sequence[] = [];
 
-  playInterval: Timer;
+  let playInterval: Timer;
 
-  constructor(mmlString: string) {
+  export const initializeMML = (mmlString: string) => {
     const mmls = mmlString.toLowerCase().replace(/\s/g, '').split(';');
 
     mmls.map(mml => {
       if (!mml) { return; }
-      this.sequences.push(new Sequence(mml));
+      sequences.push(new Sequence(mml));
     });
-
 
     const AudioContext = window['AudioContext'] // Default
         || window['webkitAudioContext'] // Safari and old versions of Chrome
@@ -82,72 +81,83 @@ export class MML {
         || window['msAudioContext'] // Safari and old versions of Chrome
         || false;
 
-    this.audioContext = new AudioContext();
-    this.gain = this.audioContext.createGain();
-    this.gain.connect(this.audioContext.destination);
-    this.gain.gain.value = 0.25;
+    audioContext = new AudioContext();
+    gain = audioContext.createGain();
+    gain.connect(audioContext.destination);
+    gain.gain.value = 0.25;
 
-    this.calculateNoteFrequencies();
-    this.parseMML();
-  }
+    calculateNoteFrequencies();
+    parseMML();
+  };
 
-  calculateNoteFrequencies = () => {
-    this.frequencies = [];
+  let calculateNoteFrequencies = () => {
+    frequencies = [];
     const numOfKeys = 88;
     const baseKeyPosition = 49;
     const baseFrequency = 440;
 
     for (let n = 1; n <= numOfKeys; n++) {
       const frequency = Math.pow(2, ((n - baseKeyPosition) / 12)) * baseFrequency;
-      this.frequencies.push(frequency);
+      frequencies.push(frequency);
     }
   };
 
-  getFrequencies = () => {
-    return this.frequencies;
-  };
-
-  stop = () => {
-    clearInterval(this.playInterval);
-    this.gain.disconnect(this.audioContext.destination);
-    this.startTime = null;
-    this.sequences.map(sequence => {
+  export const stop = () => {
+    clearInterval(playInterval);
+    gain.disconnect(audioContext.destination);
+    startTime = null;
+    sequences.map(sequence => {
       sequence.resetPlayState();
     });
 
-    this.gain = this.audioContext.createGain();
-    this.gain.connect(this.audioContext.destination);
+    gain = audioContext.createGain();
+    gain.connect(audioContext.destination);
   };
 
-  play = () => {
-    this.stop();
-    this.parseMML();
-    this.playInterval = setInterval(this.playMML, this.lookahead);
+  export const play = () => {
+    stop();
+    parseMML();
+    playInterval = setInterval(playMML, lookahead);
   };
 
-  parseMML = () => {
-    this.sequences.map(sequence => {
+  export const parseMML = () => {
+    sequences.map(sequence => {
       sequence.parseMML();
     });
   };
 
-  private playMML = () => {
-    if (!this.startTime) { this.startTime = this.audioContext.currentTime; }
+  export const playMML = () => {
+    if (!startTime) { startTime = audioContext.currentTime; }
 
-    const relativeScheduleTime = this.audioContext.currentTime + this.scheduleTime;
-    this.sequences.map(sequence => {
-      sequence.playMML(this.startTime, relativeScheduleTime, this.audioContext, this.gain, this.frequencies);
+    const relativeScheduleTime = audioContext.currentTime + scheduleTime;
+    sequences.map(sequence => {
+      sequence.playMML(startTime, relativeScheduleTime);
     })
   };
 
-  getNotesInQueue = () => {
-    return this.sequences.map(sequence => {
+  // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 duration
+  let convertDurationToSeconds = (duration: number, tempo: number) => {
+    if (duration === 0) { return 0; }
+    return (4 / duration) * 60 / tempo;
+  };
+
+  export const playNote = (note: Note, startTime = 0, nextNoteTime = 0) => {
+    const oscillator = audioContext.createOscillator();
+    oscillator.frequency.value = frequencies[note.value];
+    oscillator.type = 'sine';
+    oscillator.connect(gain);
+
+    oscillator.start(startTime + nextNoteTime);
+    oscillator.stop(startTime + nextNoteTime + convertDurationToSeconds(note.duration, note.tempo));
+  };
+
+  export const getNotesInQueue = () => {
+    return sequences.map(sequence => {
       return sequence.notesInQueue;
     });
   };
-}
 
-class Sequence {
+  class Sequence {
 
   tempo = 120;
   octave = 4;
@@ -455,13 +465,7 @@ class Sequence {
     }
   };
 
-  // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 duration
-  convertDurationToSeconds = (duration: number, tempo: number) => {
-    if (duration === 0) { return 0; }
-    return (4 / duration) * 60 / tempo;
-  };
-
-  playMML = (startTime: number, relativeScheduleTime: number, audioContext: AudioContext, gain: GainNode, frequencies: number[]) => {
+  playMML = (startTime: number, relativeScheduleTime: number) => {
     while (this.playState.nextNoteTime < relativeScheduleTime
     && this.playState.index < this.notesInQueue.length) {
       const note = this.notesInQueue[this.playState.index];
@@ -499,23 +503,15 @@ class Sequence {
           break;
         case 'end-chord':
           this.playState.chord = false;
-          this.playState.nextNoteTime += this.convertDurationToSeconds(note.duration, note.tempo);
+          this.playState.nextNoteTime += convertDurationToSeconds(note.duration, note.tempo);
           break;
         case 'rest':
-          this.playState.nextNoteTime += this.convertDurationToSeconds(note.duration, note.tempo);
+          this.playState.nextNoteTime += convertDurationToSeconds(note.duration, note.tempo);
           break;
         case 'note':
-          const oscillator = audioContext.createOscillator();
-          oscillator.frequency.value = frequencies[note.value];
-          oscillator.type = 'sine';
-          oscillator.connect(gain);
-
-          oscillator.start(startTime + this.playState.nextNoteTime);
-
-          oscillator.stop(startTime + this.playState.nextNoteTime + this.convertDurationToSeconds(note.duration, note.tempo));
-
+          playNote(note, startTime, this.playState.nextNoteTime);
           if (this.playState.chord) { break; }
-          this.playState.nextNoteTime += this.convertDurationToSeconds(note.duration, note.tempo);
+          this.playState.nextNoteTime += convertDurationToSeconds(note.duration, note.tempo);
           break;
       }
 
@@ -528,3 +524,6 @@ class Sequence {
   }
 
 }
+
+}
+

@@ -31,12 +31,12 @@ export class HomePage {
   scrollLeftFrameRequest: number;
   endTimeout: Timer = null;
 
-  NOTE_SEGMENT_HEIGHT: 64;
+  NOTE_SEGMENT_HEIGHT = 64;
 
   keyboard: HTMLElement;
   sheet: HTMLElement;
 
-  mml: MML;
+  emptySpaces = new Array(8);
 
   readTextFile = (file) => {
     let rawFile = new XMLHttpRequest();
@@ -47,8 +47,7 @@ export class HomePage {
         if(rawFile.status === 200 || rawFile.status == 0)
         {
           let allText = rawFile.responseText;
-          this.mml = new MML(allText.replace(/[\n ]/g,''));
-          this.mml.parseMML();
+          MML.initializeMML(allText.replace(/[\n ]/g,''));
         }
       }
     };
@@ -111,8 +110,8 @@ export class HomePage {
       this.sheet.scrollLeft = (this.sheet.scrollWidth - this.sheet.clientWidth) / 2;
     }
 
-    // this.requestAnimationFrame(this.displayNotes);
-    this.displayNotes();
+    this.requestAnimationFrame(this.displayNotes);
+    // this.displayNotes();
   };
 
   handleSheetScroll = (e) => {
@@ -134,7 +133,7 @@ export class HomePage {
   };
 
   displayNotes = () => {
-    const sequences = this.mml.getNotesInQueue();
+    const sequences = MML.getNotesInQueue();
     this.expect(88,sequences.length);
     this.resetSegments();
     sequences.map((sequence, keyIndex) => {
@@ -209,7 +208,7 @@ export class HomePage {
 
   playSheet = () => {
     this.isPLaying = true;
-    this.mml.play();
+    MML.play();
     this.scrollPlay();
   };
 
@@ -223,7 +222,7 @@ export class HomePage {
 
   stopSheet = () => {
     this.isPLaying = false;
-    this.mml.stop();
+    MML.stop();
     this.gain.disconnect(this.audioContext.destination);
     this.gain = this.audioContext.createGain();
     this.gain.connect(this.audioContext.destination);

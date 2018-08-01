@@ -6,7 +6,7 @@ $note-segment-height: 64px;
   flex: 0 0 100%;
   flex-direction: column;
   display: flex;
-  background-color: #555;
+  background-color: var(--off-white-bg-color);
   bottom: 0;
   transform: translate3d(0, 0, 0);
 }
@@ -28,8 +28,9 @@ $note-segment-height: 64px;
 .note-segment {
   //height: $note-segment-height;
   //flex: 0 0 $note-segment-height;
-  flex-direction: column;
-  display: flex;
+  //flex-direction: column;
+  //display: block;
+  //overflow:auto;
 }
 
 .note-of-segment {
@@ -109,20 +110,20 @@ $note-segment-height: 64px;
   background-color: darkorange;
 }
 
-.off {
-  background-color: #666;
+.note-segment {
+  background-color: var(--off-white-bg-color);
 }
 
-.off.w-black {
-  background-color: #555;
+.note-segment.w-black {
+  background-color: var(--off-black-bg-color);
 }
 
 .off-piano {
-  background-color: #fff;
+  background-color: var(--off-piano-white-bg-color);
 }
 
 .off-piano.w-black {
-  background-color: #444;
+  background-color: var(--off-piano-black-bg-color);
   border-right: 0;
 }
 
