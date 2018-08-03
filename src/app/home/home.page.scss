@@ -26,11 +26,7 @@ $note-segment-height: 64px;
 }
 
 .note-segment {
-  //height: $note-segment-height;
-  //flex: 0 0 $note-segment-height;
-  //flex-direction: column;
-  //display: block;
-  //overflow:auto;
+  height: fit-content;
 }
 
 .note-of-segment {
@@ -55,6 +51,31 @@ $note-segment-height: 64px;
   flex: 0 0 40%;
   flex-direction: row;
   display: flex;
+}
+
+.on {
+  background-color: orange;
+}
+
+.on.w-black {
+  background-color: darkorange;
+}
+
+.note-segment {
+  background-color: var(--off-white-bg-color);
+}
+
+.note-segment.w-black {
+  background-color: var(--off-black-bg-color);
+}
+
+.off-piano {
+  background-color: var(--off-piano-white-bg-color);
+}
+
+.off-piano.w-black {
+  background-color: var(--off-piano-black-bg-color);
+  border-right: 0;
 }
 
 @mixin white-key {
@@ -100,31 +121,6 @@ $note-segment-height: 64px;
 .right-margin {
   flex: 0 0 (9 * $zoom);
   width: 9 * $zoom;
-}
-
-.on {
-  background-color: orange;
-}
-
-.on.w-black {
-  background-color: darkorange;
-}
-
-.note-segment {
-  background-color: var(--off-white-bg-color);
-}
-
-.note-segment.w-black {
-  background-color: var(--off-black-bg-color);
-}
-
-.off-piano {
-  background-color: var(--off-piano-white-bg-color);
-}
-
-.off-piano.w-black {
-  background-color: var(--off-piano-black-bg-color);
-  border-right: 0;
 }
 
 .white-key {

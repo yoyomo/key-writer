@@ -36,7 +36,7 @@ export class HomePage {
   keyboard: HTMLElement;
   sheet: HTMLElement;
 
-  emptySpaces = new Array(8);
+  emptySpaces = new Array(12);
 
   readTextFile = (file) => {
     let rawFile = new XMLHttpRequest();
@@ -82,7 +82,7 @@ export class HomePage {
     this.gain.connect(this.audioContext.destination);
     this.gain.gain.value = 0.25;
 
-    this.readTextFile('../../assets/mml-files/cool-loop.txt'); // read from database
+    this.readTextFile('../../assets/mml-files/long.mml'); // read from database
   }
 
   // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
@@ -100,18 +100,18 @@ export class HomePage {
   // scrolls to bottom whenever the page has loaded
   // noinspection JSUnusedGlobalSymbols
   ionViewDidEnter = () => {
-    this.keyboard = document.getElementById('keyboard');
-    this.sheet = document.getElementById('sheet');
+    this.displayNotes();
+    this.requestAnimationFrame(()=> {
+      this.keyboard = document.getElementById('keyboard');
+      this.sheet = document.getElementById('sheet');
 
-    if (this.keyboard && this.sheet) {
-      this.keyboard.scrollTop = this.keyboard.scrollHeight;
-      this.keyboard.scrollLeft = (this.keyboard.scrollWidth - this.keyboard.clientWidth) / 2;
-      this.sheet.scrollTop = this.sheet.scrollHeight;
-      this.sheet.scrollLeft = (this.sheet.scrollWidth - this.sheet.clientWidth) / 2;
-    }
-
-    this.requestAnimationFrame(this.displayNotes);
-    // this.displayNotes();
+      if (this.keyboard && this.sheet) {
+        this.keyboard.scrollTop = this.keyboard.scrollHeight;
+        this.keyboard.scrollLeft = (this.keyboard.scrollWidth - this.keyboard.clientWidth) / 2;
+        this.sheet.scrollTop = this.sheet.scrollHeight;
+        this.sheet.scrollLeft = (this.sheet.scrollWidth - this.sheet.clientWidth) / 2;
+      }
+    });
   };
 
   handleSheetScroll = (e) => {
@@ -153,10 +153,10 @@ export class HomePage {
   };
 
   selectNote = (note: NotesInterface) => {
-    this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1];
-    if (this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]) {
-      this.playNote(note, this.audioContext.currentTime);
-    }
+    // this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1];
+    // if (this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]) {
+    //   this.playNote(note, this.audioContext.currentTime);
+    // }
   };
 
   private convertDurationToSeconds = (duration: number) => {
@@ -164,43 +164,44 @@ export class HomePage {
   };
 
   private playNote(note: NotesInterface, time: number = this.audioContext.currentTime) {
-    let osc = this.audioContext.createOscillator();
-    osc.frequency.value = note.frequency;
-    osc.type = 'sawtooth';
-    osc.detune.value = -5;
-
-    osc.connect(this.gain);
-    osc.start(time);
-    osc.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
-
-    let osc2 = this.audioContext.createOscillator();
-    osc2.frequency.value = note.frequency;
-    osc2.type = 'triangle';
-    osc2.detune.value = 5;
-
-    osc2.connect(this.gain);
-    osc2.start(time);
-    osc2.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
+    // let osc = this.audioContext.createOscillator();
+    // osc.frequency.value = note.frequency;
+    // osc.type = 'sawtooth';
+    // osc.detune.value = -5;
+    //
+    // osc.connect(this.gain);
+    // osc.start(time);
+    // osc.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
+    //
+    // let osc2 = this.audioContext.createOscillator();
+    // osc2.frequency.value = note.frequency;
+    // osc2.type = 'triangle';
+    // osc2.detune.value = 5;
+    //
+    // osc2.connect(this.gain);
+    // osc2.start(time);
+    // osc2.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
   }
 
   selectNoteOfSegment = (segmentIndex: number, note: NotesInterface) => {
-    this.currentSegmentIndex = segmentIndex;
-    this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1];
-    this.selectSegment(segmentIndex);
+    // this.currentSegmentIndex = segmentIndex;
+    // this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1];
+    // this.selectSegment(segmentIndex);
   };
 
-  selectSegment(segmentIndex: number) {
-    this.currentSegmentIndex = segmentIndex;
-    const now = this.audioContext.currentTime;
-    this.segments[segmentIndex].noteToggles.map((on, noteIndex) => {
-      if (on) {
-        this.playNote(this.notes[noteIndex], now);
-      }
-    });
-  }
+  // selectSegment(segmentIndex: number) {
+  //   this.currentSegmentIndex = segmentIndex;
+  //   const now = this.audioContext.currentTime;
+  //   this.segments[segmentIndex].noteToggles.map((on, noteIndex) => {
+  //     if (on) {
+  //       this.playNote(this.notes[noteIndex], now);
+  //     }
+  //   });
+  // }
 
   scrollPlay = () => {
     const time = this.audioContext.currentTime;
+    if(!this.startTime) { this.startTime = time; }
     if (!this.initialScrollPosition) { this.initialScrollPosition = this.sheet.scrollTop; }
     this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm / 60) * (time - this.startTime));
     this.scrollTopFrameRequest =  this.requestAnimationFrame(this.scrollPlay);
@@ -210,6 +211,7 @@ export class HomePage {
     this.isPLaying = true;
     MML.play();
     this.scrollPlay();
+    //set timeout to end sheet
   };
 
   endSheet = (endTime: number) => {

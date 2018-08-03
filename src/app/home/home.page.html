@@ -22,21 +22,21 @@
   <div class="screen">
     <div class="book">
       <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet gpu">
-        <div [ngClass]="'left-margin'"></div>
+        <div [ngClass]="'left-margin note-segment'"></div>
         <div *ngFor="let segment of segments; let keyIndex = index"
              [ngClass]="'note-segment ' +
         (notes[keyIndex].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[keyIndex].key) + (keyIndex !== notes.length-1 ? ' br' : '')">
-          <div *ngFor="let emptySpace of emptySpaces"
-               [ngClass]="'note-of-segment'"
-               [style.height]="NOTE_SEGMENT_HEIGHT + 'px'"
-          ></div>
+          <!--<div *ngFor="let emptySpace of emptySpaces"-->
+               <!--[ngClass]="'note-of-segment'"-->
+               <!--[style.height]="NOTE_SEGMENT_HEIGHT + 'px'"-->
+          <!--&gt;</div>-->
           <div *ngFor="let noteOfSegment of segment"
                [ngClass]="'note-of-segment ' + (noteOfSegment.isRest ? 'off' : 'on')"
-               [style.height]="noteOfSegment.height + 'px'"
+               [style.height.px]="noteOfSegment.height"
                (click)="selectNoteOfSegment(keyIndex, notes[keyIndex])">
           </div>
         </div>
-        <div [ngClass]="'right-margin br '"></div>
+        <div [ngClass]="'right-margin br note-segment'"></div>
       </div>
     </div>
 
