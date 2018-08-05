@@ -38,6 +38,17 @@ export interface EndLoop {
 export interface InfiniteLoop {
   type: 'infinite-loop'
 }
+
+export interface Tempo {
+  type: 'tempo'
+  value: number
+}
+
+export interface Octave {
+  type: 'octave'
+  value: number
+}
+
 export type SequenceNote = Note | StartLoop | BreakLoop | EndLoop | InfiniteLoop | StartChord | EndChord | Rest;
 
 export interface PlayState {
@@ -141,19 +152,35 @@ export module MML {
     return (4 / duration) * 60 / tempo;
   };
 
-  export const playNote = (note: Note, startTime = 0, nextNoteTime = 0) => {
-    const oscillator = audioContext.createOscillator();
-    oscillator.frequency.value = frequencies[note.value];
-    oscillator.type = 'sine';
-    oscillator.connect(gain);
+  export const playNote = (note: Note, startTime, nextNoteTime) => {
+    const osc = audioContext.createOscillator();
+    osc.frequency.value = frequencies[note.value];
+    osc.type = 'sawtooth';
+    osc.detune.value = -5;
 
-    oscillator.start(startTime + nextNoteTime);
-    oscillator.stop(startTime + nextNoteTime + convertDurationToSeconds(note.duration, note.tempo));
+    osc.connect(gain);
+    osc.start(startTime + nextNoteTime);
+    osc.stop(startTime + nextNoteTime + convertDurationToSeconds(note.duration, note.tempo));
+
+    const osc2 = audioContext.createOscillator();
+    osc2.frequency.value = frequencies[note.value];
+    osc2.type = 'triangle';
+    osc2.detune.value = 5;
+
+    osc2.connect(gain);
+    osc2.start(startTime + nextNoteTime);
+    osc2.stop(startTime + nextNoteTime + convertDurationToSeconds(note.duration, note.tempo));
   };
 
   export const getNotesInQueue = () => {
     return sequences.map(sequence => {
       return sequence.notesInQueue;
+    });
+  };
+
+  export const writeToMML = () => {
+    return sequences.map(sequence => {
+      // return sequence.writeToMML();
     });
   };
 

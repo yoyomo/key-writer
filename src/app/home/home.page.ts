@@ -1,11 +1,11 @@
 import {Component} from '@angular/core';
 import {calculateNotes, NotesInterface} from '../../assets/utils/calculate-notes';
-import {MML} from '../../assets/utils/mml';
+import {MML, Note, Rest, SequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
 interface NoteSegment {
-  isRest: boolean
+  note: Note | Rest
   height: number
 }
 
@@ -18,25 +18,22 @@ export class HomePage {
   notes: NotesInterface[];
   whiteBottomKeys: NotesInterface[];
 
-  segments: NoteSegment[][];
-  currentSegmentIndex: number;
-  audioContext: AudioContext;
-  gain: GainNode;
+  sequences: SequenceNote[][];
+
   bpm: number;
-  isPLaying: boolean;
+  isPlaying = false;
 
   startTime: number = null;
   initialScrollPosition: number = null;
   scrollTopFrameRequest: Timer;
   scrollLeftFrameRequest: number;
-  endTimeout: Timer = null;
 
   NOTE_SEGMENT_HEIGHT = 64;
 
   keyboard: HTMLElement;
   sheet: HTMLElement;
 
-  emptySpaces = new Array(12);
+  scrollEndHeight: number;
 
   readTextFile = (file) => {
     let rawFile = new XMLHttpRequest();
@@ -48,39 +45,18 @@ export class HomePage {
         {
           let allText = rawFile.responseText;
           MML.initializeMML(allText.replace(/[\n ]/g,''));
+          this.readNotes();
         }
       }
     };
     rawFile.send(null);
   };
 
-  resetSegments = () => {
-    this.segments = [];
-    for(let i = 0; i < this.notes.length; i++){
-      this.segments[i] = [];
-    }
-  };
-
   constructor(private alertCtrl: AlertController) {
     this.notes = calculateNotes();
-    this.resetSegments();
     this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
 
-    this.currentSegmentIndex = 0;
     this.bpm = 120;
-    this.isPLaying = false;
-
-    const AudioContext = window['AudioContext']
-        || window['webkitAudioContext']
-        || window['mozAudioContext']
-        || window['oAudioContext']
-        || window['msAudioContext']
-        || false;
-
-    this.audioContext = new AudioContext();
-    this.gain = this.audioContext.createGain();
-    this.gain.connect(this.audioContext.destination);
-    this.gain.gain.value = 0.25;
 
     this.readTextFile('../../assets/mml-files/long.mml'); // read from database
   }
@@ -100,7 +76,6 @@ export class HomePage {
   // scrolls to bottom whenever the page has loaded
   // noinspection JSUnusedGlobalSymbols
   ionViewDidEnter = () => {
-    this.displayNotes();
     this.requestAnimationFrame(()=> {
       this.keyboard = document.getElementById('keyboard');
       this.sheet = document.getElementById('sheet');
@@ -111,6 +86,8 @@ export class HomePage {
         this.sheet.scrollTop = this.sheet.scrollHeight;
         this.sheet.scrollLeft = (this.sheet.scrollWidth - this.sheet.clientWidth) / 2;
       }
+
+      this.scrollEndHeight = document.querySelector('.empty-space').scrollHeight;
     });
   };
 
@@ -132,64 +109,33 @@ export class HomePage {
     }
   };
 
-  displayNotes = () => {
-    const sequences = MML.getNotesInQueue();
-    this.expect(88,sequences.length);
-    this.resetSegments();
-    sequences.map((sequence, keyIndex) => {
-      sequence.map(note => {
-        let isRest = note.type === "rest";
-        switch (note.type) {
-          case 'rest':
-          case 'note':
-            this.segments[keyIndex].unshift({
-              isRest: isRest, height: this.NOTE_SEGMENT_HEIGHT * (4 / note.duration)
-            });
-            break;
-        }
-      });
-    });
-    // this.requestAnimationFrame(this.displayNotes);
+  readNotes = () => {
+    this.sequences = MML.getNotesInQueue();
+    this.expect(88, this.sequences.length);
   };
 
-  selectNote = (note: NotesInterface) => {
+  selectNote = (note: Note) => {
     // this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1];
     // if (this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]) {
-    //   this.playNote(note, this.audioContext.currentTime);
+      MML.playNote(note,0,0);
     // }
   };
 
-  private convertDurationToSeconds = (duration: number) => {
-    return duration * 60 / this.bpm;
+  selectNoteOfSegment = (sequenceIndex: number, sequenceNoteIndex: number) => {
+    let note = this.sequences[sequenceIndex][sequenceNoteIndex];
+    switch(note.type){
+      case "rest":
+          note = {type: "note", value: sequenceIndex, duration: note.duration, tempo: note.tempo};
+        break;
+      case "note":
+        note = {type: "rest", duration: note.duration, tempo: note.tempo};
+        break;
+    }
+
+    this.sequences[sequenceIndex][sequenceNoteIndex] = note;
   };
 
-  private playNote(note: NotesInterface, time: number = this.audioContext.currentTime) {
-    // let osc = this.audioContext.createOscillator();
-    // osc.frequency.value = note.frequency;
-    // osc.type = 'sawtooth';
-    // osc.detune.value = -5;
-    //
-    // osc.connect(this.gain);
-    // osc.start(time);
-    // osc.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
-    //
-    // let osc2 = this.audioContext.createOscillator();
-    // osc2.frequency.value = note.frequency;
-    // osc2.type = 'triangle';
-    // osc2.detune.value = 5;
-    //
-    // osc2.connect(this.gain);
-    // osc2.start(time);
-    // osc2.stop(time + this.convertDurationToSeconds(this.segments[this.currentSegmentIndex].duration));
-  }
-
-  selectNoteOfSegment = (segmentIndex: number, note: NotesInterface) => {
-    // this.currentSegmentIndex = segmentIndex;
-    // this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1];
-    // this.selectSegment(segmentIndex);
-  };
-
-  // selectSegment(segmentIndex: number) {
+  selectSegment = (segmentIndex: number) => {
   //   this.currentSegmentIndex = segmentIndex;
   //   const now = this.audioContext.currentTime;
   //   this.segments[segmentIndex].noteToggles.map((on, noteIndex) => {
@@ -197,43 +143,30 @@ export class HomePage {
   //       this.playNote(this.notes[noteIndex], now);
   //     }
   //   });
-  // }
+  };
 
   scrollPlay = () => {
-    const time = this.audioContext.currentTime;
+    const time = Date.now() / 1000;
     if(!this.startTime) { this.startTime = time; }
     if (!this.initialScrollPosition) { this.initialScrollPosition = this.sheet.scrollTop; }
     this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm / 60) * (time - this.startTime));
+    if(this.sheet.scrollTop + this.sheet.clientHeight <= this.scrollEndHeight) return;
     this.scrollTopFrameRequest =  this.requestAnimationFrame(this.scrollPlay);
   };
 
   playSheet = () => {
-    this.isPLaying = true;
+    this.isPlaying = true;
     MML.play();
     this.scrollPlay();
-    //set timeout to end sheet
-  };
-
-  endSheet = (endTime: number) => {
-    if (this.audioContext.currentTime >= endTime) {
-      this.stopSheet();
-    } else {
-      this.endTimeout = setTimeout(() => this.endSheet(endTime), 25);
-    }
   };
 
   stopSheet = () => {
-    this.isPLaying = false;
+    this.isPlaying = false;
     MML.stop();
-    this.gain.disconnect(this.audioContext.destination);
-    this.gain = this.audioContext.createGain();
-    this.gain.connect(this.audioContext.destination);
 
     this.cancelAnimationFrame(this.scrollTopFrameRequest);
     this.initialScrollPosition = null;
     this.startTime = null;
-
-    clearTimeout(this.endTimeout);
   };
 
   changeBPM = () => {
@@ -264,7 +197,7 @@ export class HomePage {
 
   restart = () => {
     this.sheet.scrollTop = this.sheet.scrollHeight;
-    const wasPlaying = this.isPLaying;
+    const wasPlaying = this.isPlaying;
     this.stopSheet();
     if (wasPlaying) { this.playSheet(); }
   }

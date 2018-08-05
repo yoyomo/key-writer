@@ -1,5 +1,5 @@
 <!--suppress HtmlUnknownAttribute -->
-<ion-header>
+<ion-header home-page>
   <ion-toolbar align="center">
     <ion-buttons slot="end">
       <ion-button (click)="restart()">
@@ -8,11 +8,11 @@
       <ion-button (click)="changeBPM()">
         <span>{{bpm}}bpm</span>
       </ion-button>
+      <ion-button *ngIf="isPlaying" (click)="stopSheet()">
+        <ion-icon name="pause"></ion-icon>
+      </ion-button>
       <ion-button *ngIf="!isPlaying" (click)="playSheet()">
         <ion-icon name="play"></ion-icon>
-      </ion-button>
-      <ion-button *ngIf="isPLaying" (click)="stopSheet()">
-        <ion-icon name="pause"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -21,26 +21,24 @@
 <ion-content>
   <div class="screen">
     <div class="book">
-      <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet gpu">
-        <div [ngClass]="'left-margin note-segment'"></div>
-        <div *ngFor="let segment of segments; let keyIndex = index"
-             [ngClass]="'note-segment ' +
-        (notes[keyIndex].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[keyIndex].key) + (keyIndex !== notes.length-1 ? ' br' : '')">
-          <!--<div *ngFor="let emptySpace of emptySpaces"-->
-               <!--[ngClass]="'note-of-segment'"-->
-               <!--[style.height]="NOTE_SEGMENT_HEIGHT + 'px'"-->
-          <!--&gt;</div>-->
-          <div *ngFor="let noteOfSegment of segment"
-               [ngClass]="'note-of-segment ' + (noteOfSegment.isRest ? 'off' : 'on')"
-               [style.height.px]="noteOfSegment.height"
-               (click)="selectNoteOfSegment(keyIndex, notes[keyIndex])">
+      <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet">
+        <div [ngClass]="'left-margin sequence'"></div>
+        <div *ngFor="let sequence of sequences; let sequenceIndex = index"
+             [ngClass]="'sequence ' +
+        (notes[sequenceIndex].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[sequenceIndex].key) + (sequenceIndex !== notes.length-1 ? ' br' : '')">
+          <div *ngFor="let note of sequence; let sequenceNoteIndex = index"
+               [hidden]="(note.type !== 'note' && note.type !== 'rest')"
+               [ngClass]="'note-of-segment ' + (note.type === 'rest' ? 'off' : 'on')"
+               [style.height.px]="NOTE_SEGMENT_HEIGHT * (4 / note.duration)"
+               (click)="selectNoteOfSegment(sequenceIndex, sequenceNoteIndex)">
           </div>
+          <div class="empty-space" [style.height]="NOTE_SEGMENT_HEIGHT * 12 + 'px'"></div>
         </div>
-        <div [ngClass]="'right-margin br note-segment'"></div>
+        <div [ngClass]="'right-margin br sequence'"></div>
       </div>
     </div>
 
-    <div class="keyboard gpu" id="keyboard" (scroll)="handleKeyboardScroll($event)">
+    <div class="keyboard " id="keyboard" (scroll)="handleKeyboardScroll($event)">
       <div class="top-keys">
         <div class="white-key left-margin" (click)="selectNote(notes[0])"></div>
         <div *ngFor="let note of notes"

@@ -25,8 +25,10 @@ $note-segment-height: 64px;
   //-webkit-overflow-scrolling: touch;
 }
 
-.note-segment {
+.sequence {
   height: fit-content;
+  flex-direction: column-reverse;
+  display: flex;
 }
 
 .note-of-segment {
@@ -53,6 +55,10 @@ $note-segment-height: 64px;
   display: flex;
 }
 
+.empty-space {
+  height: 100%;
+}
+
 .on {
   background-color: orange;
 }
@@ -61,11 +67,11 @@ $note-segment-height: 64px;
   background-color: darkorange;
 }
 
-.note-segment {
+.sequence {
   background-color: var(--off-white-bg-color);
 }
 
-.note-segment.w-black {
+.sequence.w-black {
   background-color: var(--off-black-bg-color);
 }
 
