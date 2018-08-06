@@ -4,11 +4,6 @@ import {MML, Note, Rest, SequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
-interface NoteSegment {
-  note: Note | Rest
-  height: number
-}
-
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -125,10 +120,10 @@ export class HomePage {
     let note = this.sequences[sequenceIndex][sequenceNoteIndex];
     switch(note.type){
       case "rest":
-          note = {type: "note", value: sequenceIndex, duration: note.duration, tempo: note.tempo};
+          note = {type: "note", value: sequenceIndex, duration: note.duration, durationInSeconds: note.durationInSeconds};
         break;
       case "note":
-        note = {type: "rest", duration: note.duration, tempo: note.tempo};
+        note = {type: "rest", duration: note.duration, durationInSeconds: note.durationInSeconds};
         break;
     }
 
