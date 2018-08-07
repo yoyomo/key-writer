@@ -615,16 +615,12 @@ export module MML {
       return {numerator: numerator, denominator: denominator};
     };
 
-    getDurations = (numerator: number, multiple: number = 2): number[] => {
-      // if(multiple > numerator) return [NaN];
-      // if(numerator === multiple) return [multiple];
-      //
-      // let nextNumerator = numerator / multiple;
-      // if(nextNumerator % Math.floor(nextNumerator) === 0){
-      //   return [multiple].concat(this.getDurations(nextNumerator));
-      // }
-      // return this.getDurations(numerator,multiple + 1);
-
+    getDurations = (numerator: number): number[] => {
+      if(numerator === 1) return [];
+      let nextNumerator: number;
+      let multiple: number;
+      for(multiple = 2; (nextNumerator = numerator / multiple) % Math.floor(nextNumerator) !== 0; multiple++);
+      return [multiple].concat(this.getDurations(nextNumerator));
     };
 
     convertNoteDurationToString = (duration: number): string => {
