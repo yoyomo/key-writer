@@ -604,51 +604,6 @@ export module MML {
       return notes[noteIndex].key;
     };
 
-    // getDuration = () => {
-    //   this.expect(/[\dl^.]/);
-    //   this.normalDuration = this.duration;
-    //
-    //   while (this.isThisValid(/[\dl^.]/)) {
-    //     switch (this.mml[this.mmlIndex]) {
-    //       case 'l':
-    //         this.normalDuration = -1;
-    //         let length = 0;
-    //         while (this.isNextValid(/\d/)) {
-    //           length = length * 10 + parseInt(this.mml[this.mmlIndex]);
-    //           this.duration = length;
-    //         }
-    //         break;
-    //       case '^':
-    //         while (this.isThisValid(/\^/)) {
-    //           let extension = 0;
-    //           while (this.isNextValid(/\d/)) {
-    //             extension = extension * 10 + parseInt(this.mml[this.mmlIndex]);
-    //           }
-    //           if (extension === 0) {
-    //             extension = this.duration;
-    //           }
-    //           this.duration = (this.duration * extension) / (this.duration + extension);
-    //         }
-    //         break;
-    //       case '.':
-    //         let extension = this.duration;
-    //         do {
-    //           extension *= 2;
-    //           this.duration = (this.duration * extension) / (this.duration + extension);
-    //         } while (this.isNextValid(/\./));
-    //         break;
-    //       default: {
-    //         let length = 0;
-    //         do {
-    //           length = length * 10 + parseInt(this.mml[this.mmlIndex]);
-    //           this.duration = length;
-    //         } while (this.isNextValid(/\d/));
-    //         break;
-    //       }
-    //     }
-    //   }
-    // };
-
     getFraction = (decimal: number): Fraction => {
       let numerator: number;
       let denominator: number;
