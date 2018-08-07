@@ -158,6 +158,7 @@ typings/
 # Gradle
 .idea/**/gradle.xml
 .idea/**/libraries
+.idea/inspectionProfiles/*
 
 # CMake
 cmake-build-*/

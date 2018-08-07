@@ -77,6 +77,11 @@ export interface NotesInterface {
   frequency: number,
 }
 
+interface Fraction {
+  numerator: number,
+  denominator: number,
+}
+
 export module MML {
 
   let notes: NotesInterface[];
@@ -644,12 +649,36 @@ export module MML {
     //   }
     // };
 
+    getFraction = (decimal: number): Fraction => {
+      let numerator: number;
+      let denominator: number;
+      for(denominator = 2; (numerator = decimal * denominator) % Math.floor(numerator) !== 0; denominator++);
+      if (numerator % denominator === 0){
+        numerator = numerator / denominator;
+        denominator = 1;
+      }
+      return {numerator: numerator, denominator: denominator};
+    };
+
+    getDurations = (numerator: number, multiple: number = 2): number[] => {
+      // if(multiple > numerator) return [NaN];
+      // if(numerator === multiple) return [multiple];
+      //
+      // let nextNumerator = numerator / multiple;
+      // if(nextNumerator % Math.floor(nextNumerator) === 0){
+      //   return [multiple].concat(this.getDurations(nextNumerator));
+      // }
+      // return this.getDurations(numerator,multiple + 1);
+
+    };
+
     convertNoteDurationToString = (duration: number): string => {
       let base = Math.floor(duration);
       let offset = duration % base;
-      // if (offset === 0) return base.toString();
-      // check if is extension ^ or .
-
+      if (offset === 0) {
+        return base === 4 ? "" : base.toString();
+      }
+      let durations = this.getDurations(this.getFraction(duration).numerator);
     };
 
     writeToMML = (): string => {
