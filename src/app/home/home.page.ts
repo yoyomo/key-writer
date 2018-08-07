@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
-import {calculateNotes, NotesInterface} from '../../assets/utils/calculate-notes';
-import {MML, Note, Rest, SequenceNote} from '../../assets/utils/mml';
+import {MML, Note, NotesInterface, SequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
@@ -15,7 +14,7 @@ export class HomePage {
 
   sequences: SequenceNote[][];
 
-  bpm: number;
+  bpm: number = 120;
   isPlaying = false;
 
   startTime: number = null;
@@ -41,6 +40,11 @@ export class HomePage {
           let allText = rawFile.responseText;
           MML.initializeMML(allText.replace(/[\n ]/g,''));
           this.readNotes();
+          this.notes = MML.getNotes();
+          this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
+
+          let mml = MML.writeToMML();
+          debugger;
         }
       }
     };
@@ -48,11 +52,6 @@ export class HomePage {
   };
 
   constructor(private alertCtrl: AlertController) {
-    this.notes = calculateNotes();
-    this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
-
-    this.bpm = 120;
-
     this.readTextFile('../../assets/mml-files/long.mml'); // read from database
   }
 

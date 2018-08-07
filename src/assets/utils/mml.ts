@@ -2,6 +2,7 @@ import Timer = NodeJS.Timer;
 
 export const C_BASE_KEY_INDEX = 39; // 0...n
 export const C_BASE_NOTE_INDEXES = {c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11};
+export const SCALE = 12;
 export const TOTAL_NUM_OF_KEYS = 88;
 export const A_BASE_KEY_INDEX = 48; // 0...n
 export const A_BASE_FREQUENCY = 440;
@@ -69,9 +70,16 @@ export interface PlayState {
   infiniteLoopIndex: number,
 }
 
+export interface NotesInterface {
+  key: string,
+  octave: number,
+  alt: string,
+  frequency: number,
+}
+
 export module MML {
 
-  let frequencies: number[];
+  let notes: NotesInterface[];
 
   let audioContext: AudioContext;
   let gain: GainNode;
@@ -107,16 +115,33 @@ export module MML {
     gain.connect(audioContext.destination);
     gain.gain.value = 0.25;
 
-    calculateNoteFrequencies();
+    calculateNotes();
     parseMML();
   };
 
-  let calculateNoteFrequencies = () => {
-    frequencies = [];
-    for (let n = 0; n < TOTAL_NUM_OF_KEYS; n++) {
-      const frequency = Math.pow(2, ((n - A_BASE_KEY_INDEX) / 12)) * A_BASE_FREQUENCY;
-      frequencies.push(frequency);
+  let calculateNotes = () => {
+    notes = [];
+    const keys = ['a','a+','b','c','c+','d','d+','e','f','f+','g','g+'];
+    const newOctaveIndex = 3;
+
+    let octave = 0;
+    let keyIndex = 0;
+
+    for(let n = 0; n < TOTAL_NUM_OF_KEYS; n++){
+      let frequency = Math.pow(2, ((n - A_BASE_KEY_INDEX) / SCALE)) * A_BASE_FREQUENCY;
+      let key = keys[keyIndex];
+      let nextKey = (keyIndex + 1) % keys.length;
+      octave = octave + (keyIndex === newOctaveIndex ? 1 : 0);
+      let alt = key.slice(-1) === "#" ? keys[nextKey][0] + '-' : '';
+
+      notes.push({key: key, 	octave: octave,	alt: alt,	frequency: frequency});
+
+      keyIndex = nextKey;
     }
+  };
+
+  export const getNotes = (): NotesInterface[] => {
+    return notes;
   };
 
   export const stop = () => {
@@ -156,7 +181,7 @@ export module MML {
 
   export const playNote = (note: Note, startTime, nextNoteTime) => {
     const osc = audioContext.createOscillator();
-    osc.frequency.value = frequencies[note.value];
+    osc.frequency.value = notes[note.value].frequency;
     osc.type = 'sawtooth';
     osc.detune.value = -5;
 
@@ -165,7 +190,7 @@ export module MML {
     osc.stop(startTime + nextNoteTime + note.durationInSeconds);
 
     const osc2 = audioContext.createOscillator();
-    osc2.frequency.value = frequencies[note.value];
+    osc2.frequency.value = notes[note.value].frequency;
     osc2.type = 'triangle';
     osc2.detune.value = 5;
 
@@ -180,10 +205,10 @@ export module MML {
     });
   };
 
-  export const writeToMML = () => {
+  export const writeToMML = (): string => {
     return sequences.map(sequence => {
       return sequence.writeToMML();
-    });
+    }).join();
   };
 
   class Sequence {
@@ -237,13 +262,7 @@ export module MML {
     };
 
     getOctaveOffset = () => {
-      let offset = 4 * (-12);
-
-      for (let i = 0; i < this.octave; i++) {
-        offset += 12;
-      }
-
-      return offset;
+      return (this.octave - 4) * SCALE;
     };
 
     getDuration = () => {
@@ -293,9 +312,7 @@ export module MML {
 
     // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 duration
     convertDurationToSeconds = (duration: number, tempo: number) => {
-      if (duration === 0) {
-        return 0;
-      }
+      if (duration === 0) { return 0;}
       return (4 / duration) * 60 / tempo;
     };
 
@@ -578,14 +595,66 @@ export module MML {
       }
     };
 
-    getNoteKey = (noteIndex: number) => {
-      let baseNoteIndex =;
-      return Object.keys(C_BASE_NOTE_INDEXES).find(key => C_BASE_NOTE_INDEXES[key] === baseNoteIndex);
+    convertNoteKeyToString = (noteIndex: number): string => {
+      return notes[noteIndex].key;
     };
 
-    writeToMML = () => {
+    // getDuration = () => {
+    //   this.expect(/[\dl^.]/);
+    //   this.normalDuration = this.duration;
+    //
+    //   while (this.isThisValid(/[\dl^.]/)) {
+    //     switch (this.mml[this.mmlIndex]) {
+    //       case 'l':
+    //         this.normalDuration = -1;
+    //         let length = 0;
+    //         while (this.isNextValid(/\d/)) {
+    //           length = length * 10 + parseInt(this.mml[this.mmlIndex]);
+    //           this.duration = length;
+    //         }
+    //         break;
+    //       case '^':
+    //         while (this.isThisValid(/\^/)) {
+    //           let extension = 0;
+    //           while (this.isNextValid(/\d/)) {
+    //             extension = extension * 10 + parseInt(this.mml[this.mmlIndex]);
+    //           }
+    //           if (extension === 0) {
+    //             extension = this.duration;
+    //           }
+    //           this.duration = (this.duration * extension) / (this.duration + extension);
+    //         }
+    //         break;
+    //       case '.':
+    //         let extension = this.duration;
+    //         do {
+    //           extension *= 2;
+    //           this.duration = (this.duration * extension) / (this.duration + extension);
+    //         } while (this.isNextValid(/\./));
+    //         break;
+    //       default: {
+    //         let length = 0;
+    //         do {
+    //           length = length * 10 + parseInt(this.mml[this.mmlIndex]);
+    //           this.duration = length;
+    //         } while (this.isNextValid(/\d/));
+    //         break;
+    //       }
+    //     }
+    //   }
+    // };
+
+    convertNoteDurationToString = (duration: number): string => {
+      let base = Math.floor(duration);
+      let offset = duration % base;
+      // if (offset === 0) return base.toString();
+      // check if is extension ^ or .
+
+    };
+
+    writeToMML = (): string => {
       let mmlText = "";
-      return this.notesInQueue.map(note => {
+      this.notesInQueue.map(note => {
         switch (note.type) {
           case "infinite-loop":
             mmlText += "$";
@@ -615,10 +684,14 @@ export module MML {
             mmlText += "r" + note.duration;
             break;
           case "note":
-            mmlText += this.getNoteKey(note.value) + note.duration;
+            mmlText += this.convertNoteKeyToString(note.value) + this.convertNoteDurationToString(note.duration);
             break;
         }
       });
+
+      mmlText += ";";
+
+      return mmlText;
     }
 
   }
