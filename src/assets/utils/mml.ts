@@ -605,22 +605,20 @@ export module MML {
     };
 
     getFraction = (decimal: number): Fraction => {
-      let numerator: number;
-      let denominator: number;
-      for(denominator = 2; (numerator = decimal * denominator) % Math.floor(numerator) !== 0; denominator++);
-      if (numerator % denominator === 0){
-        numerator = numerator / denominator;
-        denominator = 1;
-      }
-      return {numerator: numerator, denominator: denominator};
+      for(var denominator = 1; decimal * denominator % 1 !== 0; denominator++);
+      return {numerator: decimal * denominator, denominator: denominator};
     };
 
-    getDurations = (numerator: number): number[] => {
-      if(numerator === 1) return [];
-      let nextNumerator: number;
-      let multiple: number;
-      for(multiple = 2; (nextNumerator = numerator / multiple) % Math.floor(nextNumerator) !== 0; multiple++);
-      return [multiple].concat(this.getDurations(nextNumerator));
+    getDurations = (d: number): number[] => {
+      let f = this.getFraction(d);
+      if(d % 1 === 0) return [d];
+      let e: number;
+      let d_1: number;
+      for(e = 1; e < f.numerator; e++){
+        d_1 = f.numerator * e / ( e * f.denominator - f.numerator );
+        if (d_1 > 0 && f.numerator / Math.floor(d_1) % 1 === 0) break;
+      }
+      return [e].concat(this.getDurations(d_1));
     };
 
     convertNoteDurationToString = (duration: number): string => {
@@ -629,7 +627,7 @@ export module MML {
       if (offset === 0) {
         return base === 4 ? "" : base.toString();
       }
-      let durations = this.getDurations(this.getFraction(duration).numerator);
+      let durations = this.getDurations(duration);
     };
 
     writeToMML = (): string => {
