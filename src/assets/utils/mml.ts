@@ -611,14 +611,16 @@ export module MML {
 
     getDurations = (d: number): number[] => {
       let f = this.getFraction(d);
+      if(d < 1) return (new Array(f.denominator).fill(f.numerator).slice());
       if(d % 1 === 0) return [d];
       let e: number;
       let d_1: number;
-      for(e = 1; e < f.numerator; e++){
+      let limit = f.numerator > f.denominator ? f.numerator : f.denominator;
+      for(e = 1; e <= limit; e++){
         d_1 = f.numerator * e / ( e * f.denominator - f.numerator );
-        if (d_1 > 0 && f.numerator / Math.floor(d_1) % 1 === 0) break;
+        if (d_1 > 0 && ((d_1 < 1 && (1/d_1) % 1 === 0 )|| (limit / Math.floor(d_1) % 1 === 0))) return [e].concat(this.getDurations(d_1));
       }
-      return [e].concat(this.getDurations(d_1));
+      return [];
     };
 
     convertNoteDurationToString = (duration: number): string => {
