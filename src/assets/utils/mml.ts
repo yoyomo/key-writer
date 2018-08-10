@@ -499,6 +499,7 @@ export module MML {
     };
 
     breakLoop = () => {
+      this.expect(/\|/);
       this.notesInQueue.push({type: 'break-loop'});
     };
 
@@ -633,22 +634,41 @@ export module MML {
       return {numerator: decimal * denominator, denominator: denominator};
     };
 
-    getCompressedDurationsWithExtensions = (d: number): number[] => {
-      let f = this.getFraction(d);
-      if(d < 1) {
-        for (var c = f.numerator - 1; c > 0 && f.numerator / c % 1 !== 0; c--) ;
-        let s = Math.floor(f.denominator / f.numerator);
-        let r = f.denominator % f.numerator;
-        return (new Array(s).fill(c || 1)).concat(new Array(r).fill(f.numerator)).slice();
+    compressLongDuration = (numerator: number, denominator: number): number[] => {
+      if(numerator === 1) return new Array(denominator).fill(numerator);
+      for (var c = 2; c < numerator && numerator / c % 1 !== 0; c++) ;
+      let times = denominator % (numerator * c);
+      if(numerator === denominator){
+        times = 1;
       }
+      else if(denominator < numerator * c){
+        for(let offset = c; offset > 0 && (times = (denominator * offset) % (numerator * c)) > denominator ; offset--);
+      }
+      c = (c >= numerator ? 1 : c);
+      let leftout = denominator % times;
+      return this.compressLongDuration(c, times).concat(new Array(leftout).fill(numerator))
+    };
 
-      if(d % 1 === 0) return [d];
+    compressShortDuration = (decimal: number): number[] => {
+      if(decimal === 0) return [];
+      if(decimal % 1 === 0) return [decimal];
+      let f = this.getFraction(decimal);
+
       let limit = f.numerator > f.denominator ? f.numerator : f.denominator;
       for(let e = 1; e <= limit; e++){
         let d_1 = f.numerator * e / ( e * f.denominator - f.numerator );
         if (d_1 > 0 && ((d_1 < 1 && (1/d_1) % 1 === 0 )|| (limit / Math.floor(d_1) % 1 === 0))) return [e].concat(this.getCompressedDurationsWithExtensions(d_1));
       }
       return [];
+    };
+
+    getCompressedDurationsWithExtensions = (duration: number): number[] => {
+
+      let f = this.getFraction(duration);
+      if(duration < 1) {
+        return this.compressLongDuration(f.numerator,f.denominator);
+      }
+      return this.compressShortDuration(duration);
     };
 
     addDot = (note: Note): Note => {
