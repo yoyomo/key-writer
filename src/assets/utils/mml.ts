@@ -11,7 +11,6 @@ export interface Note {
   type: 'note',
   index: number,
   duration: number,
-  durationInSeconds: number,
   durationWithExtensions: number[],
 }
 
@@ -22,14 +21,12 @@ export interface StartChord {
 export interface EndChord {
   type: 'end-chord',
   duration: number,
-  durationInSeconds: number
   durationWithExtensions: number[],
 }
 
 export interface Rest {
   type: 'rest',
   duration: number,
-  durationInSeconds: number,
   durationWithExtensions: number[],
 }
 
@@ -72,6 +69,7 @@ export interface PlayState {
   index: number,
   nextNoteTime: number,
   chord: boolean,
+  tempo: number,
   loopStartIndex: number,
   loopCount: number,
   loopEndIndex: number,
@@ -107,16 +105,7 @@ export module MML {
 
   let playInterval: Timer;
 
-  export const initializeMML = (mmlString: string) => {
-    const mmls = mmlString.toLowerCase().replace(/\s/g, '').split(';');
-
-    mmls.map(mml => {
-      if (!mml) {
-        return;
-      }
-      sequences.push(new Sequence(mml));
-    });
-
+  export const initialize = () => {
     const AudioContext = window['AudioContext'] // Default
         || window['webkitAudioContext'] // Safari and old versions of Chrome
         || window['mozAudioContext'] // Safari and old versions of Chrome
@@ -130,6 +119,17 @@ export module MML {
     gain.gain.value = 0.25;
 
     calculateNotes();
+  };
+
+  export const readMML = (mmlString: string) => {
+    const mmls = mmlString.toLowerCase().replace(/\s/g, '').split(';');
+
+    mmls.map(mml => {
+      if (!mml) {
+        return;
+      }
+      sequences.push(new Sequence(mml));
+    });
     parseMML();
   };
 
@@ -199,15 +199,17 @@ export module MML {
     return (4 / duration) * 60 / tempo;
   };
 
-  export const playNote = (note: Note, startTime = audioContext.currentTime, nextNoteTime = 0) => {
+  export const playNote = (note: Note, tempo: number ,scheduledStartTime: number) => {
+    if(!scheduledStartTime) scheduledStartTime = audioContext.currentTime;
+
     const osc = audioContext.createOscillator();
     osc.frequency.value = notes[note.index].frequency;
     osc.type = 'sawtooth';
     osc.detune.value = -5;
 
     osc.connect(gain);
-    osc.start(startTime + nextNoteTime);
-    osc.stop(startTime + nextNoteTime + note.durationInSeconds);
+    osc.start(scheduledStartTime);
+    osc.stop(scheduledStartTime + convertDurationToSeconds(note.duration, tempo));
 
     const osc2 = audioContext.createOscillator();
     osc2.frequency.value = notes[note.index].frequency;
@@ -215,8 +217,8 @@ export module MML {
     osc2.detune.value = 5;
 
     osc2.connect(gain);
-    osc2.start(startTime + nextNoteTime);
-    osc2.stop(startTime + nextNoteTime + note.durationInSeconds);
+    osc2.start(scheduledStartTime);
+    osc2.stop(scheduledStartTime + convertDurationToSeconds(note.duration, tempo));
   };
 
   export const getNotesInQueue = () => {
@@ -259,6 +261,7 @@ export module MML {
         index: 0,
         nextNoteTime: 0,
         chord: false,
+        tempo: 120,
         loopStartIndex: -1,
         loopCount: -1,
         loopEndIndex: -1,
@@ -344,7 +347,6 @@ export module MML {
         type: 'note',
         index: noteIndex,
         duration: this.duration,
-        durationInSeconds: convertDurationToSeconds(this.duration, this.tempo),
         durationWithExtensions: this.durationWithExtensions,
       });
     };
@@ -436,7 +438,6 @@ export module MML {
       this.notesInQueue.push({
         type: 'rest',
         duration: this.duration,
-        durationInSeconds: convertDurationToSeconds(this.duration, this.tempo),
         durationWithExtensions: this.durationWithExtensions,
       });
 
@@ -463,7 +464,6 @@ export module MML {
       this.notesInQueue.push({
         type: 'end-chord',
         duration: this.duration,
-        durationInSeconds: convertDurationToSeconds(this.duration, this.tempo),
         durationWithExtensions: this.durationWithExtensions,
       });
       this.nextNote();
@@ -563,7 +563,7 @@ export module MML {
       }
     };
 
-    playMML = (startTime: number, relativeScheduleTime: number) => {
+    playMML = (relativeStartTime: number, relativeScheduleTime: number) => {
       while (this.playState.nextNoteTime < relativeScheduleTime
       && this.playState.index < this.notesInQueue.length) {
         const note = this.notesInQueue[this.playState.index];
@@ -596,22 +596,23 @@ export module MML {
           case 'infinite-loop':
             this.playState.infiniteLoopIndex = this.playState.index;
             break;
+          case 'tempo':
+            this.playState.tempo = note.tempo;
+            break;
           case 'start-chord':
             this.playState.chord = true;
             break;
           case 'end-chord':
             this.playState.chord = false;
-            this.playState.nextNoteTime += note.durationInSeconds;
+            this.playState.nextNoteTime += convertDurationToSeconds(note.duration, this.playState.tempo);
             break;
           case 'rest':
-            this.playState.nextNoteTime += note.durationInSeconds;
+            this.playState.nextNoteTime += convertDurationToSeconds(note.duration, this.playState.tempo);
             break;
           case 'note':
-            playNote(note, startTime, this.playState.nextNoteTime);
-            if (this.playState.chord) {
-              break;
-            }
-            this.playState.nextNoteTime += note.durationInSeconds;
+            playNote(note, this.playState.tempo, relativeStartTime + this.playState.nextNoteTime);
+            if (this.playState.chord) break;
+            this.playState.nextNoteTime += convertDurationToSeconds(note.duration, this.playState.tempo);
             break;
         }
 
@@ -648,6 +649,21 @@ export module MML {
         if (d_1 > 0 && ((d_1 < 1 && (1/d_1) % 1 === 0 )|| (limit / Math.floor(d_1) % 1 === 0))) return [e].concat(this.getCompressedDurationsWithExtensions(d_1));
       }
       return [];
+    };
+
+    addDot = (note: Note): Note => {
+      let dot = note.duration * 2;
+      note.duration = this.calculateDurationFromExtension(note.duration,dot);
+      note.durationWithExtensions = this.getCompressedDurationsWithExtensions(note.duration);
+      return note;
+    };
+
+    getDurationFromDurationsWithExtensions = (durationWithExtensions: number[]): number => {
+      let duration = durationWithExtensions[0];
+      durationWithExtensions.slice(1).map(extension => {
+        duration = this.calculateDurationFromExtension(duration,extension);
+      });
+      return duration;
     };
 
     convertNoteDurationToString = (duration: number): string => {

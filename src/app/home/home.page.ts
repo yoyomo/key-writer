@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MML, Note, NotesInterface, SequenceNote} from '../../assets/utils/mml';
+import {MML, NotesInterface, SequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
@@ -33,45 +33,41 @@ export class HomePage {
     let rawFile = new XMLHttpRequest();
     rawFile.open("GET", file, false);
     rawFile.onreadystatechange = () => {
-      if(rawFile.readyState === 4)
-      {
-        if(rawFile.status === 200 || rawFile.status == 0)
-        {
-          let allText = rawFile.responseText;
-          MML.initializeMML(allText.replace(/[\n ]/g,''));
-          this.readNotes();
-          this.notes = MML.getNotes().map(note => {
-            return {...note, key: note.key.replace('+','#').toUpperCase()}
-          });
-          this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
+      if (rawFile.readyState === 4 && (rawFile.status === 200 || rawFile.status == 0)) {
+        let allText = rawFile.responseText;
+        MML.readMML(allText.replace(/[\n ]/g, ''));
+        this.readNotes();
 
-          let mml = MML.writeToMML();
-        }
+        let mml = MML.writeToMML();
       }
     };
     rawFile.send(null);
   };
 
   constructor(private alertCtrl: AlertController) {
+    MML.initialize();
+    this.notes = MML.getNotes().map(note => {
+      return {...note, key: note.key.replace('+', '#').toUpperCase()}
+    });
+    this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
     this.readTextFile('../../assets/mml-files/long.mml'); // read from database
   }
 
-  // First, let's shim the requestAnimationFrame API, with a setTimeout fallback
   requestAnimationFrame = window['requestAnimationFrame'] ||
-      window['webkitRequestAnimationFrame'] ||
-      window['mozRequestAnimationFrame'] ||
-      window['oRequestAnimationFrame'] ||
-      window['msRequestAnimationFrame'];
+    window['webkitRequestAnimationFrame'] ||
+    window['mozRequestAnimationFrame'] ||
+    window['oRequestAnimationFrame'] ||
+    window['msRequestAnimationFrame'];
 
   cancelAnimationFrame = window['cancelAnimationFrame'] ||
-      window['webkitCancelAnimationFrame'] ||
-      window['mozCancelAnimationFrame'] ||
-      window['msCancelAnimationFrame'];
+    window['webkitCancelAnimationFrame'] ||
+    window['mozCancelAnimationFrame'] ||
+    window['msCancelAnimationFrame'];
 
   // scrolls to bottom whenever the page has loaded
   // noinspection JSUnusedGlobalSymbols
   ionViewDidEnter = () => {
-    this.requestAnimationFrame(()=> {
+    this.requestAnimationFrame(() => {
       this.keyboard = document.getElementById('keyboard');
       this.sheet = document.getElementById('sheet');
 
@@ -99,7 +95,7 @@ export class HomePage {
   };
 
   expect = (expected, actual) => {
-    if(actual !== expected){
+    if (actual !== expected) {
       console.error(`Expected note length to be: ${expected}, but got: ${actual}`);
     }
   };
@@ -110,18 +106,32 @@ export class HomePage {
   };
 
   selectNote = (noteIndex: number) => {
-    MML.playNote({type: "note", index: noteIndex, duration: 4, durationInSeconds: MML.convertDurationToSeconds(4, this.bpm), durationWithExtensions: [4]});
+    MML.playNote({
+      type: "note",
+      index: noteIndex,
+      duration: 4,
+      durationWithExtensions: [4]
+    },this.bpm,0);
   };
 
   selectNoteOfSegment = (sequenceIndex: number, sequenceNoteIndex: number) => {
     let note = this.sequences[sequenceIndex][sequenceNoteIndex];
-    switch(note.type){
+    switch (note.type) {
       case "rest":
-          note = {type: "note", index: sequenceIndex, duration: note.duration, durationInSeconds: note.durationInSeconds, durationWithExtensions: note.durationWithExtensions};
-          MML.playNote(note);
+        note = {
+          type: "note",
+          index: sequenceIndex,
+          duration: note.duration,
+          durationWithExtensions: note.durationWithExtensions
+        };
+        MML.playNote(note, this.bpm, 0);
         break;
       case "note":
-        note = {type: "rest", duration: note.duration, durationInSeconds: note.durationInSeconds, durationWithExtensions: note.durationWithExtensions};
+        note = {
+          type: "rest",
+          duration: note.duration,
+          durationWithExtensions: note.durationWithExtensions
+        };
         break;
     }
 
@@ -130,11 +140,15 @@ export class HomePage {
 
   scrollPlay = () => {
     const time = Date.now() / 1000;
-    if(!this.startTime) { this.startTime = time; }
-    if (!this.initialScrollPosition) { this.initialScrollPosition = this.sheet.scrollTop; }
+    if (!this.startTime) {
+      this.startTime = time;
+    }
+    if (!this.initialScrollPosition) {
+      this.initialScrollPosition = this.sheet.scrollTop;
+    }
     this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm / 60) * (time - this.startTime));
-    if(this.sheet.scrollTop + this.sheet.clientHeight <= this.scrollEndHeight) return;
-    this.scrollTopFrameRequest =  this.requestAnimationFrame(this.scrollPlay);
+    if (this.sheet.scrollTop + this.sheet.clientHeight <= this.scrollEndHeight) return;
+    this.scrollTopFrameRequest = this.requestAnimationFrame(this.scrollPlay);
   };
 
   playSheet = () => {
@@ -182,6 +196,8 @@ export class HomePage {
     this.sheet.scrollTop = this.sheet.scrollHeight;
     const wasPlaying = this.isPlaying;
     this.stopSheet();
-    if (wasPlaying) { this.playSheet(); }
+    if (wasPlaying) {
+      this.playSheet();
+    }
   }
 }
