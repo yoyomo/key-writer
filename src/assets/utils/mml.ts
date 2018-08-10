@@ -270,6 +270,10 @@ export module MML {
       return (this.octave - 4) * SCALE;
     };
 
+    calculateDurationFromExtension = (duration: number, extension: number) => {
+      return (duration * extension) / (duration + extension);
+    };
+
     getDuration = () => {
       this.expect(/[\dl^.]/);
       this.normalDuration = this.duration;
@@ -293,14 +297,14 @@ export module MML {
               if (extension === 0) {
                 extension = this.duration;
               }
-              this.duration = (this.duration * extension) / (this.duration + extension);
+              this.duration = this.calculateDurationFromExtension(this.duration, extension);
             }
             break;
           case '.':
             let extension = this.duration;
             do {
               extension *= 2;
-              this.duration = (this.duration * extension) / (this.duration + extension);
+              this.duration = this.calculateDurationFromExtension(this.duration, extension);
             } while (this.isNextValid(/\./));
             break;
           default: {
@@ -609,34 +613,38 @@ export module MML {
       return {numerator: decimal * denominator, denominator: denominator};
     };
 
-    getDurations = (d: number): number[] => {
+    getDurationsWithExtensions = (d: number): number[] => {
       let f = this.getFraction(d);
-      if(d < 1){
-        for(let c = f.numerator - 1; c > 0; c--){
-          if(f.numerator / c %1 === 0){
-            let s = Math.floor(f.denominator / f.numerator);
-            let r = f.denominator % f.numerator;
-            return (new Array(s).fill(c)).concat(new Array(r).fill(f.numerator)).slice();
-          }
-        }
-        return (new Array(f.denominator).fill(f.numerator)).slice();
+      if(d < 1) {
+        for (var c = f.numerator - 1; c > 0 && f.numerator / c % 1 !== 0; c--) ;
+        let s = Math.floor(f.denominator / f.numerator);
+        let r = f.denominator % f.numerator;
+        return (new Array(s).fill(c || 1)).concat(new Array(r).fill(f.numerator)).slice();
       }
+
       if(d % 1 === 0) return [d];
       let limit = f.numerator > f.denominator ? f.numerator : f.denominator;
       for(let e = 1; e <= limit; e++){
         let d_1 = f.numerator * e / ( e * f.denominator - f.numerator );
-        if (d_1 > 0 && ((d_1 < 1 && (1/d_1) % 1 === 0 )|| (limit / Math.floor(d_1) % 1 === 0))) return [e].concat(this.getDurations(d_1));
+        if (d_1 > 0 && ((d_1 < 1 && (1/d_1) % 1 === 0 )|| (limit / Math.floor(d_1) % 1 === 0))) return [e].concat(this.getDurationsWithExtensions(d_1));
       }
       return [];
     };
 
     convertNoteDurationToString = (duration: number): string => {
-      let base = Math.floor(duration);
-      let offset = duration % base;
-      if (offset === 0) {
-        return base === 4 ? "" : base.toString();
-      }
-      return this.getDurations(duration).join('^');
+      let mmlDuration = "";
+      let durationsWithExtensions = this.getDurationsWithExtensions(duration);
+      let prevDuration = durationsWithExtensions[0];
+      mmlDuration += prevDuration === 4 ? "" : prevDuration;
+      durationsWithExtensions.slice(1).map((extension) => {
+          if(prevDuration === (extension/2)){
+            mmlDuration += '.';
+          }else{
+            mmlDuration += '^' + extension;
+          }
+          prevDuration = this.calculateDurationFromExtension(prevDuration,extension);
+      });
+      return mmlDuration;
     };
 
     writeToMML = (): string => {
@@ -665,10 +673,10 @@ export module MML {
             mmlText += "[";
             break;
           case "end-chord":
-            mmlText += "]" + note.duration;
+            mmlText += "]" + this.convertNoteDurationToString(note.duration);
             break;
           case "rest":
-            mmlText += "r" + note.duration;
+            mmlText += "r" + this.convertNoteDurationToString(note.duration);
             break;
           case "note":
             mmlText += this.convertNoteKeyToString(note.value) + this.convertNoteDurationToString(note.duration);

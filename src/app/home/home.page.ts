@@ -40,11 +40,12 @@ export class HomePage {
           let allText = rawFile.responseText;
           MML.initializeMML(allText.replace(/[\n ]/g,''));
           this.readNotes();
-          this.notes = MML.getNotes();
+          this.notes = MML.getNotes().map(note => {
+            return {...note, key: note.key.replace('+','#').toUpperCase()}
+          });
           this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
 
           let mml = MML.writeToMML();
-          debugger;
         }
       }
     };
