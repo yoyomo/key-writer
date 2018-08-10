@@ -2,11 +2,11 @@
 <ion-header home-page>
   <ion-toolbar align="center">
     <ion-buttons slot="end">
-      <ion-button (click)="restart()">
-        <ion-icon name="skip-backward"></ion-icon>
-      </ion-button>
       <ion-button (click)="changeBPM()">
         <span>{{bpm}}bpm</span>
+      </ion-button>
+      <ion-button (click)="restart()">
+        <ion-icon name="skip-backward"></ion-icon>
       </ion-button>
       <ion-button *ngIf="isPlaying" (click)="stopSheet()">
         <ion-icon name="pause"></ion-icon>

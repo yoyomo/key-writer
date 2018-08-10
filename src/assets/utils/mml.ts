@@ -12,6 +12,7 @@ export interface Note {
   value: number,
   duration: number,
   durationInSeconds: number,
+  durationWithExtensions: number[],
 }
 
 export interface StartChord {
@@ -22,12 +23,14 @@ export interface EndChord {
   type: 'end-chord',
   duration: number,
   durationInSeconds: number
+  durationWithExtensions: number[],
 }
 
 export interface Rest {
   type: 'rest',
   duration: number,
   durationInSeconds: number,
+  durationWithExtensions: number[],
 }
 
 export interface StartLoop {
@@ -222,6 +225,7 @@ export module MML {
     octave = 4;
     duration = 4;
     normalDuration = -1;
+    durationWithExtensions = [];
 
     chordNoteIndexes = [];
     readingChord = false;
@@ -277,6 +281,7 @@ export module MML {
     getDuration = () => {
       this.expect(/[\dl^.]/);
       this.normalDuration = this.duration;
+      this.durationWithExtensions = [this.duration];
 
       while (this.isThisValid(/[\dl^.]/)) {
         switch (this.mml[this.mmlIndex]) {
@@ -298,6 +303,7 @@ export module MML {
                 extension = this.duration;
               }
               this.duration = this.calculateDurationFromExtension(this.duration, extension);
+              this.durationWithExtensions.push(extension);
             }
             break;
           case '.':
@@ -305,6 +311,7 @@ export module MML {
             do {
               extension *= 2;
               this.duration = this.calculateDurationFromExtension(this.duration, extension);
+              this.durationWithExtensions.push(extension);
             } while (this.isNextValid(/\./));
             break;
           default: {
@@ -331,6 +338,7 @@ export module MML {
         value: noteIndex,
         duration: this.duration,
         durationInSeconds: this.convertDurationToSeconds(this.duration, this.tempo),
+        durationWithExtensions: this.durationWithExtensions,
       });
     };
 
@@ -419,8 +427,10 @@ export module MML {
         this.getDuration();
       }
       this.notesInQueue.push({
-        type: 'rest', duration: this.duration,
-        durationInSeconds: this.convertDurationToSeconds(this.duration, this.tempo)
+        type: 'rest',
+        duration: this.duration,
+        durationInSeconds: this.convertDurationToSeconds(this.duration, this.tempo),
+        durationWithExtensions: this.durationWithExtensions,
       });
 
       this.nextNote();
@@ -444,8 +454,10 @@ export module MML {
       this.readingChord = false;
       this.chordNoteIndexes = [];
       this.notesInQueue.push({
-        type: 'end-chord', duration: this.duration,
-        durationInSeconds: this.convertDurationToSeconds(this.duration, this.tempo)
+        type: 'end-chord',
+        duration: this.duration,
+        durationInSeconds: this.convertDurationToSeconds(this.duration, this.tempo),
+        durationWithExtensions: this.durationWithExtensions,
       });
       this.nextNote();
     };
@@ -613,7 +625,7 @@ export module MML {
       return {numerator: decimal * denominator, denominator: denominator};
     };
 
-    getDurationsWithExtensions = (d: number): number[] => {
+    getCompressedDurationsWithExtensions = (d: number): number[] => {
       let f = this.getFraction(d);
       if(d < 1) {
         for (var c = f.numerator - 1; c > 0 && f.numerator / c % 1 !== 0; c--) ;
@@ -626,14 +638,14 @@ export module MML {
       let limit = f.numerator > f.denominator ? f.numerator : f.denominator;
       for(let e = 1; e <= limit; e++){
         let d_1 = f.numerator * e / ( e * f.denominator - f.numerator );
-        if (d_1 > 0 && ((d_1 < 1 && (1/d_1) % 1 === 0 )|| (limit / Math.floor(d_1) % 1 === 0))) return [e].concat(this.getDurationsWithExtensions(d_1));
+        if (d_1 > 0 && ((d_1 < 1 && (1/d_1) % 1 === 0 )|| (limit / Math.floor(d_1) % 1 === 0))) return [e].concat(this.getCompressedDurationsWithExtensions(d_1));
       }
       return [];
     };
 
     convertNoteDurationToString = (duration: number): string => {
       let mmlDuration = "";
-      let durationsWithExtensions = this.getDurationsWithExtensions(duration);
+      let durationsWithExtensions = this.getCompressedDurationsWithExtensions(duration);
       let prevDuration = durationsWithExtensions[0];
       mmlDuration += prevDuration === 4 ? "" : prevDuration;
       durationsWithExtensions.slice(1).map((extension) => {
