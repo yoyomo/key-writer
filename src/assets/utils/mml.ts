@@ -9,7 +9,7 @@ export const A_BASE_FREQUENCY = 440;
 
 export interface Note {
   type: 'note',
-  value: number,
+  index: number,
   duration: number,
   durationInSeconds: number,
   durationWithExtensions: number[],
@@ -52,16 +52,21 @@ export interface InfiniteLoop {
 
 export interface Tempo {
   type: 'tempo'
-  value: number
+  tempo: number
 }
 
 export interface Octave {
   type: 'octave'
-  value: number
+  octave: number
+}
+
+export interface Length {
+  type: 'length'
+  length: number
 }
 
 export type SequenceNote = Note | StartLoop | BreakLoop | EndLoop | InfiniteLoop | StartChord | EndChord | Rest
-    | Octave | Tempo;
+    | Octave | Tempo | Length;
 
 export interface PlayState {
   index: number,
@@ -74,6 +79,7 @@ export interface PlayState {
 }
 
 export interface NotesInterface {
+  index: number,
   key: string,
   octave: number,
   alt: string,
@@ -142,7 +148,7 @@ export module MML {
       octave = octave + (keyIndex === newOctaveIndex ? 1 : 0);
       let alt = key.slice(-1) === "#" ? keys[nextKey][0] + '-' : '';
 
-      notes.push({key: key, 	octave: octave,	alt: alt,	frequency: frequency});
+      notes.push({index: n, key: key, 	octave: octave,	alt: alt,	frequency: frequency});
 
       keyIndex = nextKey;
     }
@@ -187,9 +193,15 @@ export module MML {
     })
   };
 
-  export const playNote = (note: Note, startTime, nextNoteTime) => {
+  // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 duration
+  export const convertDurationToSeconds = (duration: number, tempo: number) => {
+    if (duration === 0) { return 0;}
+    return (4 / duration) * 60 / tempo;
+  };
+
+  export const playNote = (note: Note, startTime = audioContext.currentTime, nextNoteTime = 0) => {
     const osc = audioContext.createOscillator();
-    osc.frequency.value = notes[note.value].frequency;
+    osc.frequency.value = notes[note.index].frequency;
     osc.type = 'sawtooth';
     osc.detune.value = -5;
 
@@ -198,7 +210,7 @@ export module MML {
     osc.stop(startTime + nextNoteTime + note.durationInSeconds);
 
     const osc2 = audioContext.createOscillator();
-    osc2.frequency.value = notes[note.value].frequency;
+    osc2.frequency.value = notes[note.index].frequency;
     osc2.type = 'triangle';
     osc2.detune.value = 5;
 
@@ -292,6 +304,7 @@ export module MML {
               length = length * 10 + parseInt(this.mml[this.mmlIndex]);
               this.duration = length;
             }
+            this.notesInQueue.push({type: "length", length: length});
             break;
           case '^':
             while (this.isThisValid(/\^/)) {
@@ -326,18 +339,12 @@ export module MML {
       }
     };
 
-    // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 duration
-    convertDurationToSeconds = (duration: number, tempo: number) => {
-      if (duration === 0) { return 0;}
-      return (4 / duration) * 60 / tempo;
-    };
-
     saveNote = (noteIndex: number) => {
       this.notesInQueue.push({
         type: 'note',
-        value: noteIndex,
+        index: noteIndex,
         duration: this.duration,
-        durationInSeconds: this.convertDurationToSeconds(this.duration, this.tempo),
+        durationInSeconds: convertDurationToSeconds(this.duration, this.tempo),
         durationWithExtensions: this.durationWithExtensions,
       });
     };
@@ -383,7 +390,7 @@ export module MML {
       this.expect(/o/);
       if (this.isNextValid(/\d/)) {
         this.octave = parseInt(this.mml[this.mmlIndex]);
-        this.notesInQueue.push({type: "octave", value: this.octave});
+        this.notesInQueue.push({type: "octave", octave: this.octave});
       }
     };
 
@@ -395,7 +402,7 @@ export module MML {
       } else {
         this.octave--;
       }
-      this.notesInQueue.push({type: "octave", value: this.octave});
+      this.notesInQueue.push({type: "octave", octave: this.octave});
     };
 
     increaseOctave = () => {
@@ -406,7 +413,7 @@ export module MML {
       } else {
         this.octave++;
       }
-      this.notesInQueue.push({type: "octave", value: this.octave});
+      this.notesInQueue.push({type: "octave", octave: this.octave});
     };
 
     getTempo = () => {
@@ -416,7 +423,7 @@ export module MML {
       while (this.isNextValid(/\d/)) {
         newTempo = newTempo * 10 + parseInt(this.mml[this.mmlIndex]);
         this.tempo = newTempo;
-        this.notesInQueue.push({type: "tempo", value: this.tempo});
+        this.notesInQueue.push({type: "tempo", tempo: this.tempo});
       }
     };
 
@@ -429,7 +436,7 @@ export module MML {
       this.notesInQueue.push({
         type: 'rest',
         duration: this.duration,
-        durationInSeconds: this.convertDurationToSeconds(this.duration, this.tempo),
+        durationInSeconds: convertDurationToSeconds(this.duration, this.tempo),
         durationWithExtensions: this.durationWithExtensions,
       });
 
@@ -456,7 +463,7 @@ export module MML {
       this.notesInQueue.push({
         type: 'end-chord',
         duration: this.duration,
-        durationInSeconds: this.convertDurationToSeconds(this.duration, this.tempo),
+        durationInSeconds: convertDurationToSeconds(this.duration, this.tempo),
         durationWithExtensions: this.durationWithExtensions,
       });
       this.nextNote();
@@ -667,10 +674,10 @@ export module MML {
             mmlText += "$";
             break;
           case "octave":
-            mmlText += "o" + note.value;
+            mmlText += "o" + note.octave;
             break;
           case "tempo":
-            mmlText += "t" + note.value;
+            mmlText += "t" + note.tempo;
             break;
           case "start-loop":
             mmlText += "/:";
@@ -691,7 +698,7 @@ export module MML {
             mmlText += "r" + this.convertNoteDurationToString(note.duration);
             break;
           case "note":
-            mmlText += this.convertNoteKeyToString(note.value) + this.convertNoteDurationToString(note.duration);
+            mmlText += this.convertNoteKeyToString(note.index) + this.convertNoteDurationToString(note.duration);
             break;
         }
       });

@@ -40,17 +40,17 @@
 
     <div class="keyboard " id="keyboard" (scroll)="handleKeyboardScroll($event)">
       <div class="top-keys">
-        <div class="white-key left-margin" (click)="selectNote(notes[0])"></div>
+        <div class="white-key left-margin" (click)="selectNote(0)"></div>
         <div *ngFor="let note of notes"
              [ngClass]="(note.key.slice(-1) === '#') ? 'black-top-key' : 'white-top-key-'+note.key"
-             (click)="selectNote(note)">
+             (click)="selectNote(note.index)">
         </div>
-        <div class="white-key right-margin br" (click)="selectNote(notes[notes.length-1])"></div>
+        <div class="white-key right-margin br" (click)="selectNote(notes.length-1)"></div>
       </div>
 
       <div class="bottom-keys">
         <div class="bottom-key" *ngFor="let whiteBottomKey of whiteBottomKeys"
-             (click)="selectNote(whiteBottomKey)">
+             (click)="selectNote(whiteBottomKey.index)">
           <div class="absolute gray">{{whiteBottomKey.key + whiteBottomKey.octave}}</div>
         </div>
       </div>

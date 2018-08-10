@@ -109,35 +109,23 @@ export class HomePage {
     this.expect(88, this.sequences.length);
   };
 
-  selectNote = (note: Note) => {
-    // this.segments[this.currentSegmentIndex].noteToggles[note.id - 1] = !this.segments[this.currentSegmentIndex].noteToggles[note.id - 1];
-    // if (this.segments[this.currentSegmentIndex].noteToggles[note.id - 1]) {
-      MML.playNote(note,0,0);
-    // }
+  selectNote = (noteIndex: number) => {
+    MML.playNote({type: "note", index: noteIndex, duration: 4, durationInSeconds: MML.convertDurationToSeconds(4, this.bpm), durationWithExtensions: [4]});
   };
 
   selectNoteOfSegment = (sequenceIndex: number, sequenceNoteIndex: number) => {
     let note = this.sequences[sequenceIndex][sequenceNoteIndex];
     switch(note.type){
       case "rest":
-          note = {type: "note", value: sequenceIndex, duration: note.duration, durationInSeconds: note.durationInSeconds};
+          note = {type: "note", index: sequenceIndex, duration: note.duration, durationInSeconds: note.durationInSeconds, durationWithExtensions: note.durationWithExtensions};
+          MML.playNote(note);
         break;
       case "note":
-        note = {type: "rest", duration: note.duration, durationInSeconds: note.durationInSeconds};
+        note = {type: "rest", duration: note.duration, durationInSeconds: note.durationInSeconds, durationWithExtensions: note.durationWithExtensions};
         break;
     }
 
     this.sequences[sequenceIndex][sequenceNoteIndex] = note;
-  };
-
-  selectSegment = (segmentIndex: number) => {
-  //   this.currentSegmentIndex = segmentIndex;
-  //   const now = this.audioContext.currentTime;
-  //   this.segments[segmentIndex].noteToggles.map((on, noteIndex) => {
-  //     if (on) {
-  //       this.playNote(this.notes[noteIndex], now);
-  //     }
-  //   });
   };
 
   scrollPlay = () => {
