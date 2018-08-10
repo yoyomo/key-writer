@@ -611,13 +611,20 @@ export module MML {
 
     getDurations = (d: number): number[] => {
       let f = this.getFraction(d);
-      if(d < 1) return (new Array(f.denominator).fill(f.numerator).slice());
+      if(d < 1){
+        for(let c = f.numerator - 1; c > 0; c--){
+          if(f.numerator / c %1 === 0){
+            let s = Math.floor(f.denominator / f.numerator);
+            let r = f.denominator % f.numerator;
+            return (new Array(s).fill(c)).concat(new Array(r).fill(f.numerator)).slice();
+          }
+        }
+        return (new Array(f.denominator).fill(f.numerator)).slice();
+      }
       if(d % 1 === 0) return [d];
-      let e: number;
-      let d_1: number;
       let limit = f.numerator > f.denominator ? f.numerator : f.denominator;
-      for(e = 1; e <= limit; e++){
-        d_1 = f.numerator * e / ( e * f.denominator - f.numerator );
+      for(let e = 1; e <= limit; e++){
+        let d_1 = f.numerator * e / ( e * f.denominator - f.numerator );
         if (d_1 > 0 && ((d_1 < 1 && (1/d_1) % 1 === 0 )|| (limit / Math.floor(d_1) % 1 === 0))) return [e].concat(this.getDurations(d_1));
       }
       return [];
@@ -629,7 +636,7 @@ export module MML {
       if (offset === 0) {
         return base === 4 ? "" : base.toString();
       }
-      let durations = this.getDurations(duration);
+      return this.getDurations(duration).join('^');
     };
 
     writeToMML = (): string => {
