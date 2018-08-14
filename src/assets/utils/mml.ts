@@ -6,6 +6,8 @@ export const SCALE = 12;
 export const TOTAL_NUM_OF_KEYS = 88;
 export const A_BASE_KEY_INDEX = 48; // 0...n
 export const A_BASE_FREQUENCY = 440;
+export const NEGRA = 4;
+export const BASE_OCTAVE = 4;
 
 export interface Note {
   type: 'note',
@@ -62,6 +64,8 @@ export interface Length {
   length: number
 }
 
+export type TimedSequenceNote = Note | EndChord | Rest;
+
 export type SequenceNote = Note | StartLoop | BreakLoop | EndLoop | InfiniteLoop | StartChord | EndChord | Rest
     | Octave | Tempo | Length;
 
@@ -82,11 +86,6 @@ export interface NotesInterface {
   octave: number,
   alt: string,
   frequency: number,
-}
-
-interface Fraction {
-  numerator: number,
-  denominator: number,
 }
 
 export module MML {
@@ -135,20 +134,20 @@ export module MML {
 
   let calculateNotes = () => {
     notes = [];
-    const keys = ['a','a+','b','c','c+','d','d+','e','f','f+','g','g+'];
+    const keys = ['a', 'a+', 'b', 'c', 'c+', 'd', 'd+', 'e', 'f', 'f+', 'g', 'g+'];
     const newOctaveIndex = 3;
 
     let octave = 0;
     let keyIndex = 0;
 
-    for(let n = 0; n < TOTAL_NUM_OF_KEYS; n++){
+    for (let n = 0; n < TOTAL_NUM_OF_KEYS; n++) {
       let frequency = Math.pow(2, ((n - A_BASE_KEY_INDEX) / SCALE)) * A_BASE_FREQUENCY;
       let key = keys[keyIndex];
       let nextKey = (keyIndex + 1) % keys.length;
       octave = octave + (keyIndex === newOctaveIndex ? 1 : 0);
       let alt = key.slice(-1) === "#" ? keys[nextKey][0] + '-' : '';
 
-      notes.push({index: n, key: key, 	octave: octave,	alt: alt,	frequency: frequency});
+      notes.push({index: n, key: key, octave: octave, alt: alt, frequency: frequency});
 
       keyIndex = nextKey;
     }
@@ -195,12 +194,14 @@ export module MML {
 
   // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 duration
   export const convertDurationToSeconds = (duration: number, tempo: number) => {
-    if (duration === 0) { return 0;}
-    return (4 / duration) * 60 / tempo;
+    if (duration === 0) {
+      return 0;
+    }
+    return (NEGRA / duration) * 60 / tempo;
   };
 
-  export const playNote = (note: Note, tempo: number ,scheduledStartTime: number) => {
-    if(!scheduledStartTime) scheduledStartTime = audioContext.currentTime;
+  export const playNote = (note: Note, tempo: number, scheduledStartTime: number) => {
+    if (!scheduledStartTime) scheduledStartTime = audioContext.currentTime;
 
     const osc = audioContext.createOscillator();
     osc.frequency.value = notes[note.index].frequency;
@@ -236,8 +237,8 @@ export module MML {
   class Sequence {
 
     tempo = 120;
-    octave = 4;
-    duration = 4;
+    octave = BASE_OCTAVE;
+    duration = NEGRA;
     normalDuration = -1;
     durationWithExtensions = [];
 
@@ -286,7 +287,7 @@ export module MML {
     };
 
     getOctaveOffset = () => {
-      return (this.octave - 4) * SCALE;
+      return (this.octave - BASE_OCTAVE) * SCALE;
     };
 
     calculateDurationFromExtension = (duration: number, extension: number) => {
@@ -323,9 +324,8 @@ export module MML {
             }
             break;
           case '.':
-            let extension = this.duration;
             do {
-              extension *= 2;
+              let extension = this.durationWithExtensions[this.durationWithExtensions.length - 1] * 2;
               this.duration = this.calculateDurationFromExtension(this.duration, extension);
               this.durationWithExtensions.push(extension);
             } while (this.isNextValid(/\./));
@@ -625,80 +625,57 @@ export module MML {
       }
     };
 
-    convertNoteKeyToString = (noteIndex: number): string => {
-      return notes[noteIndex].key;
-    };
-
-    getFraction = (decimal: number): Fraction => {
-      for(var denominator = 1; decimal * denominator % 1 !== 0; denominator++);
-      return {numerator: decimal * denominator, denominator: denominator};
-    };
-
-    compressLongDuration = (numerator: number, denominator: number): number[] => {
-      if(numerator === 1) return new Array(denominator).fill(numerator);
-      for (var c = 2; c < numerator && numerator / c % 1 !== 0; c++) ;
-      let times = denominator % (numerator * c);
-      if(numerator === denominator){
-        times = 1;
-      }
-      else if(denominator < numerator * c){
-        for(let offset = c; offset > 0 && (times = (denominator * offset) % (numerator * c)) > denominator ; offset--);
-      }
-      c = (c >= numerator ? 1 : c);
-      let leftout = denominator % times;
-      return this.compressLongDuration(c, times).concat(new Array(leftout).fill(numerator))
-    };
-
-    compressShortDuration = (decimal: number): number[] => {
-      if(decimal === 0) return [];
-        if(decimal % 1 === 0) return [decimal];
-        let fraction = this.getFraction(decimal);
-        let limit = fraction.numerator > fraction.denominator ? fraction.numerator : fraction.denominator;
-        for(let extension = 1; extension <= limit; extension++){
-          let nextDecimal = fraction.numerator * extension / ( extension * fraction.denominator - fraction.numerator );
-          if (nextDecimal > 0 && (nextDecimal < 1 || (fraction.numerator / Math.floor(nextDecimal) % 1 === 0))){
-            return [extension].concat(this.getCompressedDurationsWithExtensions(nextDecimal));
-          }
-        }
-        return [];
-    };
-
-    getCompressedDurationsWithExtensions = (duration: number): number[] => {
-
-      let f = this.getFraction(duration);
-      if(duration < 1) {
-        return this.compressLongDuration(f.numerator,f.denominator);
-      }
-      return this.compressShortDuration(duration);
-    };
-
-    addDot = (note: Note): Note => {
-      let dot = note.duration * 2;
-      note.duration = this.calculateDurationFromExtension(note.duration,dot);
-      note.durationWithExtensions = this.getCompressedDurationsWithExtensions(note.duration);
+    addDot = (note: TimedSequenceNote): TimedSequenceNote => {
+      let dotValue = note.duration * 2;
+      note.duration = this.calculateDurationFromExtension(note.duration, dotValue);
+      let dotExtension = note.durationWithExtensions[note.durationWithExtensions.length - 1] * 2;
+      note.durationWithExtensions.push(dotExtension);
       return note;
     };
 
-    getDurationFromDurationsWithExtensions = (durationWithExtensions: number[]): number => {
-      let duration = durationWithExtensions[0];
-      durationWithExtensions.slice(1).map(extension => {
-        duration = this.calculateDurationFromExtension(duration,extension);
+    addExtension = (note: TimedSequenceNote): TimedSequenceNote => {
+      note.duration = this.calculateDurationFromExtension(note.duration, NEGRA);
+      note.durationWithExtensions.push(NEGRA);
+      return note;
+    };
+
+    editExtension = (note: TimedSequenceNote, extensionIndex: number, newExtension: number): TimedSequenceNote => {
+      if(newExtension % 1 !== 0 ){
+        throw new Error(`Extensions cannot be float numbers`);
+      }
+      note.durationWithExtensions[extensionIndex] = newExtension;
+      return note;
+    };
+
+    removeExtension = (note: TimedSequenceNote, extensionIndex: number): TimedSequenceNote => {
+      note.durationWithExtensions.splice(extensionIndex, 1);
+      note.duration = this.getDurationFromDurationsWithExtensions(note);
+      return note;
+    };
+
+    getDurationFromDurationsWithExtensions = (note: TimedSequenceNote): number => {
+      let duration = note.durationWithExtensions[0];
+      note.durationWithExtensions.slice(1).map(extension => {
+        duration = this.calculateDurationFromExtension(duration, extension);
       });
       return duration;
     };
 
-    convertNoteDurationToString = (duration: number): string => {
+    stringifyNoteKey = (note: Note): string => {
+      return notes[note.index].key;
+    };
+
+    stringifyNoteDuration = (note: TimedSequenceNote): string => {
       let mmlDuration = "";
-      let durationsWithExtensions = this.getCompressedDurationsWithExtensions(duration);
-      let prevDuration = durationsWithExtensions[0];
-      mmlDuration += prevDuration === 4 ? "" : prevDuration;
-      durationsWithExtensions.slice(1).map((extension) => {
-          if(prevDuration === (extension/2)){
-            mmlDuration += '.';
-          }else{
-            mmlDuration += '^' + extension;
-          }
-          prevDuration = this.calculateDurationFromExtension(prevDuration,extension);
+      let prevExtension = note.durationWithExtensions[0];
+      mmlDuration += prevExtension === NEGRA ? "" : prevExtension;
+      note.durationWithExtensions.slice(1).map((extension) => {
+        if (prevExtension === (extension / 2)) {
+          mmlDuration += '.';
+        } else {
+          mmlDuration += '^' + extension;
+        }
+        prevExtension = extension;
       });
       return mmlDuration;
     };
@@ -729,13 +706,13 @@ export module MML {
             mmlText += "[";
             break;
           case "end-chord":
-            mmlText += "]" + this.convertNoteDurationToString(note.duration);
+            mmlText += "]" + this.stringifyNoteDuration(note);
             break;
           case "rest":
-            mmlText += "r" + this.convertNoteDurationToString(note.duration);
+            mmlText += "r" + this.stringifyNoteDuration(note);
             break;
           case "note":
-            mmlText += this.convertNoteKeyToString(note.index) + this.convertNoteDurationToString(note.duration);
+            mmlText += this.stringifyNoteKey(note) + this.stringifyNoteDuration(note);
             break;
         }
       });
