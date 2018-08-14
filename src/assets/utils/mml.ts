@@ -651,15 +651,16 @@ export module MML {
 
     compressShortDuration = (decimal: number): number[] => {
       if(decimal === 0) return [];
-      if(decimal % 1 === 0) return [decimal];
-      let f = this.getFraction(decimal);
-
-      let limit = f.numerator > f.denominator ? f.numerator : f.denominator;
-      for(let e = 1; e <= limit; e++){
-        let d_1 = f.numerator * e / ( e * f.denominator - f.numerator );
-        if (d_1 > 0 && ((d_1 < 1 && (1/d_1) % 1 === 0 )|| (limit / Math.floor(d_1) % 1 === 0))) return [e].concat(this.getCompressedDurationsWithExtensions(d_1));
-      }
-      return [];
+        if(decimal % 1 === 0) return [decimal];
+        let fraction = this.getFraction(decimal);
+        let limit = fraction.numerator > fraction.denominator ? fraction.numerator : fraction.denominator;
+        for(let extension = 1; extension <= limit; extension++){
+          let nextDecimal = fraction.numerator * extension / ( extension * fraction.denominator - fraction.numerator );
+          if (nextDecimal > 0 && (nextDecimal < 1 || (fraction.numerator / Math.floor(nextDecimal) % 1 === 0))){
+            return [extension].concat(this.getCompressedDurationsWithExtensions(nextDecimal));
+          }
+        }
+        return [];
     };
 
     getCompressedDurationsWithExtensions = (duration: number): number[] => {
