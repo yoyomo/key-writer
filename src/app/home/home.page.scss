@@ -59,6 +59,12 @@ $note-segment-height: 64px;
   height: 100%;
 }
 
+.negra { background: url("../../assets/imgs/negra.svg") no-repeat center; }
+.blanca { background: url("../../assets/imgs/blanca.svg") no-repeat center; }
+.corchea { background: url("../../assets/imgs/corchea.svg") no-repeat center; }
+.redonda { background: url("../../assets/imgs/redonda.svg") no-repeat center; }
+.semicorchea { background: url("../../assets/imgs/semicorchea.svg") no-repeat center; }
+
 .on {
   background-color: orange;
 }

@@ -192,7 +192,7 @@ export module MML {
     })
   };
 
-  // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 duration
+  // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 defaultDuration
   export const convertDurationToSeconds = (duration: number, tempo: number) => {
     if (duration === 0) {
       return 0;

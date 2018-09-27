@@ -1,6 +1,13 @@
 <!--suppress HtmlUnknownAttribute -->
 <ion-header home-page>
   <ion-toolbar align="center">
+    <ion-buttons slot="start">
+      <ion-button (click)="showDefaultDuration()" [ngClass]="getDurationClass()">
+      </ion-button>
+      <ion-button (click)="togglePedal()">
+longo
+      </ion-button>
+    </ion-buttons>
     <ion-buttons slot="end">
       <ion-button (click)="changeBPM()">
         <span>{{bpm}}bpm</span>
@@ -40,17 +47,17 @@
 
     <div class="keyboard " id="keyboard" (scroll)="handleKeyboardScroll($event)">
       <div class="top-keys">
-        <div class="white-key left-margin" (click)="selectNote(0)"></div>
+        <div class="white-key left-margin" (click)="playNote(0)"></div>
         <div *ngFor="let note of notes"
              [ngClass]="(note.key.slice(-1) === '#') ? 'black-top-key' : 'white-top-key-'+note.key"
-             (click)="selectNote(note.index)">
+             (click)="playNote(note.index)">
         </div>
-        <div class="white-key right-margin br" (click)="selectNote(notes.length-1)"></div>
+        <div class="white-key right-margin br" (click)="playNote(notes.length-1)"></div>
       </div>
 
       <div class="bottom-keys">
         <div class="bottom-key" *ngFor="let whiteBottomKey of whiteBottomKeys"
-             (click)="selectNote(whiteBottomKey.index)">
+             (click)="playNote(whiteBottomKey.index)">
           <div class="absolute gray">{{whiteBottomKey.key + whiteBottomKey.octave}}</div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MML, NotesInterface, SequenceNote} from '../../assets/utils/mml';
+import {MML, NEGRA, NotesInterface, SequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
@@ -15,6 +15,8 @@ export class HomePage {
   sequences: SequenceNote[][];
 
   bpm: number = 120;
+  defaultDuration: number = 4;
+  pedal = false;
   isPlaying = false;
 
   startTime: number = null;
@@ -105,12 +107,12 @@ export class HomePage {
     this.expect(88, this.sequences.length);
   };
 
-  selectNote = (noteIndex: number) => {
+  playNote = (noteIndex: number) => {
     MML.playNote({
       type: "note",
       index: noteIndex,
-      duration: 4,
-      durationWithExtensions: [4]
+      duration: this.pedal ? Number.MIN_VALUE * NEGRA : this.defaultDuration,
+      durationWithExtensions: [this.defaultDuration]
     },this.bpm,0);
   };
 
@@ -199,5 +201,19 @@ export class HomePage {
     if (wasPlaying) {
       this.playSheet();
     }
-  }
+  };
+
+  getDurationClass = () => {
+    switch(this.defaultDuration){
+      case 4:
+        return 'negra';
+    }
+  };
+
+  togglePedal = () => {
+    if(this.pedal){
+      MML.stop();
+    }
+    this.pedal = !this.pedal;
+  };
 }
