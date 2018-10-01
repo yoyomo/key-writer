@@ -19,6 +19,8 @@ export class HomePage {
   pedal = false;
   isPlaying = false;
 
+  playingOscillators: {[k: number]: OscillatorNode[]} = {};
+
   startTime: number = null;
   initialScrollPosition: number = null;
   scrollTopFrameRequest: Timer;
@@ -107,13 +109,29 @@ export class HomePage {
     this.expect(88, this.sequences.length);
   };
 
+  stopOscillators = (noteIndex) => {
+    if (!this.playingOscillators[noteIndex]) return;
+    this.playingOscillators[noteIndex].map(osc => osc.stop());
+    delete this.playingOscillators[noteIndex];
+  };
+
   playNote = (noteIndex: number) => {
-    MML.playNote({
-      type: "note",
-      index: noteIndex,
-      duration: this.pedal ? Number.MIN_VALUE * NEGRA : this.defaultDuration,
-      durationWithExtensions: [this.defaultDuration]
-    },this.bpm,0);
+    if (this.playingOscillators[noteIndex] && this.playingOscillators[noteIndex].length > 0){
+      this.stopOscillators(noteIndex);
+    }
+    else {
+      let noteDuration = this.pedal ? 0 : this.defaultDuration;
+      this.playingOscillators[noteIndex] =
+          MML.playNote({
+            type: "note",
+            index: noteIndex,
+            duration: noteDuration,
+            durationWithExtensions: [noteDuration]
+          },this.bpm,0);
+      this.playingOscillators[noteIndex].map((osc) => {
+        osc.onended = () => this.stopOscillators(noteIndex);
+      });
+    }
   };
 
   selectNoteOfSegment = (sequenceIndex: number, sequenceNoteIndex: number) => {

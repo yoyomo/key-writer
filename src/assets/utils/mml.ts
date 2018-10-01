@@ -194,32 +194,41 @@ export module MML {
 
   // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 defaultDuration
   export const convertDurationToSeconds = (duration: number, tempo: number) => {
-    if (duration === 0) {
-      return 0;
+    if (duration === 0 || tempo === 0) {
+      return Number.MAX_VALUE;
     }
     return (NEGRA / duration) * 60 / tempo;
   };
 
-  export const playNote = (note: Note, tempo: number, scheduledStartTime: number) => {
+  export const playNote = (note: Note, tempo: number, scheduledStartTime: number): OscillatorNode[] => {
     if (!scheduledStartTime) scheduledStartTime = audioContext.currentTime;
 
-    const osc = audioContext.createOscillator();
-    osc.frequency.value = notes[note.index].frequency;
-    osc.type = 'sawtooth';
-    osc.detune.value = -5;
+    let oscillators: OscillatorNode[] = [];
+    let numberOfOscillators = 2;
 
-    osc.connect(gain);
-    osc.start(scheduledStartTime);
-    osc.stop(scheduledStartTime + convertDurationToSeconds(note.duration, tempo));
+    for(let i = 0; i < numberOfOscillators; i++){
+      const osc = audioContext.createOscillator();
+      osc.frequency.value = notes[note.index].frequency;
 
-    const osc2 = audioContext.createOscillator();
-    osc2.frequency.value = notes[note.index].frequency;
-    osc2.type = 'triangle';
-    osc2.detune.value = 5;
+      switch (i) {
+        case 1:
+          osc.type = 'sawtooth';
+          osc.detune.value = -5;
+          break;
+        case 2:
+          osc.type = 'triangle';
+          osc.detune.value = 5;
+          break;
+      }
 
-    osc2.connect(gain);
-    osc2.start(scheduledStartTime);
-    osc2.stop(scheduledStartTime + convertDurationToSeconds(note.duration, tempo));
+      osc.connect(gain);
+      osc.start(scheduledStartTime);
+      osc.stop(scheduledStartTime + convertDurationToSeconds(note.duration, tempo));
+
+      oscillators.push(osc);
+    }
+
+    return oscillators;
   };
 
   export const getNotesInQueue = () => {
