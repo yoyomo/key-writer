@@ -2,10 +2,11 @@
 <ion-header home-page>
   <ion-toolbar align="center">
     <ion-buttons slot="start">
-      <ion-button (click)="showDefaultDuration()" [ngClass]="getDurationClass()">
+      <ion-button (click)="showSelectDefaultDuration()" >
+        <img width="16px" height="16px" src="../../assets/imgs/{{durations[defaultDuration]}}.svg">
       </ion-button>
       <ion-button (click)="togglePedal()">
-longo
+          longo
       </ion-button>
     </ion-buttons>
     <ion-buttons slot="end">
@@ -24,7 +25,6 @@ longo
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
-
 <ion-content>
   <div class="screen">
     <div class="book">

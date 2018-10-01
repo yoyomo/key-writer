@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MML, NEGRA, NotesInterface, SequenceNote} from '../../assets/utils/mml';
+import {MML, NotesInterface, SequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
@@ -20,6 +20,7 @@ export class HomePage {
   isPlaying = false;
 
   playingOscillators: {[k: number]: OscillatorNode[]} = {};
+  durations = {0.5: "double_whole", 1: "whole", 2: "half", 4: "quarter", 8: "eighth", 16: "sixteenth", 32: "thirty_second", 64: "sixty_fourth"};
 
   startTime: number = null;
   initialScrollPosition: number = null;
@@ -192,8 +193,7 @@ export class HomePage {
       inputs: [{name: 'bpm', value: `${this.bpm}`, type: 'number'}],
       buttons: [
         {
-          text: 'Cancel', role: 'cancel', handler: () => {
-          }
+          text: 'Cancel', role: 'cancel', handler: () => {}
         },
         {
           text: 'OK', handler: data => {
@@ -212,19 +212,35 @@ export class HomePage {
     }).then(bpmPopup => bpmPopup.present());
   };
 
+  showSelectDefaultDuration = () => {
+    this.alertCtrl.create({
+      header: 'Set the Default Note Duration',
+      inputs: Object.entries(this.durations).map(([value,name]) => {
+        return {type: 'radio', name: 'duration', value: value, label: value,
+          checked: this.defaultDuration === parseFloat(value)}
+      }),
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {}
+        }, {
+          text: 'Ok',
+          handler: (duration: string) => {
+            this.defaultDuration = parseFloat(duration);
+          }
+        }
+      ]
+    }).then(durationPopup => durationPopup.present());
+  };
+
   restart = () => {
     this.sheet.scrollTop = this.sheet.scrollHeight;
     const wasPlaying = this.isPlaying;
     this.stopSheet();
     if (wasPlaying) {
       this.playSheet();
-    }
-  };
-
-  getDurationClass = () => {
-    switch(this.defaultDuration){
-      case 4:
-        return 'negra';
     }
   };
 
