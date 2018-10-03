@@ -3,6 +3,11 @@ import {MML, NotesInterface, Rest, SequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
+export interface SequenceNoteId {
+  sequence: number
+  note: number
+}
+
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
@@ -29,6 +34,8 @@ export class HomePage {
     32: "thirty_second",
     64: "sixty_fourth"
   };
+
+  currentEditingNoteId: SequenceNoteId = {sequence: null, note: null};
 
   startTime: number = null;
   initialScrollPosition: number = null;
@@ -144,13 +151,38 @@ export class HomePage {
     }
   };
 
-  selectNoteOfSegment = (sequenceIndex: number, sequenceNoteIndex: number) => {
-    let note = this.sequences[sequenceIndex][sequenceNoteIndex];
+  mouseHoldTimer = {time: 0, limit: 3, cancel: false};
+
+  toggleEditNote = (noteId: SequenceNoteId) => {
+    this.currentEditingNoteId = {sequence: noteId.sequence, note: noteId.note};
+  };
+
+  holdNote = (noteId: SequenceNoteId) => {
+    this.mouseHoldTimer.time = 0;
+    this.mouseHoldTimer.cancel = false;
+    this.currentEditingNoteId = {sequence: null, note: null};
+    let holdNoteTimeout = () => {
+      setTimeout(() => {
+            this.mouseHoldTimer.time++;
+            if (this.mouseHoldTimer.time < this.mouseHoldTimer.limit) {
+              holdNoteTimeout();
+            } else if(!this.mouseHoldTimer.cancel){
+              this.toggleEditNote(noteId);
+            }
+          },100 )
+    };
+    holdNoteTimeout();
+  };
+
+  toggleNoteOfSegment = (noteId: SequenceNoteId) => {
+    if(this.mouseHoldTimer.time >= this.mouseHoldTimer.limit) return;
+    this.mouseHoldTimer.cancel = true;
+    let note = this.sequences[noteId.sequence][noteId.note];
     switch (note.type) {
       case "rest":
         note = {
           type: "note",
-          index: sequenceIndex,
+          index: noteId.sequence,
           duration: note.duration,
           durationWithExtensions: note.durationWithExtensions
         };
@@ -165,7 +197,7 @@ export class HomePage {
         break;
     }
 
-    this.sequences[sequenceIndex][sequenceNoteIndex] = note;
+    this.sequences[noteId.sequence][noteId.note] = note;
   };
 
   scrollPlay = () => {

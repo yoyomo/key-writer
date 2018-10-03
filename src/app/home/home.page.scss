@@ -35,6 +35,10 @@ $note-segment-height: 64px;
   border-top: 1px solid darkgray;
 }
 
+.editing {
+  box-shadow: 0 0 10px orange;
+}
+
 .keyboard {
   flex: 0 0 20%;
   flex-direction: column;
