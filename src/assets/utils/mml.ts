@@ -59,15 +59,16 @@ export interface Octave {
   octave: number
 }
 
-export interface Length {
-  type: 'length'
-  length: number
+export interface DefaultDuration {
+  type: 'default-duration'
+  duration: number
+  durationWithExtensions: number[]
 }
 
-export type TimedSequenceNote = Note | EndChord | Rest;
+export type TimedSequenceNote = Note | EndChord | Rest | DefaultDuration;
 
 export type SequenceNote = Note | StartLoop | BreakLoop | EndLoop | InfiniteLoop | StartChord | EndChord | Rest
-    | Octave | Tempo | Length;
+    | Octave | Tempo | DefaultDuration;
 
 export interface PlayState {
   index: number,
@@ -249,7 +250,7 @@ export module MML {
     octave = BASE_OCTAVE;
     duration = NEGRA;
     normalDuration = -1;
-    durationWithExtensions = [];
+    durationWithExtensions = [this.duration];
 
     chordNoteIndexes = [];
     readingChord = false;
@@ -308,16 +309,19 @@ export module MML {
       this.normalDuration = this.duration;
       this.durationWithExtensions = [this.duration];
 
+      let updateDefaultDuration = false;
+
       while (this.isThisValid(/[\dl^.]/)) {
         switch (this.mml[this.mmlIndex]) {
           case 'l':
+            updateDefaultDuration = true;
             this.normalDuration = -1;
             let length = 0;
             while (this.isNextValid(/\d/)) {
               length = length * 10 + parseInt(this.mml[this.mmlIndex]);
               this.duration = length;
             }
-            this.notesInQueue.push({type: "length", length: length});
+            this.durationWithExtensions = [this.duration];
             break;
           case '^':
             while (this.isThisValid(/\^/)) {
@@ -345,10 +349,19 @@ export module MML {
               length = length * 10 + parseInt(this.mml[this.mmlIndex]);
               this.duration = length;
             } while (this.isNextValid(/\d/));
+            this.durationWithExtensions = [this.duration];
             break;
           }
         }
       }
+
+      if (updateDefaultDuration) {
+        this.notesInQueue.push({type: "default-duration",
+          duration: this.duration,
+          durationWithExtensions: this.durationWithExtensions
+        });
+      }
+
     };
 
     saveNote = (noteIndex: number) => {
@@ -434,8 +447,8 @@ export module MML {
       while (this.isNextValid(/\d/)) {
         newTempo = newTempo * 10 + parseInt(this.mml[this.mmlIndex]);
         this.tempo = newTempo;
-        this.notesInQueue.push({type: "tempo", tempo: this.tempo});
       }
+      this.notesInQueue.push({type: "tempo", tempo: this.tempo});
     };
 
     getRest = () => {
@@ -701,6 +714,9 @@ export module MML {
             break;
           case "tempo":
             mmlText += "t" + note.tempo;
+            break;
+          case "default-duration":
+            mmlText += "l" + this.stringifyNoteDuration(note);
             break;
           case "start-loop":
             mmlText += "/:";

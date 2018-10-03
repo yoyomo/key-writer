@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MML, NotesInterface, SequenceNote} from '../../assets/utils/mml';
+import {MML, NotesInterface, Rest, SequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
@@ -19,8 +19,16 @@ export class HomePage {
   pedal = false;
   isPlaying = false;
 
-  playingOscillators: {[k: number]: OscillatorNode[]} = {};
-  durations = {0.5: "double_whole", 1: "whole", 2: "half", 4: "quarter", 8: "eighth", 16: "sixteenth", 32: "thirty_second", 64: "sixty_fourth"};
+  playingOscillators: { [k: number]: OscillatorNode[] } = {};
+  durations = {
+    1: "whole",
+    2: "half",
+    4: "quarter",
+    8: "eighth",
+    16: "sixteenth",
+    32: "thirty_second",
+    64: "sixty_fourth"
+  };
 
   startTime: number = null;
   initialScrollPosition: number = null;
@@ -44,6 +52,7 @@ export class HomePage {
         this.readNotes();
 
         let mml = MML.writeToMML();
+        console.log(mml);
       }
     };
     rawFile.send(null);
@@ -59,15 +68,15 @@ export class HomePage {
   }
 
   requestAnimationFrame = window['requestAnimationFrame'] ||
-    window['webkitRequestAnimationFrame'] ||
-    window['mozRequestAnimationFrame'] ||
-    window['oRequestAnimationFrame'] ||
-    window['msRequestAnimationFrame'];
+      window['webkitRequestAnimationFrame'] ||
+      window['mozRequestAnimationFrame'] ||
+      window['oRequestAnimationFrame'] ||
+      window['msRequestAnimationFrame'];
 
   cancelAnimationFrame = window['cancelAnimationFrame'] ||
-    window['webkitCancelAnimationFrame'] ||
-    window['mozCancelAnimationFrame'] ||
-    window['msCancelAnimationFrame'];
+      window['webkitCancelAnimationFrame'] ||
+      window['mozCancelAnimationFrame'] ||
+      window['msCancelAnimationFrame'];
 
   // scrolls to bottom whenever the page has loaded
   // noinspection JSUnusedGlobalSymbols
@@ -117,7 +126,7 @@ export class HomePage {
   };
 
   playNote = (noteIndex: number) => {
-    if (this.playingOscillators[noteIndex] && this.playingOscillators[noteIndex].length > 0){
+    if (this.playingOscillators[noteIndex] && this.playingOscillators[noteIndex].length > 0) {
       this.stopOscillators(noteIndex);
     }
     else {
@@ -128,7 +137,7 @@ export class HomePage {
             index: noteIndex,
             duration: noteDuration,
             durationWithExtensions: [noteDuration]
-          },this.bpm,0);
+          }, this.bpm, 0);
       this.playingOscillators[noteIndex].map((osc) => {
         osc.onended = () => this.stopOscillators(noteIndex);
       });
@@ -187,13 +196,50 @@ export class HomePage {
     this.startTime = null;
   };
 
+  toggleInfiniteLoop = () => {
+    this.sequences.map(sequence => {
+      let infiniteLoopFound = false;
+      for (let i = 0; i < sequence.length; i++) {
+        let seqNote = sequence[i];
+        if (seqNote.type === "infinite-loop") {
+          sequence.splice(i, 1);
+          infiniteLoopFound = true;
+          break;
+        }
+      }
+      if (!infiniteLoopFound) {
+        sequence.unshift({type: "infinite-loop"});
+      }
+    });
+    console.log(MML.writeToMML());
+  };
+
+  updateTempo = (bpm: number) => {
+    this.bpm = bpm;
+    this.sequences.map(sequence => {
+      let tempoFound = false;
+      for (let i = 0; i < sequence.length; i++) {
+        let seqNote = sequence[i];
+        if (seqNote.type === "tempo") {
+          seqNote.tempo = bpm;
+          tempoFound = true;
+          break;
+        }
+      }
+      if (!tempoFound) {
+        sequence.unshift({type: "tempo", tempo: bpm});
+      }
+    });
+  };
+
   changeBPM = () => {
     this.alertCtrl.create({
       header: 'Change Beats per Minute (bpm)',
       inputs: [{name: 'bpm', value: `${this.bpm}`, type: 'number'}],
       buttons: [
         {
-          text: 'Cancel', role: 'cancel', handler: () => {}
+          text: 'Cancel', role: 'cancel', handler: () => {
+          }
         },
         {
           text: 'OK', handler: data => {
@@ -205,30 +251,81 @@ export class HomePage {
               }).then(bpmError => bpmError.present());
               return;
             }
-            this.bpm = data.bpm;
+            this.updateTempo(data.bpm);
           }
         }
       ]
     }).then(bpmPopup => bpmPopup.present());
   };
 
+  lastRestsWith = (callback: (rest: Rest, sequenceIndex: number, noteIndex: number) => void) => {
+    this.sequences.map((sequence, sequenceIndex) => {
+      for (let i = sequence.length - 1; i >= 0; i--) {
+        let sequenceNote = sequence[i];
+        if (sequenceNote.type === "note") break;
+        if (sequenceNote.type !== "rest") continue;
+        callback(sequenceNote, sequenceIndex, i);
+      }
+    });
+  };
+
+  cropLastRests = () => {
+    this.lastRestsWith((rest, sequenceIndex, noteIndex) => {
+      this.sequences[sequenceIndex].splice(noteIndex, 1);
+    });
+  };
+
+  updateDefaultDuration = (newDuration: number) => {
+    this.defaultDuration = newDuration;
+
+    this.lastRestsWith(rest => {
+      if (rest.duration === this.defaultDuration) {
+        rest.duration = this.defaultDuration;
+        rest.durationWithExtensions = [this.defaultDuration];
+      }
+    });
+
+
+    this.sequences.map(sequence => {
+      let lengthFound = false;
+      for (let i = 0; i < sequence.length; i++) {
+        let seqNote = sequence[i];
+        if (seqNote.type === "default-duration") {
+          seqNote.duration = this.defaultDuration;
+          seqNote.durationWithExtensions = [this.defaultDuration];
+          lengthFound = true;
+          break;
+        }
+      }
+      if(!lengthFound){
+        sequence.unshift({type: "default-duration",
+          duration: this.defaultDuration,
+          durationWithExtensions: [this.defaultDuration]});
+      }
+    })
+  };
+
   showSelectDefaultDuration = () => {
     this.alertCtrl.create({
       header: 'Set the Default Note Duration',
-      inputs: Object.entries(this.durations).map(([value,name]) => {
-        return {type: 'radio', name: 'duration', value: value, label: value,
-          checked: this.defaultDuration === parseFloat(value)}
+      inputs: Object.keys(this.durations).map(d => {
+        return {
+          type: 'radio', name: 'duration', value: d, label: d,
+          checked: this.defaultDuration === parseFloat(d)
+        }
       }),
       buttons: [
         {
           text: 'Cancel',
           role: 'cancel',
           cssClass: 'secondary',
-          handler: () => {}
+          handler: () => {
+          }
         }, {
           text: 'Ok',
           handler: (duration: string) => {
-            this.defaultDuration = parseFloat(duration);
+            this.updateDefaultDuration(parseFloat(duration))
+
           }
         }
       ]
@@ -245,7 +342,7 @@ export class HomePage {
   };
 
   togglePedal = () => {
-    if(this.pedal){
+    if (this.pedal) {
       MML.stop();
     }
     this.pedal = !this.pedal;
