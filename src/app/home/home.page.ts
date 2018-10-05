@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MML, NotesInterface, Rest, SequenceNote} from '../../assets/utils/mml';
+import {MML, NEGRA, NotesInterface, Rest, SequenceNote, TimedSequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
@@ -7,6 +7,8 @@ export interface SequenceNoteId {
   sequence: number
   note: number
 }
+
+export type DurationUpdateType = "default" | "selected" | "group"
 
 @Component({
   selector: 'app-home',
@@ -36,6 +38,7 @@ export class HomePage {
   };
 
   currentEditingNoteId: SequenceNoteId = {sequence: null, note: null};
+  mouseHoldTimer = {time: 0, limit: 3, cancel: false};
 
   startTime: number = null;
   initialScrollPosition: number = null;
@@ -151,7 +154,33 @@ export class HomePage {
     }
   };
 
-  mouseHoldTimer = {time: 0, limit: 3, cancel: false};
+  scrollPlay = () => {
+    const time = Date.now() / 1000;
+    if (!this.startTime) {
+      this.startTime = time;
+    }
+    if (!this.initialScrollPosition) {
+      this.initialScrollPosition = this.sheet.scrollTop;
+    }
+    this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm / 60) * (time - this.startTime));
+    if (this.sheet.scrollTop + this.sheet.clientHeight <= this.scrollEndHeight) return;
+    this.scrollTopFrameRequest = this.requestAnimationFrame(this.scrollPlay);
+  };
+
+  playSheet = () => {
+    this.isPlaying = true;
+    MML.play();
+    this.scrollPlay();
+  };
+
+  stopSheet = () => {
+    this.isPlaying = false;
+    MML.stop();
+
+    this.cancelAnimationFrame(this.scrollTopFrameRequest);
+    this.initialScrollPosition = null;
+    this.startTime = null;
+  };
 
   toggleEditNote = (noteId: SequenceNoteId) => {
     this.currentEditingNoteId = {sequence: noteId.sequence, note: noteId.note};
@@ -200,32 +229,14 @@ export class HomePage {
     this.sequences[noteId.sequence][noteId.note] = note;
   };
 
-  scrollPlay = () => {
-    const time = Date.now() / 1000;
-    if (!this.startTime) {
-      this.startTime = time;
-    }
-    if (!this.initialScrollPosition) {
-      this.initialScrollPosition = this.sheet.scrollTop;
-    }
-    this.sheet.scrollTop = this.initialScrollPosition - ((this.NOTE_SEGMENT_HEIGHT * this.bpm / 60) * (time - this.startTime));
-    if (this.sheet.scrollTop + this.sheet.clientHeight <= this.scrollEndHeight) return;
-    this.scrollTopFrameRequest = this.requestAnimationFrame(this.scrollPlay);
+  deleteEditingNote = () => {
+    this.sequences[this.currentEditingNoteId.sequence].splice(this.currentEditingNoteId.note,1);
+    this.currentEditingNoteId = {sequence: null, note: null};
   };
 
-  playSheet = () => {
-    this.isPlaying = true;
-    MML.play();
-    this.scrollPlay();
-  };
-
-  stopSheet = () => {
-    this.isPlaying = false;
-    MML.stop();
-
-    this.cancelAnimationFrame(this.scrollTopFrameRequest);
-    this.initialScrollPosition = null;
-    this.startTime = null;
+  appendRest = () => {
+    this.sequences[this.currentEditingNoteId.sequence].splice(++this.currentEditingNoteId.note,0,
+        {type: "rest", duration: this.defaultDuration, durationWithExtensions: [this.defaultDuration]});
   };
 
   toggleInfiniteLoop = () => {
@@ -290,30 +301,59 @@ export class HomePage {
     }).then(bpmPopup => bpmPopup.present());
   };
 
-  lastRestsWith = (callback: (rest: Rest, sequenceIndex: number, noteIndex: number) => void) => {
-    this.sequences.map((sequence, sequenceIndex) => {
-      for (let i = sequence.length - 1; i >= 0; i--) {
-        let sequenceNote = sequence[i];
-        if (sequenceNote.type === "note") break;
-        if (sequenceNote.type !== "rest") continue;
-        callback(sequenceNote, sequenceIndex, i);
-      }
-    });
+  addDot = (note: TimedSequenceNote): TimedSequenceNote => {
+    let dotValue = note.duration * 2;
+    note.duration = MML.Sequence.calculateDurationFromExtension(note.duration, dotValue);
+    let dotExtension = note.durationWithExtensions[note.durationWithExtensions.length - 1] * 2;
+    note.durationWithExtensions.push(dotExtension);
+    return note;
   };
 
-  cropLastRests = () => {
-    this.lastRestsWith((rest, sequenceIndex, noteIndex) => {
-      this.sequences[sequenceIndex].splice(noteIndex, 1);
+  addExtension = (note: TimedSequenceNote): TimedSequenceNote => {
+    note.duration = MML.Sequence.calculateDurationFromExtension(note.duration, NEGRA);
+    note.durationWithExtensions.push(NEGRA);
+    return note;
+  };
+
+  editExtension = (note: TimedSequenceNote, extensionIndex: number, newExtension: number): TimedSequenceNote => {
+    if(newExtension % 1 !== 0 ){
+      throw new Error(`Extensions cannot be float numbers`);
+    }
+    note.durationWithExtensions[extensionIndex] = newExtension;
+    return note;
+  };
+
+  removeExtension = (note: TimedSequenceNote, extensionIndex: number): TimedSequenceNote => {
+    note.durationWithExtensions.splice(extensionIndex, 1);
+    note.duration = this.getDurationFromDurationsWithExtensions(note);
+    return note;
+  };
+
+  getDurationFromDurationsWithExtensions = (note: TimedSequenceNote): number => {
+    let duration = note.durationWithExtensions[0];
+    note.durationWithExtensions.slice(1).map(extension => {
+      duration = this.calculateDurationFromExtension(duration, extension);
     });
+    return duration;
+  };
+
+  updateSelectedDuration = (newDuration: number) => {
+    let timedNote: TimedSequenceNote = (this.sequences[this.currentEditingNoteId.sequence][this.currentEditingNoteId.note] as TimedSequenceNote);
+
   };
 
   updateDefaultDuration = (newDuration: number) => {
     this.defaultDuration = newDuration;
 
-    this.lastRestsWith(rest => {
-      if (rest.duration === this.defaultDuration) {
-        rest.duration = this.defaultDuration;
-        rest.durationWithExtensions = [this.defaultDuration];
+    this.sequences.map((sequence) => {
+      for (let i = sequence.length - 1; i >= 0; i--) {
+        let rest = sequence[i];
+        if (rest.type === "note") break;
+        if (rest.type !== "rest") continue;
+        if (rest.duration === this.defaultDuration) {
+          rest.duration = this.defaultDuration;
+          rest.durationWithExtensions = [this.defaultDuration];
+        }
       }
     });
 
@@ -337,13 +377,13 @@ export class HomePage {
     })
   };
 
-  showSelectDefaultDuration = () => {
+  showUpdateDuration = (type: DurationUpdateType) => {
     this.alertCtrl.create({
-      header: 'Set the Default Note Duration',
+      header: `Set the ${type === "default" ? 'Default' : 'Selected'} Note Duration`,
       inputs: Object.keys(this.durations).map(d => {
         return {
           type: 'radio', name: 'duration', value: d, label: d,
-          checked: this.defaultDuration === parseFloat(d)
+          checked: this.defaultDuration === parseInt(d)
         }
       }),
       buttons: [
@@ -356,7 +396,14 @@ export class HomePage {
         }, {
           text: 'Ok',
           handler: (duration: string) => {
-            this.updateDefaultDuration(parseFloat(duration))
+            switch(type){
+              case "default":
+                this.updateDefaultDuration(parseInt(duration));
+                break;
+              case "selected":
+                this.updateSelectedDuration(parseInt(duration));
+                break;
+            }
 
           }
         }

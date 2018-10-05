@@ -244,7 +244,7 @@ export module MML {
     }).join();
   };
 
-  class Sequence {
+  export class Sequence {
 
     tempo = 120;
     octave = BASE_OCTAVE;
@@ -300,7 +300,7 @@ export module MML {
       return (this.octave - BASE_OCTAVE) * SCALE;
     };
 
-    calculateDurationFromExtension = (duration: number, extension: number) => {
+    static calculateDurationFromExtension = (duration: number, extension: number) => {
       return (duration * extension) / (duration + extension);
     };
 
@@ -645,42 +645,6 @@ export module MML {
 
         this.playState.index++;
       }
-    };
-
-    addDot = (note: TimedSequenceNote): TimedSequenceNote => {
-      let dotValue = note.duration * 2;
-      note.duration = this.calculateDurationFromExtension(note.duration, dotValue);
-      let dotExtension = note.durationWithExtensions[note.durationWithExtensions.length - 1] * 2;
-      note.durationWithExtensions.push(dotExtension);
-      return note;
-    };
-
-    addExtension = (note: TimedSequenceNote): TimedSequenceNote => {
-      note.duration = this.calculateDurationFromExtension(note.duration, NEGRA);
-      note.durationWithExtensions.push(NEGRA);
-      return note;
-    };
-
-    editExtension = (note: TimedSequenceNote, extensionIndex: number, newExtension: number): TimedSequenceNote => {
-      if(newExtension % 1 !== 0 ){
-        throw new Error(`Extensions cannot be float numbers`);
-      }
-      note.durationWithExtensions[extensionIndex] = newExtension;
-      return note;
-    };
-
-    removeExtension = (note: TimedSequenceNote, extensionIndex: number): TimedSequenceNote => {
-      note.durationWithExtensions.splice(extensionIndex, 1);
-      note.duration = this.getDurationFromDurationsWithExtensions(note);
-      return note;
-    };
-
-    getDurationFromDurationsWithExtensions = (note: TimedSequenceNote): number => {
-      let duration = note.durationWithExtensions[0];
-      note.durationWithExtensions.slice(1).map(extension => {
-        duration = this.calculateDurationFromExtension(duration, extension);
-      });
-      return duration;
     };
 
     stringifyNoteKey = (note: Note): string => {

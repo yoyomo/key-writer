@@ -2,14 +2,14 @@
 <ion-header home-page>
   <ion-toolbar align="center">
     <ion-buttons slot="start">
-      <ion-button (click)="showSelectDefaultDuration()" >
+      <ion-button (click)="showUpdateDuration()">
         <img width="16px" height="16px" src="../../assets/imgs/{{durations[defaultDuration]}}.svg">
       </ion-button>
       <ion-button (click)="togglePedal()">
-          longo
+        longo
       </ion-button>
       <!--<ion-button (click)="cropLastRests()">-->
-        <!--crop-->
+      <!--crop-->
       <!--</ion-button>-->
       <ion-button (click)="toggleInfiniteLoop()">
         loop
@@ -31,6 +31,14 @@
     </ion-buttons>
   </ion-toolbar>
   <ion-toolbar *ngIf="currentEditingNoteId.note && currentEditingNoteId.sequence">
+    <ion-buttons slot="start">
+      <ion-button (click)="deleteEditingNote()">
+        <ion-icon name="trash"></ion-icon>
+      </ion-button>
+      <ion-button (click)="appendRest()">
+        <ion-icon name="add"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 <ion-content>
