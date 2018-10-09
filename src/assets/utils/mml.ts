@@ -214,11 +214,11 @@ export module MML {
       switch (i) {
         case 1:
           osc.type = 'sawtooth';
-          osc.detune.value = -5;
+          // osc.detune.value = -5;
           break;
         case 2:
-          osc.type = 'triangle';
-          osc.detune.value = 5;
+          osc.type = 'sine';
+          // osc.detune.value = 5;
           break;
       }
 
@@ -300,7 +300,7 @@ export module MML {
       return (this.octave - BASE_OCTAVE) * SCALE;
     };
 
-    static calculateDurationFromExtension = (duration: number, extension: number) => {
+    static calculateDurationFromNewExtension = (duration: number, extension: number) => {
       return (duration * extension) / (duration + extension);
     };
 
@@ -332,14 +332,14 @@ export module MML {
               if (extension === 0) {
                 extension = this.duration;
               }
-              this.duration = this.calculateDurationFromExtension(this.duration, extension);
+              this.duration = Sequence.calculateDurationFromNewExtension(this.duration, extension);
               this.durationWithExtensions.push(extension);
             }
             break;
           case '.':
             do {
               let extension = this.durationWithExtensions[this.durationWithExtensions.length - 1] * 2;
-              this.duration = this.calculateDurationFromExtension(this.duration, extension);
+              this.duration = Sequence.calculateDurationFromNewExtension(this.duration, extension);
               this.durationWithExtensions.push(extension);
             } while (this.isNextValid(/\./));
             break;

@@ -24,6 +24,7 @@ export class HomePage {
   bpm: number = 120;
   defaultDuration: number = 4;
   pedal = false;
+  infiniteLoop = true;
   isPlaying = false;
 
   playingOscillators: { [k: number]: OscillatorNode[] } = {};
@@ -192,19 +193,19 @@ export class HomePage {
     this.currentEditingNoteId = {sequence: null, note: null};
     let holdNoteTimeout = () => {
       setTimeout(() => {
-            this.mouseHoldTimer.time++;
-            if (this.mouseHoldTimer.time < this.mouseHoldTimer.limit) {
-              holdNoteTimeout();
-            } else if(!this.mouseHoldTimer.cancel){
-              this.toggleEditNote(noteId);
-            }
-          },100 )
+        this.mouseHoldTimer.time++;
+        if (this.mouseHoldTimer.time < this.mouseHoldTimer.limit) {
+          holdNoteTimeout();
+        } else if (!this.mouseHoldTimer.cancel) {
+          this.toggleEditNote(noteId);
+        }
+      }, 100)
     };
     holdNoteTimeout();
   };
 
   toggleNoteOfSegment = (noteId: SequenceNoteId) => {
-    if(this.mouseHoldTimer.time >= this.mouseHoldTimer.limit) return;
+    if (this.mouseHoldTimer.time >= this.mouseHoldTimer.limit) return;
     this.mouseHoldTimer.cancel = true;
     let note = this.sequences[noteId.sequence][noteId.note];
     switch (note.type) {
@@ -230,16 +231,18 @@ export class HomePage {
   };
 
   deleteEditingNote = () => {
-    this.sequences[this.currentEditingNoteId.sequence].splice(this.currentEditingNoteId.note,1);
+    this.sequences[this.currentEditingNoteId.sequence].splice(this.currentEditingNoteId.note, 1);
     this.currentEditingNoteId = {sequence: null, note: null};
   };
 
   appendRest = () => {
-    this.sequences[this.currentEditingNoteId.sequence].splice(++this.currentEditingNoteId.note,0,
+    this.sequences[this.currentEditingNoteId.sequence].splice(++this.currentEditingNoteId.note, 0,
         {type: "rest", duration: this.defaultDuration, durationWithExtensions: [this.defaultDuration]});
   };
 
   toggleInfiniteLoop = () => {
+    this.infiniteLoop = !this.infiniteLoop;
+
     this.sequences.map(sequence => {
       let infiniteLoopFound = false;
       for (let i = 0; i < sequence.length; i++) {
@@ -250,7 +253,7 @@ export class HomePage {
           break;
         }
       }
-      if (!infiniteLoopFound) {
+      if (!infiniteLoopFound && this.infiniteLoop) {
         sequence.unshift({type: "infinite-loop"});
       }
     });
@@ -301,45 +304,39 @@ export class HomePage {
     }).then(bpmPopup => bpmPopup.present());
   };
 
-  addDot = (note: TimedSequenceNote): TimedSequenceNote => {
-    let dotValue = note.duration * 2;
-    note.duration = MML.Sequence.calculateDurationFromExtension(note.duration, dotValue);
-    let dotExtension = note.durationWithExtensions[note.durationWithExtensions.length - 1] * 2;
-    note.durationWithExtensions.push(dotExtension);
-    return note;
-  };
-
-  addExtension = (note: TimedSequenceNote): TimedSequenceNote => {
-    note.duration = MML.Sequence.calculateDurationFromExtension(note.duration, NEGRA);
-    note.durationWithExtensions.push(NEGRA);
-    return note;
-  };
-
-  editExtension = (note: TimedSequenceNote, extensionIndex: number, newExtension: number): TimedSequenceNote => {
-    if(newExtension % 1 !== 0 ){
-      throw new Error(`Extensions cannot be float numbers`);
-    }
-    note.durationWithExtensions[extensionIndex] = newExtension;
-    return note;
-  };
-
-  removeExtension = (note: TimedSequenceNote, extensionIndex: number): TimedSequenceNote => {
-    note.durationWithExtensions.splice(extensionIndex, 1);
-    note.duration = this.getDurationFromDurationsWithExtensions(note);
-    return note;
-  };
+  // addDot = (note: TimedSequenceNote): TimedSequenceNote => {
+  //   let dotValue = note.duration * 2;
+  //   note.duration = MML.Sequence.calculateDurationFromNewExtension(note.duration, dotValue);
+  //   let dotExtension = note.durationWithExtensions[note.durationWithExtensions.length - 1] * 2;
+  //   note.durationWithExtensions.push(dotExtension);
+  //   return note;
+  // };
+  //
 
   getDurationFromDurationsWithExtensions = (note: TimedSequenceNote): number => {
     let duration = note.durationWithExtensions[0];
     note.durationWithExtensions.slice(1).map(extension => {
-      duration = this.calculateDurationFromExtension(duration, extension);
+      duration = MML.Sequence.calculateDurationFromNewExtension(duration, extension);
     });
     return duration;
   };
 
-  updateSelectedDuration = (newDuration: number) => {
-    let timedNote: TimedSequenceNote = (this.sequences[this.currentEditingNoteId.sequence][this.currentEditingNoteId.note] as TimedSequenceNote);
+  updateExtension = (newDuration: number, extensionId: number) => {
+    let timedNote = this.getSelectedNote();
+    timedNote.durationWithExtensions[extensionId] = newDuration;
+    timedNote.duration = this.getDurationFromDurationsWithExtensions(timedNote);
+  };
 
+  addExtension = (newDuration: number) => {
+    let timedNote = this.getSelectedNote();
+    timedNote.durationWithExtensions.push(newDuration);
+    timedNote.duration = this.getDurationFromDurationsWithExtensions(timedNote);
+  };
+
+  removeExtension = (extensionIndex: number) => {
+    let timedNote = this.getSelectedNote();
+    timedNote.durationWithExtensions.splice(extensionIndex, 1);
+    timedNote.duration = this.getDurationFromDurationsWithExtensions(timedNote);
   };
 
   updateDefaultDuration = (newDuration: number) => {
@@ -369,17 +366,28 @@ export class HomePage {
           break;
         }
       }
-      if(!lengthFound){
-        sequence.unshift({type: "default-duration",
+      if (!lengthFound) {
+        sequence.unshift({
+          type: "default-duration",
           duration: this.defaultDuration,
-          durationWithExtensions: [this.defaultDuration]});
+          durationWithExtensions: [this.defaultDuration]
+        });
       }
     })
   };
 
-  showUpdateDuration = (type: DurationUpdateType) => {
+  getSelectedNote = (): TimedSequenceNote => {
+    let selectedNote = this.sequences[this.currentEditingNoteId.sequence][this.currentEditingNoteId.note];
+    switch (selectedNote.type) {
+      case "rest":
+      case "note":
+        return selectedNote;
+    }
+  };
+
+  showUpdateDefaultDuration = () => {
     this.alertCtrl.create({
-      header: `Set the ${type === "default" ? 'Default' : 'Selected'} Note Duration`,
+      header: "Set the Default Note Duration",
       inputs: Object.keys(this.durations).map(d => {
         return {
           type: 'radio', name: 'duration', value: d, label: d,
@@ -396,19 +404,50 @@ export class HomePage {
         }, {
           text: 'Ok',
           handler: (duration: string) => {
-            switch(type){
-              case "default":
-                this.updateDefaultDuration(parseInt(duration));
-                break;
-              case "selected":
-                this.updateSelectedDuration(parseInt(duration));
-                break;
-            }
-
+            this.updateDefaultDuration(parseInt(duration));
           }
         }
       ]
     }).then(durationPopup => durationPopup.present());
+  };
+
+  showUpdateExtensions = (extensionId: number) => {
+    this.alertCtrl.create({
+      header: `Add Note Extension`,
+      inputs: [{type: 'radio', name: 'extension', value: ' ', label: ' ', checked: extensionId < 0 },
+        {type: 'radio', name: 'extension', value: '.', label: '.'}]
+          .concat(Object.keys(this.durations).map(d => {
+            return {
+              type: 'radio', name: 'extension', value: d, label: d,
+              checked: extensionId >= 0 && this.getSelectedNote().durationWithExtensions[extensionId] === parseInt(d)
+            }
+          })),
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+          }
+        }, {
+          text: 'Ok',
+          handler: (duration: string) => {
+            switch (duration) {
+              case " ":
+                if (extensionId >= 0) this.removeExtension(extensionId);
+                break;
+              case ".":
+                this.addDot();
+                break;
+              default:
+                if (extensionId >= 0) this.updateExtension(parseInt(duration), extensionId);
+                else this.addExtension(parseInt(duration));
+                break;
+            }
+          }
+        }
+      ]
+    }).then(extensionPopup => extensionPopup.present());
   };
 
   restart = () => {

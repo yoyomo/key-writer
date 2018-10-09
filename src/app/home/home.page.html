@@ -2,17 +2,17 @@
 <ion-header home-page>
   <ion-toolbar align="center">
     <ion-buttons slot="start">
-      <ion-button (click)="showUpdateDuration()">
+      <ion-button (click)="showUpdateDefaultDuration()">
         <img width="16px" height="16px" src="../../assets/imgs/{{durations[defaultDuration]}}.svg">
       </ion-button>
-      <ion-button (click)="togglePedal()">
-        longo
+      <ion-button (click)="togglePedal()" [color]="pedal ? 'primary' : ''">
+        <ion-icon name="recording"></ion-icon>
       </ion-button>
       <!--<ion-button (click)="cropLastRests()">-->
-      <!--crop-->
+      <!--<ion-icon name="crop"></ion-icon>-->
       <!--</ion-button>-->
-      <ion-button (click)="toggleInfiniteLoop()">
-        loop
+      <ion-button (click)="toggleInfiniteLoop()" [color]="infiniteLoop ? 'primary' : ''">
+        <ion-icon name="infinite"></ion-icon>
       </ion-button>
     </ion-buttons>
     <ion-buttons slot="end">
@@ -37,6 +37,13 @@
       </ion-button>
       <ion-button (click)="appendRest()">
         <ion-icon name="add"></ion-icon>
+      </ion-button>
+      <ion-button *ngFor="let ext of getSelectedNote().durationWithExtensions; let extensionId = index"
+                  (click)="showUpdateExtensions(extensionId)">
+        <img width="16px" height="16px" src="../../assets/imgs/{{durations[ext]}}.svg">
+      </ion-button>
+      <ion-button (click)="showUpdateExtensions(-1)">
+        <ion-icon name="arrow-dropright"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
