@@ -304,14 +304,8 @@ export class HomePage {
     }).then(bpmPopup => bpmPopup.present());
   };
 
-  // addDot = (note: TimedSequenceNote): TimedSequenceNote => {
-  //   let dotValue = note.duration * 2;
-  //   note.duration = MML.Sequence.calculateDurationFromNewExtension(note.duration, dotValue);
-  //   let dotExtension = note.durationWithExtensions[note.durationWithExtensions.length - 1] * 2;
-  //   note.durationWithExtensions.push(dotExtension);
-  //   return note;
-  // };
-  //
+
+
 
   getDurationFromDurationsWithExtensions = (note: TimedSequenceNote): number => {
     let duration = note.durationWithExtensions[0];
@@ -336,6 +330,13 @@ export class HomePage {
   removeExtension = (extensionIndex: number) => {
     let timedNote = this.getSelectedNote();
     timedNote.durationWithExtensions.splice(extensionIndex, 1);
+    timedNote.duration = this.getDurationFromDurationsWithExtensions(timedNote);
+  };
+
+  addDot = () => {
+    let timedNote = this.getSelectedNote();
+    let dottedDuration = timedNote.durationWithExtensions.slice(-1)[0] * 2;
+    timedNote.durationWithExtensions.push(dottedDuration);
     timedNote.duration = this.getDurationFromDurationsWithExtensions(timedNote);
   };
 

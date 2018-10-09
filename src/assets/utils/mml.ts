@@ -213,7 +213,7 @@ export module MML {
 
       switch (i) {
         case 1:
-          osc.type = 'sawtooth';
+          osc.type = 'sine';
           // osc.detune.value = -5;
           break;
         case 2:
@@ -376,6 +376,7 @@ export module MML {
     nextNote = () => {
       if (this.normalDuration > 0) {
         this.duration = this.normalDuration;
+        this.durationWithExtensions = [this.duration];
         this.normalDuration = -1;
       }
     };

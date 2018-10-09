@@ -40,7 +40,11 @@
       </ion-button>
       <ion-button *ngFor="let ext of getSelectedNote().durationWithExtensions; let extensionId = index"
                   (click)="showUpdateExtensions(extensionId)">
-        <img width="16px" height="16px" src="../../assets/imgs/{{durations[ext]}}.svg">
+        <ng-container *ngIf="getSelectedNote().durationWithExtensions[extensionId-1] === ext/2; then isDot else isNote"></ng-container>
+        <ng-template #isDot>.</ng-template>
+        <ng-template #isNote>
+          <img width="16px" height="16px" src="../../assets/imgs/{{durations[ext]}}.svg">
+        </ng-template>
       </ion-button>
       <ion-button (click)="showUpdateExtensions(-1)">
         <ion-icon name="arrow-dropright"></ion-icon>
