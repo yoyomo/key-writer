@@ -418,23 +418,6 @@ export class HomePage {
     }
 
     timedNote.duration = this.getDurationFromDurationsWithExtensions(timedNote);
-
-    if (timedNote.duration > previousDuration) {
-      //increasing
-    } else if (timedNote.duration < previousDuration) {
-      //decreasing
-      let lastNoteOfSequence = this.sequences[this.currentEditingNoteId.sequence].slice(-1)[0];
-      switch (lastNoteOfSequence.type) {
-        case "rest":
-          if (lastNoteOfSequence.duration < this.defaultDuration) {
-
-
-          }
-          break;
-        case "note":
-          break;
-      }
-    }
   };
 
   showUpdateExtensions = (extensionId: number) => {
