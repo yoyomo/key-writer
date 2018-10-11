@@ -401,7 +401,6 @@ export class HomePage {
 
   updateExtensions = (newExtension: string, extensionId: number) => {
     let timedNote = this.getSelectedNote();
-    let previousDuration = timedNote.duration;
 
     switch (newExtension) {
       case " ":
