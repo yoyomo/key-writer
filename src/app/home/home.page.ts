@@ -73,7 +73,7 @@ export class HomePage {
       return {...note, key: note.key.replace('+', '#').toUpperCase()}
     });
     this.whiteBottomKeys = this.notes.filter(n => n.key.slice(-1) !== '#');
-    this.readTextFile('../../assets/mml-files/long.mml'); // read from database
+    this.readTextFile('../../assets/mml-files/compressed.mml'); // read from database
   }
 
   requestAnimationFrame = window['requestAnimationFrame'] ||
@@ -145,7 +145,7 @@ export class HomePage {
             type: "note",
             index: noteIndex,
             duration: noteDuration,
-            durationWithExtensions: [noteDuration]
+            extensions: [noteDuration]
           }, this.bpm, 0);
       this.playingOscillators[noteIndex].map((osc) => {
         osc.onended = () => this.stopOscillators(noteIndex);
@@ -221,7 +221,7 @@ export class HomePage {
           type: "note",
           index: noteId.sequence,
           duration: note.duration,
-          durationWithExtensions: note.durationWithExtensions
+          extensions: note.extensions
         };
         MML.playNote(note, this.bpm, 0);
         break;
@@ -229,7 +229,7 @@ export class HomePage {
         note = {
           type: "rest",
           duration: note.duration,
-          durationWithExtensions: note.durationWithExtensions
+          extensions: note.extensions
         };
         break;
     }
@@ -244,7 +244,7 @@ export class HomePage {
 
   appendRest = () => {
     this.sequences[this.currentEditingNoteId.sequence].splice(++this.currentEditingNoteId.note, 0,
-        {type: "rest", duration: this.defaultDuration, durationWithExtensions: [this.defaultDuration]});
+        {type: "rest", duration: this.defaultDuration, extensions: [this.defaultDuration]});
   };
 
   toggleInfiniteLoop = () => {
@@ -318,15 +318,6 @@ export class HomePage {
     }).then(bpmPopup => bpmPopup.present());
   };
 
-
-  getDurationFromDurationsWithExtensions = (note: TimedSequenceNote): number => {
-    let duration = note.durationWithExtensions[0];
-    note.durationWithExtensions.slice(1).map(extension => {
-      duration = MML.Sequence.calculateDurationFromNewExtension(duration, extension);
-    });
-    return duration;
-  };
-
   updateDefaultDuration = (newDuration: number) => {
     this.defaultDuration = newDuration;
 
@@ -337,7 +328,7 @@ export class HomePage {
         if (rest.type !== "rest") continue;
         if (rest.duration === this.defaultDuration) {
           rest.duration = this.defaultDuration;
-          rest.durationWithExtensions = [this.defaultDuration];
+          rest.extensions = [this.defaultDuration];
         }
       }
     });
@@ -349,7 +340,7 @@ export class HomePage {
         let seqNote = sequence[i];
         if (seqNote.type === "default-duration") {
           seqNote.duration = this.defaultDuration;
-          seqNote.durationWithExtensions = [this.defaultDuration];
+          seqNote.extensions = [this.defaultDuration];
           lengthFound = true;
           break;
         }
@@ -358,7 +349,7 @@ export class HomePage {
         sequence.unshift({
           type: "default-duration",
           duration: this.defaultDuration,
-          durationWithExtensions: [this.defaultDuration]
+          extensions: [this.defaultDuration]
         });
       }
     })
@@ -399,24 +390,32 @@ export class HomePage {
     }).then(durationPopup => durationPopup.present());
   };
 
+  getDurationFromExtensions = (note: TimedSequenceNote): number => {
+    let duration = note.extensions[0];
+    note.extensions.slice(1).map(extension => {
+      duration = MML.Sequence.calculateDurationFromNewExtension(duration, extension);
+    });
+    return duration;
+  };
+
   updateExtensions = (newExtension: string, extensionId: number) => {
     let timedNote = this.getSelectedNote();
 
     switch (newExtension) {
       case " ":
-        if (extensionId >= 0) timedNote.durationWithExtensions.splice(extensionId, 1);
+        if (extensionId >= 0) timedNote.extensions.splice(extensionId, 1);
         break;
       case ".":
-        let dottedDuration = timedNote.durationWithExtensions.slice(-1)[0] * 2;
-        timedNote.durationWithExtensions.push(dottedDuration);
+        let dottedDuration = timedNote.extensions.slice(-1)[0] * 2;
+        timedNote.extensions.push(dottedDuration);
         break;
       default:
-        if (extensionId >= 0) timedNote.durationWithExtensions[extensionId] = parseInt(newExtension);
-        else timedNote.durationWithExtensions.push(parseInt(newExtension));
+        if (extensionId >= 0) timedNote.extensions[extensionId] = parseInt(newExtension);
+        else timedNote.extensions.push(parseInt(newExtension));
         break;
     }
 
-    timedNote.duration = this.getDurationFromDurationsWithExtensions(timedNote);
+    timedNote.duration = this.getDurationFromExtensions(timedNote);
   };
 
   showUpdateExtensions = (extensionId: number) => {
@@ -427,7 +426,7 @@ export class HomePage {
           .concat(Object.keys(this.durations).map(d => {
             return {
               type: 'radio', name: 'extension', value: d, label: d,
-              checked: extensionId >= 0 && this.getSelectedNote().durationWithExtensions[extensionId] === parseInt(d)
+              checked: extensionId >= 0 && this.getSelectedNote().extensions[extensionId] === parseInt(d)
             }
           })),
       buttons: [
