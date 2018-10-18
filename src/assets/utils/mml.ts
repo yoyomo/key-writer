@@ -12,7 +12,6 @@ export const BASE_OCTAVE = 4;
 export interface Note {
   type: 'note',
   index: number,
-  duration: number,
   extensions: number[],
 }
 
@@ -22,13 +21,11 @@ export interface StartChord {
 
 export interface EndChord {
   type: 'end-chord',
-  duration: number,
   extensions: number[],
 }
 
 export interface Rest {
   type: 'rest',
-  duration: number,
   extensions: number[],
 }
 
@@ -61,7 +58,6 @@ export interface Octave {
 
 export interface DefaultDuration {
   type: 'default-duration'
-  duration: number
   extensions: number[]
 }
 
@@ -93,7 +89,6 @@ export interface Header {
   tempo: number
   defaultDuration: number
   infiniteLoop: boolean
-  duration: number
   extensions: number[]
 }
 
@@ -178,11 +173,9 @@ export module MML {
         tempo: headerSequence.tempo,
         defaultDuration: headerSequence.defaultDuration,
         infiniteLoop: headerSequence.hasInfiniteLoop,
-        duration: headerSequence.duration,
         extensions: headerSequence.extensions,
       }
     }
-    debugger;
   };
 
   export const parseMML = () => {
@@ -226,8 +219,17 @@ export module MML {
     playInterval = setInterval(playMML, lookahead);
   };
 
+  export const getDurationFromExtensions = (note: TimedSequenceNote): number => {
+    let duration = note.extensions[0];
+    note.extensions.slice(1).map(extension => {
+      duration = MML.Sequence.calculateDurationFromNewExtension(duration, extension);
+    });
+    return duration;
+  };
+
   // 1bpm = 1s -> 1beat= 1/60s, 1beat = 4 defaultDuration
-  export const convertDurationToSeconds = (duration: number, tempo: number) => {
+  export const convertDurationToSeconds = (note: TimedSequenceNote, tempo: number) => {
+    let duration = getDurationFromExtensions(note);
     if (duration === 0 || tempo === 0) {
       return Number.MAX_VALUE;
     }
@@ -257,7 +259,7 @@ export module MML {
 
       osc.connect(gain);
       osc.start(scheduledStartTime);
-      osc.stop(scheduledStartTime + convertDurationToSeconds(note.duration, tempo));
+      osc.stop(scheduledStartTime + convertDurationToSeconds(note, tempo));
 
       oscillators.push(osc);
     }
@@ -275,8 +277,7 @@ export module MML {
 
     tempo = 120;
     octave = BASE_OCTAVE;
-    duration = QUARTER_NOTE;
-    extensions = [this.duration];
+    extensions = [QUARTER_NOTE];
     defaultDuration = QUARTER_NOTE;
 
     chordNoteIndexes = [];
@@ -333,60 +334,49 @@ export module MML {
       return (duration * extension) / (duration + extension);
     };
 
+    readNextLength = () => {
+      let length = 0;
+      do{
+        if(this.isThisValid(/\d/)){
+          length = length * 10 + parseInt(this.mml[this.mmlIndex]);
+        }
+      } while (this.isNextValid(/\d/));
+      return length === 0 ? this.defaultDuration : length;
+    };
+
     getDuration = () => {
-      this.expect(/[\dl^.]/);
-      this.extensions = [this.duration];
+      this.expect(/[\dl^.~]/);
+      this.extensions = [this.defaultDuration];
+      let prevDefaultDuration = this.defaultDuration;
 
-      let updateDefaultDuration = false;
-
-      while (this.isThisValid(/[\dl^.]/)) {
+      while (this.isThisValid(/[\dl^.~]/)) {
         switch (this.mml[this.mmlIndex]) {
           case 'l':
-            updateDefaultDuration = true;
-            let length = 0;
-            while (this.isNextValid(/\d/)) {
-              length = length * 10 + parseInt(this.mml[this.mmlIndex]);
-              this.duration = length;
-            }
-            this.defaultDuration = this.duration;
-            this.extensions = [this.duration];
+            this.defaultDuration = this.readNextLength();
+            this.extensions = [this.defaultDuration];
             break;
           case '^':
-            while (this.isThisValid(/\^/)) {
-              let extension = 0;
-              while (this.isNextValid(/\d/)) {
-                extension = extension * 10 + parseInt(this.mml[this.mmlIndex]);
-              }
-              if (extension === 0) {
-                extension = this.duration;
-              }
-              this.duration = Sequence.calculateDurationFromNewExtension(this.duration, extension);
-              this.extensions.push(extension);
-            }
+              this.extensions.push(this.readNextLength());
             break;
           case '.':
             do {
               let extension = this.extensions[this.extensions.length - 1] * 2;
-              this.duration = Sequence.calculateDurationFromNewExtension(this.duration, extension);
               this.extensions.push(extension);
             } while (this.isNextValid(/\./));
             break;
+          case '~':
+            this.extensions.push(...new Array(this.readNextLength()).fill(this.extensions[0]));
+            break;
           default: {
-            let length = 0;
-            do {
-              length = length * 10 + parseInt(this.mml[this.mmlIndex]);
-              this.duration = length;
-            } while (this.isNextValid(/\d/));
-            this.extensions = [this.duration];
+            this.extensions = [this.readNextLength()];
             break;
           }
         }
       }
 
-      if (updateDefaultDuration) {
+      if (prevDefaultDuration !== this.defaultDuration) {
         this.notesInQueue.push({
           type: "default-duration",
-          duration: this.duration,
           extensions: this.extensions
         });
       }
@@ -397,15 +387,13 @@ export module MML {
       this.notesInQueue.push({
         type: 'note',
         index: noteIndex,
-        duration: this.duration,
         extensions: this.extensions,
       });
     };
 
     nextNote = () => {
       if(!this.isHeader){
-        this.duration = this.defaultDuration;
-        this.extensions = [this.duration];
+        this.extensions = [this.defaultDuration];
       }
     };
 
@@ -488,7 +476,6 @@ export module MML {
       }
       this.notesInQueue.push({
         type: 'rest',
-        duration: this.duration,
         extensions: this.extensions,
       });
 
@@ -514,7 +501,6 @@ export module MML {
       this.chordNoteIndexes = [];
       this.notesInQueue.push({
         type: 'end-chord',
-        duration: this.duration,
         extensions: this.extensions,
       });
       this.nextNote();
@@ -657,15 +643,15 @@ export module MML {
             break;
           case 'end-chord':
             this.playState.chord = false;
-            this.playState.nextNoteTime += convertDurationToSeconds(note.duration, this.playState.tempo);
+            this.playState.nextNoteTime += convertDurationToSeconds(note, this.playState.tempo);
             break;
           case 'rest':
-            this.playState.nextNoteTime += convertDurationToSeconds(note.duration, this.playState.tempo);
+            this.playState.nextNoteTime += convertDurationToSeconds(note, this.playState.tempo);
             break;
           case 'note':
             playNote(note, this.playState.tempo, relativeStartTime + this.playState.nextNoteTime);
             if (this.playState.chord) break;
-            this.playState.nextNoteTime += convertDurationToSeconds(note.duration, this.playState.tempo);
+            this.playState.nextNoteTime += convertDurationToSeconds(note, this.playState.tempo);
             break;
         }
 
@@ -681,16 +667,32 @@ export module MML {
       return notes[note.index].key;
     };
 
-    stringifyNoteDuration = (note: TimedSequenceNote): string => {
+    stringifyNoteDuration = (note: TimedSequenceNote, defaultDuration = QUARTER_NOTE): string => {
       let mmlDuration = "";
       let prevExtension = note.extensions[0];
-      mmlDuration += prevExtension === QUARTER_NOTE ? "" : prevExtension;
+      let repetition = 0;
+
+      mmlDuration += prevExtension === defaultDuration ? "" : prevExtension;
       note.extensions.slice(1).map((extension) => {
-        if (prevExtension === (extension / 2)) {
-          mmlDuration += '.';
-        } else {
-          mmlDuration += '^' + extension;
+        if (prevExtension === extension) {
+          if(!repetition){
+            mmlDuration += '~';
+          }
+          repetition++;
         }
+        else {
+          if(repetition){
+            mmlDuration += repetition;
+            repetition = 0;
+          }
+
+          if (prevExtension === (extension / 2)) {
+            mmlDuration += '.';
+          } else {
+            mmlDuration += '^' + extension;
+          }
+        }
+
         prevExtension = extension;
       });
       return mmlDuration;
@@ -698,6 +700,7 @@ export module MML {
 
     writeToMML = (): string => {
       let mmlText = "";
+      let defaultDuration = QUARTER_NOTE;
       this.notesInQueue.map(note => {
         switch (note.type) {
           case "infinite-loop":
@@ -711,6 +714,7 @@ export module MML {
             break;
           case "default-duration":
             mmlText += "l" + this.stringifyNoteDuration(note);
+            defaultDuration = getDurationFromExtensions(note);
             break;
           case "start-loop":
             mmlText += "/:";
@@ -725,13 +729,13 @@ export module MML {
             mmlText += "[";
             break;
           case "end-chord":
-            mmlText += "]" + this.stringifyNoteDuration(note);
+            mmlText += "]" + this.stringifyNoteDuration(note,defaultDuration);
             break;
           case "rest":
-            mmlText += "r" + this.stringifyNoteDuration(note);
+            mmlText += "r" + this.stringifyNoteDuration(note,defaultDuration);
             break;
           case "note":
-            mmlText += this.stringifyNoteKey(note) + this.stringifyNoteDuration(note);
+            mmlText += this.stringifyNoteKey(note) + this.stringifyNoteDuration(note, defaultDuration);
             break;
         }
       });

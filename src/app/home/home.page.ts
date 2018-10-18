@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MML, NotesInterface, SequenceNote, TimedSequenceNote} from '../../assets/utils/mml';
+import {MML, NotesInterface, QUARTER_NOTE, SequenceNote, TimedSequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
@@ -117,6 +117,10 @@ export class HomePage {
     this.scrollLeftFrameRequest = this.requestAnimationFrame(() => this.sheet.scrollLeft = e.target.scrollLeft);
   };
 
+  getSequenceNoteHeight = (sequenceNote: TimedSequenceNote) => {
+    return this.NOTE_SEGMENT_HEIGHT * (QUARTER_NOTE / MML.getDurationFromExtensions(sequenceNote));
+  };
+
   expect = (expected, actual) => {
     if (actual !== expected) {
       console.error(`Expected note length to be: ${expected}, but got: ${actual}`);
@@ -125,7 +129,7 @@ export class HomePage {
 
   readNotes = () => {
     this.sequences = MML.getNotesInQueue();
-    this.expect(88, this.sequences.length);
+    this.expect(this.notes.length, this.sequences.length);
   };
 
   stopOscillators = (noteIndex) => {
@@ -144,7 +148,6 @@ export class HomePage {
           MML.playNote({
             type: "note",
             index: noteIndex,
-            duration: noteDuration,
             extensions: [noteDuration]
           }, this.bpm, 0);
       this.playingOscillators[noteIndex].map((osc) => {
@@ -220,7 +223,6 @@ export class HomePage {
         note = {
           type: "note",
           index: noteId.sequence,
-          duration: note.duration,
           extensions: note.extensions
         };
         MML.playNote(note, this.bpm, 0);
@@ -228,7 +230,6 @@ export class HomePage {
       case "note":
         note = {
           type: "rest",
-          duration: note.duration,
           extensions: note.extensions
         };
         break;
@@ -244,7 +245,7 @@ export class HomePage {
 
   appendRest = () => {
     this.sequences[this.currentEditingNoteId.sequence].splice(++this.currentEditingNoteId.note, 0,
-        {type: "rest", duration: this.defaultDuration, extensions: [this.defaultDuration]});
+        {type: "rest", extensions: [this.defaultDuration]});
   };
 
   toggleInfiniteLoop = () => {
@@ -326,8 +327,7 @@ export class HomePage {
         let rest = sequence[i];
         if (rest.type === "note") break;
         if (rest.type !== "rest") continue;
-        if (rest.duration === this.defaultDuration) {
-          rest.duration = this.defaultDuration;
+        if (MML.getDurationFromExtensions(rest) === this.defaultDuration) {
           rest.extensions = [this.defaultDuration];
         }
       }
@@ -339,7 +339,6 @@ export class HomePage {
       for (let i = 0; i < sequence.length; i++) {
         let seqNote = sequence[i];
         if (seqNote.type === "default-duration") {
-          seqNote.duration = this.defaultDuration;
           seqNote.extensions = [this.defaultDuration];
           lengthFound = true;
           break;
@@ -348,7 +347,6 @@ export class HomePage {
       if (!lengthFound) {
         sequence.unshift({
           type: "default-duration",
-          duration: this.defaultDuration,
           extensions: [this.defaultDuration]
         });
       }
@@ -390,14 +388,6 @@ export class HomePage {
     }).then(durationPopup => durationPopup.present());
   };
 
-  getDurationFromExtensions = (note: TimedSequenceNote): number => {
-    let duration = note.extensions[0];
-    note.extensions.slice(1).map(extension => {
-      duration = MML.Sequence.calculateDurationFromNewExtension(duration, extension);
-    });
-    return duration;
-  };
-
   updateExtensions = (newExtension: string, extensionId: number) => {
     let timedNote = this.getSelectedNote();
 
@@ -414,8 +404,6 @@ export class HomePage {
         else timedNote.extensions.push(parseInt(newExtension));
         break;
     }
-
-    timedNote.duration = this.getDurationFromExtensions(timedNote);
   };
 
   showUpdateExtensions = (extensionId: number) => {

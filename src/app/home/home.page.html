@@ -60,12 +60,12 @@
         <div *ngFor="let sequence of sequences; let sequenceIndex = index"
              [ngClass]="'sequence ' +
         (notes[sequenceIndex].key.slice(-1) === '#' ? 'w-black' : 'w-'+notes[sequenceIndex].key) + (sequenceIndex !== notes.length-1 ? ' br' : '')">
-          <div *ngFor="let note of sequence; let sequenceNoteIndex = index"
-               [hidden]="(note.type !== 'note' && note.type !== 'rest')"
-               [ngClass]="'note-of-segment ' + (note.type === 'rest' ? 'off' : 'on') +
+          <div *ngFor="let sequenceNote of sequence; let sequenceNoteIndex = index"
+               [hidden]="(sequenceNote.type !== 'note' && sequenceNote.type !== 'rest')"
+               [ngClass]="'note-of-segment ' + (sequenceNote.type === 'rest' ? 'off' : 'on') +
                 (currentEditingNoteId.sequence === sequenceIndex
                 && currentEditingNoteId.note === sequenceNoteIndex ? ' editing' : '')"
-               [style.height.px]="NOTE_SEGMENT_HEIGHT * (4 / note.duration)"
+               [style.height.px]="getSequenceNoteHeight(sequenceNote)"
                (mousedown)="holdNote({sequence: sequenceIndex, note: sequenceNoteIndex})"
                (mouseup)="toggleNoteOfSegment({sequence: sequenceIndex, note: sequenceNoteIndex})">
           </div>
