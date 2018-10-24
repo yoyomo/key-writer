@@ -85,13 +85,6 @@ export interface NotesInterface {
   frequency: number,
 }
 
-export interface Header {
-  tempo: number
-  defaultDuration: number
-  infiniteLoop: boolean
-  extensions: number[]
-}
-
 export module MML {
 
   let notes: NotesInterface[];
@@ -108,7 +101,7 @@ export module MML {
 
   let playInterval: Timer;
 
-  let header: Header;
+  let header: Sequence;
 
   export const initialize = () => {
     const AudioContext = window['AudioContext'] // Default
@@ -166,15 +159,8 @@ export module MML {
 
   export const parseHeader = (headerLine: string) => {
     if (headerLine.indexOf('%') !== -1) {
-      let headerSequence = new Sequence(headerLine);
-      headerSequence.isHeader = true;
-      headerSequence.parseMML();
-      header = {
-        tempo: headerSequence.tempo,
-        defaultDuration: headerSequence.defaultDuration,
-        infiniteLoop: headerSequence.hasInfiniteLoop,
-        extensions: headerSequence.extensions,
-      }
+      header = new Sequence(headerLine);
+      header.parseMML();
     }
   };
 
@@ -289,11 +275,18 @@ export module MML {
 
     notesInQueue: SequenceNote[] = [];
     playState: PlayState;
-    hasInfiniteLoop = false;
-    isHeader = false;
 
     constructor(mml: string) {
       this.mml = mml;
+      if (header) {
+        this.tempo = header.tempo;
+        this.notesInQueue.push({type: "tempo", tempo: this.tempo});
+        this.defaultDuration = header.defaultDuration;
+        this.extensions = header.extensions;
+        if(header.notesInQueue.includes({type: "infinite-loop"})){
+          this.notesInQueue.push({type: "infinite-loop"});
+        }
+      }
       this.resetPlayState();
     }
 
@@ -336,8 +329,8 @@ export module MML {
 
     readNextLength = () => {
       let length = 0;
-      do{
-        if(this.isThisValid(/\d/)){
+      do {
+        if (this.isThisValid(/\d/)) {
           length = length * 10 + parseInt(this.mml[this.mmlIndex]);
         }
       } while (this.isNextValid(/\d/));
@@ -356,7 +349,7 @@ export module MML {
             this.extensions = [this.defaultDuration];
             break;
           case '^':
-              this.extensions.push(this.readNextLength());
+            this.extensions.push(this.readNextLength());
             break;
           case '.':
             do {
@@ -392,9 +385,7 @@ export module MML {
     };
 
     nextNote = () => {
-      if(!this.isHeader){
-        this.extensions = [this.defaultDuration];
-      }
+      this.extensions = [this.defaultDuration];
     };
 
     getNote = () => {
@@ -424,7 +415,6 @@ export module MML {
         return;
       }
       this.saveNote(noteIndex);
-      this.nextNote();
     };
 
     getOctave = () => {
@@ -463,8 +453,8 @@ export module MML {
       let newTempo = 0;
       while (this.isNextValid(/\d/)) {
         newTempo = newTempo * 10 + parseInt(this.mml[this.mmlIndex]);
-        this.tempo = newTempo;
       }
+      this.tempo = newTempo;
       this.notesInQueue.push({type: "tempo", tempo: this.tempo});
     };
 
@@ -479,7 +469,6 @@ export module MML {
         extensions: this.extensions,
       });
 
-      this.nextNote();
     };
 
     getChord = () => {
@@ -503,14 +492,12 @@ export module MML {
         type: 'end-chord',
         extensions: this.extensions,
       });
-      this.nextNote();
     };
 
     setInfiniteLoop = () => {
       this.expect(/$/);
       this.mmlIndex++;
       this.notesInQueue.push({type: 'infinite-loop'});
-      this.hasInfiniteLoop = true;
     };
 
     startLoop = () => {
@@ -544,6 +531,7 @@ export module MML {
     parseMML = () => {
       while (this.mmlIndex < this.mml.length) {
         const prevMMLIndex = this.mmlIndex;
+        this.nextNote();
         switch (this.mml[this.mmlIndex]) {
           case 'c':
           case 'd':
@@ -675,13 +663,13 @@ export module MML {
       mmlDuration += prevExtension === defaultDuration ? "" : prevExtension;
       note.extensions.slice(1).map((extension) => {
         if (prevExtension === extension) {
-          if(!repetition){
+          if (!repetition) {
             mmlDuration += '~';
           }
           repetition++;
         }
         else {
-          if(repetition){
+          if (repetition) {
             mmlDuration += repetition;
             repetition = 0;
           }
@@ -729,10 +717,10 @@ export module MML {
             mmlText += "[";
             break;
           case "end-chord":
-            mmlText += "]" + this.stringifyNoteDuration(note,defaultDuration);
+            mmlText += "]" + this.stringifyNoteDuration(note, defaultDuration);
             break;
           case "rest":
-            mmlText += "r" + this.stringifyNoteDuration(note,defaultDuration);
+            mmlText += "r" + this.stringifyNoteDuration(note, defaultDuration);
             break;
           case "note":
             mmlText += this.stringifyNoteKey(note) + this.stringifyNoteDuration(note, defaultDuration);
