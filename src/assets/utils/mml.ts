@@ -164,21 +164,19 @@ export module MML {
       if (!mml) {
         return;
       }
-      let sequence = new Sequence(mml, header);
+      let sequence = new Sequence(mml);
       if(mml === headerMML){
         header = sequence;
         header.parseMML();
       }
       sequences.push(sequence);
     });
-    parseMML();
-  };
 
-  export const parseMML = () => {
     sequences.map(sequence => {
       sequence.parseMML();
     });
   };
+
 
   export const writeToMML = (): string => {
     return sequences.map(sequence => {
@@ -192,9 +190,8 @@ export module MML {
     }
 
     const relativeScheduleTime = audioContext.currentTime + scheduleTime;
-    header.playMML(startTime,relativeScheduleTime);
-    sequences.slice(1).map(sequence => {
-      sequence.playMML(startTime, relativeScheduleTime, header);
+    sequences.map(sequence => {
+      sequence.playMML(startTime, relativeScheduleTime);
     });
   };
 
@@ -212,7 +209,6 @@ export module MML {
 
   export const play = () => {
     stop();
-    parseMML();
     playInterval = setInterval(playMML, lookahead);
   };
 
@@ -287,7 +283,7 @@ export module MML {
     notesInQueue: SequenceNote[] = [];
     playState: PlayState;
 
-    constructor(mml: string, header?: Sequence | void) {
+    constructor(mml: string) {
       this.mml = mml;
       if (header) {
         this.tempo = header.tempo;
@@ -606,7 +602,7 @@ export module MML {
       }
     };
 
-    playMML = (relativeStartTime: number, relativeScheduleTime: number, header?: Sequence | void) => {
+    playMML = (relativeStartTime: number, relativeScheduleTime: number) => {
       while (this.playState.nextNoteTime < relativeScheduleTime
       && (!header || this.playState.nextNoteTime < header.playState.nextNoteTime)
       && this.playState.index < this.notesInQueue.length) {
