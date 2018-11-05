@@ -129,6 +129,7 @@ export class HomePage {
 
   readNotes = () => {
     this.sequences = MML.getNotesInQueue();
+
     this.expect(this.notes.length, this.sequences.length);
   };
 

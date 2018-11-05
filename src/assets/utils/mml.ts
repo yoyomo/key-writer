@@ -75,10 +75,14 @@ export interface PlayState {
   nextNoteTime: number,
   chord: boolean,
   tempo: number,
-  loopStartIndex: number,
+  startLoopIndex: number,
   loopCount: number,
-  loopEndIndex: number,
+  endLoopIndex: number,
   infiniteLoopIndex: number,
+
+  loopNoteTime: number,
+  startLoopOffset: number,
+  endLoopOffset: number,
 }
 
 export interface NotesInterface {
@@ -95,6 +99,7 @@ export module MML {
 
   let audioContext: AudioContext;
   let gain: GainNode;
+  let filter: BiquadFilterNode;
 
   let scheduleTime = 0.1;
   let lookahead = 25;
@@ -116,9 +121,15 @@ export module MML {
         || false;
 
     audioContext = new AudioContext();
+    filter = audioContext.createBiquadFilter();
     gain = audioContext.createGain();
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(500,0);
+    filter.connect(gain);
+
+    gain.gain.setValueAtTime(0.25, 0);
     gain.connect(audioContext.destination);
-    gain.gain.value = 0.25;
 
     calculateNotes();
   };
@@ -152,10 +163,10 @@ export module MML {
     const mmls = mmlString.toLowerCase().replace(/\s/g, '').split(';');
 
     let headerMML = '';
-    for(let i = mmls.length - 1; i >= 0; i--){
+    for (let i = mmls.length - 1; i >= 0; i--) {
       let mml = mmls[i];
-      if(mml.includes('%')){
-        headerMML = mmls.splice(i,1)[0];
+      if (mml.includes('%')) {
+        headerMML = mmls.splice(i, 1)[0];
       }
     }
     mmls.unshift(headerMML);
@@ -165,7 +176,7 @@ export module MML {
         return;
       }
       let sequence = new Sequence(mml);
-      if(mml === headerMML){
+      if (mml === headerMML) {
         header = sequence;
         header.parseMML();
       }
@@ -241,7 +252,7 @@ export module MML {
 
       switch (i) {
         case 1:
-          osc.type = 'sine';
+          osc.type = 'sawtooth';
           // osc.detune.value = -5;
           break;
         case 2:
@@ -250,7 +261,7 @@ export module MML {
           break;
       }
 
-      osc.connect(gain);
+      osc.connect(filter);
       osc.start(scheduledStartTime);
       osc.stop(scheduledStartTime + convertDurationToSeconds(note, tempo));
 
@@ -280,6 +291,8 @@ export module MML {
     mml: string;
     goToNext = false;
 
+    isHeader = false;
+
     notesInQueue: SequenceNote[] = [];
     playState: PlayState;
 
@@ -299,10 +312,14 @@ export module MML {
         nextNoteTime: 0,
         chord: false,
         tempo: 120,
-        loopStartIndex: -1,
+        startLoopIndex: -1,
         loopCount: -1,
-        loopEndIndex: -1,
+        endLoopIndex: -1,
         infiniteLoopIndex: -1,
+
+        loopNoteTime: 0,
+        startLoopOffset: 0,
+        endLoopOffset: 0,
       };
     };
 
@@ -535,6 +552,7 @@ export module MML {
     setHeader = () => {
       this.expect(/%/);
       this.notesInQueue.push({type: 'header'});
+      this.isHeader = true;
     };
 
     parseMML = () => {
@@ -604,33 +622,68 @@ export module MML {
 
     playMML = (relativeStartTime: number, relativeScheduleTime: number) => {
       while (this.playState.nextNoteTime < relativeScheduleTime
-      && (!header || this.playState.nextNoteTime < header.playState.nextNoteTime)
+      && (this.isHeader || !header || this.playState.nextNoteTime < header.playState.nextNoteTime)
       && this.playState.index < this.notesInQueue.length) {
+        if (!this.isHeader && header) {
+          if (header.playState.startLoopIndex >= 0 && this.playState.startLoopIndex < 0) {
+            this.playState.startLoopIndex = this.playState.index;
+            this.playState.startLoopOffset = header.playState.loopNoteTime - this.playState.nextNoteTime;
+            if (this.playState.startLoopOffset < 0) this.playState.startLoopOffset = 0;
+          }
+          else if (header.playState.endLoopIndex >= 0 && this.playState.endLoopIndex < 0) {
+            this.playState.endLoopIndex = this.playState.index;
+            this.playState.endLoopOffset = header.playState.loopNoteTime - this.playState.nextNoteTime;
+            if (this.playState.endLoopOffset < 0) this.playState.endLoopOffset = 0;
+            this.playState.loopCount = header.playState.loopCount;
+
+            this.playState.index = this.playState.startLoopIndex;
+            this.playState.nextNoteTime += this.playState.startLoopOffset;
+          }
+          else if (header.playState.loopCount !== this.playState.loopCount) {
+            if (header.playState.loopCount < 0) {
+              this.playState.index = this.playState.endLoopIndex;
+              this.playState.nextNoteTime += this.playState.endLoopOffset;
+
+              this.playState.loopCount = -1;
+              this.playState.startLoopIndex = -1;
+              this.playState.endLoopIndex = -1;
+            }
+            else {
+              this.playState.index = this.playState.startLoopIndex;
+              this.playState.nextNoteTime += this.playState.startLoopOffset;
+              this.playState.loopCount = header.playState.loopCount;
+            }
+          }
+        }
+
         const note = this.notesInQueue[this.playState.index];
         switch (note.type) {
           case 'start-loop':
-            this.playState.loopStartIndex = this.playState.index;
+            this.playState.startLoopIndex = this.playState.index;
+            this.playState.loopNoteTime = this.playState.nextNoteTime;
             break;
           case 'end-loop':
             if (this.playState.loopCount < 0) {
-              this.playState.loopEndIndex = this.playState.index;
+              this.playState.endLoopIndex = this.playState.index;
               this.playState.loopCount = note.times;
+              this.playState.loopNoteTime = this.playState.nextNoteTime;
             }
+
             this.playState.loopCount--;
             if (this.playState.loopCount > 0) {
-              this.playState.index = this.playState.loopStartIndex;
+              this.playState.index = this.playState.startLoopIndex;
             } else {
               this.playState.loopCount = -1;
-              this.playState.loopStartIndex = -1;
-              this.playState.loopEndIndex = -1;
+              this.playState.startLoopIndex = -1;
+              this.playState.endLoopIndex = -1;
             }
             break;
           case 'break-loop':
             if (this.playState.loopCount === 1) {
-              this.playState.index = this.playState.loopEndIndex;
+              this.playState.index = this.playState.endLoopIndex;
               this.playState.loopCount = -1;
-              this.playState.loopStartIndex = -1;
-              this.playState.loopEndIndex = -1;
+              this.playState.startLoopIndex = -1;
+              this.playState.endLoopIndex = -1;
             }
             break;
           case 'infinite-loop':
@@ -661,6 +714,8 @@ export module MML {
         }
 
         this.playState.index++;
+
+        if (this.isHeader) break;
       }
     };
 
