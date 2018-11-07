@@ -129,8 +129,23 @@ export class HomePage {
 
   readNotes = () => {
     this.sequences = MML.getNotesInQueue();
+    if(!this.sequences[0].filter(sn=>sn.type === 'header')){
+      this.sequences.unshift([
+        {type: 'header'},
+        {type: 'tempo', tempo: this.bpm},
+        {type: 'infinite-loop'},
+        {type: 'rest', extensions: [1,1,1,1]}
+      ])
+    }
 
-    this.expect(this.notes.length, this.sequences.length);
+
+    this.notes.map(note => {
+      if(!this.sequences[note.index + 1].filter(n=>{return n.type==="note" && n.index===note.index}).length){
+        this.sequences.splice(note.index + 1,0,[])
+      }
+    });
+
+    this.expect(this.notes.length, this.sequences.length-1);
   };
 
   stopOscillators = (noteIndex) => {
