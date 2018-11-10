@@ -17,10 +17,11 @@ export class HomePage {
   notes: NotesInterface[];
   whiteBottomKeys: NotesInterface[];
 
+  header: SequenceNote[];
   sequences: SequenceNote[][];
 
   bpm: number = 120;
-  defaultDuration: number = 4;
+  defaultExtension: number[] = [4];
   pedal = false;
   infiniteLoop = true;
   isPlaying = false;
@@ -128,24 +129,24 @@ export class HomePage {
   };
 
   readNotes = () => {
-    this.sequences = MML.getNotesInQueue();
-    if(!this.sequences[0].filter(sn=>sn.type === 'header')){
-      this.sequences.unshift([
-        {type: 'header'},
-        {type: 'tempo', tempo: this.bpm},
-        {type: 'infinite-loop'},
-        {type: 'rest', extensions: [1,1,1,1]}
-      ])
+    this.header = MML.getHeaderNotesInQueue();
+    if(!this.header) {
+      this.header = [
+          {type: 'header'},
+          {type: 'tempo', tempo: this.bpm},
+          {type: 'infinite-loop'},
+          {type: 'rest', extensions: [1,1,1,1]}
+          ];
     }
-
+    this.sequences = MML.getNotesInQueue();
 
     this.notes.map(note => {
-      if(!this.sequences[note.index + 1].filter(n=>{return n.type==="note" && n.index===note.index}).length){
-        this.sequences.splice(note.index + 1,0,[])
+      if(!(this.sequences[note.index] && this.sequences[note.index].filter(n=>{return n.type==="note" && n.index===note.index}).length)){
+        this.sequences.splice(note.index,0,[])
       }
     });
 
-    this.expect(this.notes.length, this.sequences.length-1);
+    this.expect(this.notes.length, this.sequences.length);
   };
 
   stopOscillators = (noteIndex) => {
@@ -159,12 +160,11 @@ export class HomePage {
       this.stopOscillators(noteIndex);
     }
     else {
-      let noteDuration = this.pedal ? 0 : this.defaultDuration;
       this.playingOscillators[noteIndex] =
           MML.playNote({
             type: "note",
             index: noteIndex,
-            extensions: [noteDuration]
+            extensions: this.pedal ? [0] : this.defaultExtension
           }, this.bpm, 0);
       this.playingOscillators[noteIndex].map((osc) => {
         osc.onended = () => this.stopOscillators(noteIndex);
@@ -261,7 +261,7 @@ export class HomePage {
 
   appendRest = () => {
     this.sequences[this.currentEditingNoteId.sequence].splice(++this.currentEditingNoteId.note, 0,
-        {type: "rest", extensions: [this.defaultDuration]});
+        {type: "rest", extensions: this.defaultExtension});
   };
 
   toggleInfiniteLoop = () => {
@@ -335,38 +335,26 @@ export class HomePage {
     }).then(bpmPopup => bpmPopup.present());
   };
 
-  updateDefaultDuration = (newDuration: number) => {
-    this.defaultDuration = newDuration;
+  updateDefaultExtension = (newExtension: number[]) => {
 
     this.sequences.map((sequence) => {
       for (let i = sequence.length - 1; i >= 0; i--) {
         let rest = sequence[i];
         if (rest.type === "note") break;
         if (rest.type !== "rest") continue;
-        if (MML.getDurationFromExtensions(rest) === this.defaultDuration) {
-          rest.extensions = [this.defaultDuration];
+        if (rest.extensions.join() === this.defaultExtension.join()) {
+          rest.extensions = newExtension;
         }
       }
     });
 
+    this.header.map(headerItem => {
+      if(headerItem.type === "default-duration"){
+        headerItem.extensions = newExtension;
+      }
+    });
 
-    this.sequences.map(sequence => {
-      let lengthFound = false;
-      for (let i = 0; i < sequence.length; i++) {
-        let seqNote = sequence[i];
-        if (seqNote.type === "default-duration") {
-          seqNote.extensions = [this.defaultDuration];
-          lengthFound = true;
-          break;
-        }
-      }
-      if (!lengthFound) {
-        sequence.unshift({
-          type: "default-duration",
-          extensions: [this.defaultDuration]
-        });
-      }
-    })
+    this.defaultExtension = newExtension;
   };
 
   getSelectedNote = (): TimedSequenceNote => {
@@ -384,7 +372,7 @@ export class HomePage {
       inputs: Object.keys(this.durations).map(d => {
         return {
           type: 'radio', name: 'duration', value: d, label: d,
-          checked: this.defaultDuration === parseInt(d)
+          checked: this.defaultExtension[0] === parseInt(d)
         }
       }),
       buttons: [
@@ -397,7 +385,7 @@ export class HomePage {
         }, {
           text: 'Ok',
           handler: (duration: string) => {
-            this.updateDefaultDuration(parseInt(duration));
+            this.updateDefaultExtension([parseInt(duration)]);
           }
         }
       ]

@@ -110,7 +110,7 @@ export module MML {
 
   let playInterval: Timer;
 
-  let header: Sequence;
+  let header: Sequence | void;
 
   export const initialize = () => {
     const AudioContext = window['AudioContext'] // Default
@@ -167,19 +167,16 @@ export module MML {
       let mml = mmls[i];
       if (mml.includes('%')) {
         headerMML = mmls.splice(i, 1)[0];
+        break;
       }
     }
-    mmls.unshift(headerMML);
+
+    header = new Sequence(headerMML);
+    header.parseMML();
 
     mmls.map(mml => {
-      if (!mml) {
-        return;
-      }
+      if (!mml) return;
       let sequence = new Sequence(mml);
-      if (mml === headerMML) {
-        header = sequence;
-        header.parseMML();
-      }
       sequences.push(sequence);
     });
 
@@ -190,9 +187,9 @@ export module MML {
 
 
   export const writeToMML = (): string => {
-    return sequences.map(sequence => {
+    return (header && header.writeToMML() || '').concat(sequences.map(sequence => {
       return sequence.writeToMML();
-    }).join();
+    }).join(""));
   };
 
   export const playMML = () => {
@@ -201,6 +198,7 @@ export module MML {
     }
 
     const relativeScheduleTime = audioContext.currentTime + scheduleTime;
+    header && header.playMML(startTime,relativeScheduleTime);
     sequences.map(sequence => {
       sequence.playMML(startTime, relativeScheduleTime);
     });
@@ -210,6 +208,7 @@ export module MML {
     clearInterval(playInterval);
     gain.disconnect(audioContext.destination);
     startTime = null;
+    header && header.resetPlayState();
     sequences.map(sequence => {
       sequence.resetPlayState();
     });
@@ -269,6 +268,10 @@ export module MML {
     }
 
     return oscillators;
+  };
+
+  export const getHeaderNotesInQueue = () => {
+    return header && header.notesInQueue;
   };
 
   export const getNotesInQueue = () => {
@@ -723,23 +726,23 @@ export module MML {
       return notes[note.index].key;
     };
 
-    stringifyNoteDuration = (note: TimedSequenceNote, defaultDuration = QUARTER_NOTE): string => {
+    stringifyNoteDuration = (note: TimedSequenceNote, defaultExtension: number[]): string => {
       let mmlDuration = "";
       let prevExtension = note.extensions[0];
-      let repetition = 0;
+      let occurrences = 1;
 
-      mmlDuration += prevExtension === defaultDuration ? "" : prevExtension;
+      mmlDuration += note.extensions.join('') === defaultExtension.join('') ? "" : prevExtension;
       note.extensions.slice(1).map((extension) => {
         if (prevExtension === extension) {
-          if (!repetition) {
+          if (occurrences === 1) {
             mmlDuration += '~';
           }
-          repetition++;
+          occurrences++;
         }
         else {
-          if (repetition) {
-            mmlDuration += repetition;
-            repetition = 0;
+          if (occurrences > 1) {
+            mmlDuration += occurrences;
+            occurrences = 1;
           }
 
           if (prevExtension === (extension / 2)) {
@@ -751,12 +754,13 @@ export module MML {
 
         prevExtension = extension;
       });
+      if (occurrences > 1) mmlDuration += occurrences;
       return mmlDuration;
     };
 
     writeToMML = (): string => {
       let mmlText = "";
-      let defaultDuration = QUARTER_NOTE;
+      let defaultExtensions = [QUARTER_NOTE];
       this.notesInQueue.map(note => {
         switch (note.type) {
           case "infinite-loop":
@@ -769,8 +773,8 @@ export module MML {
             mmlText += "t" + note.tempo;
             break;
           case "default-duration":
-            mmlText += "l" + this.stringifyNoteDuration(note);
-            defaultDuration = getDurationFromExtensions(note);
+            mmlText += "l" + this.stringifyNoteDuration(note,[]);
+            defaultExtensions = note.extensions;
             break;
           case "start-loop":
             mmlText += "/:";
@@ -788,13 +792,13 @@ export module MML {
             mmlText += "[";
             break;
           case "end-chord":
-            mmlText += "]" + this.stringifyNoteDuration(note, defaultDuration);
+            mmlText += "]" + this.stringifyNoteDuration(note, defaultExtensions);
             break;
           case "rest":
-            mmlText += "r" + this.stringifyNoteDuration(note, defaultDuration);
+            mmlText += "r" + this.stringifyNoteDuration(note, defaultExtensions);
             break;
           case "note":
-            mmlText += this.stringifyNoteKey(note) + this.stringifyNoteDuration(note, defaultDuration);
+            mmlText += this.stringifyNoteKey(note) + this.stringifyNoteDuration(note, defaultExtensions);
             break;
         }
       });
