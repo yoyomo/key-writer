@@ -125,10 +125,10 @@ export module MML {
     gain = audioContext.createGain();
 
     filter.type = "lowpass";
-    filter.frequency.setValueAtTime(500,0);
+    filter.frequency.setValueAtTime(700,0);
     filter.connect(gain);
 
-    gain.gain.setValueAtTime(0.25, 0);
+    // gain.gain.setValueAtTime(0.5, 0);
     gain.connect(audioContext.destination);
 
     calculateNotes();
@@ -213,8 +213,7 @@ export module MML {
       sequence.resetPlayState();
     });
 
-    gain = audioContext.createGain();
-    gain.connect(audioContext.destination);
+    initialize()
   };
 
   export const play = () => {
@@ -223,6 +222,7 @@ export module MML {
   };
 
   export const getDurationFromExtensions = (note: TimedSequenceNote): number => {
+    if(!note.extensions) return;
     let duration = note.extensions[0];
     note.extensions.slice(1).map(extension => {
       duration = MML.Sequence.calculateDurationFromNewExtension(duration, extension);
@@ -249,14 +249,14 @@ export module MML {
       const osc = audioContext.createOscillator();
       osc.frequency.value = notes[note.index].frequency;
 
-      switch (i) {
-        case 1:
+      switch (i%2) {
+        case 0:
           osc.type = 'sawtooth';
-          // osc.detune.value = -5;
+          osc.detune.value = -5;
           break;
-        case 2:
+        case 1:
           osc.type = 'sine';
-          // osc.detune.value = 5;
+          osc.detune.value = 5;
           break;
       }
 
@@ -628,6 +628,7 @@ export module MML {
       && (this.isHeader || !header || this.playState.nextNoteTime < header.playState.nextNoteTime)
       && this.playState.index < this.notesInQueue.length) {
         if (!this.isHeader && header) {
+          this.playState.tempo = header.tempo;
           if (header.playState.startLoopIndex >= 0 && this.playState.startLoopIndex < 0) {
             this.playState.startLoopIndex = this.playState.index;
             this.playState.startLoopOffset = header.playState.loopNoteTime - this.playState.nextNoteTime;
@@ -658,6 +659,9 @@ export module MML {
             }
           }
         }
+
+        let prevPlayState = this.playState;
+        this.playState = {...this.playState};
 
         const note = this.notesInQueue[this.playState.index];
         switch (note.type) {
@@ -718,7 +722,7 @@ export module MML {
 
         this.playState.index++;
 
-        if (this.isHeader) break;
+        if (this.isHeader && prevPlayState.nextNoteTime !== this.playState.nextNoteTime) break;
       }
     };
 
