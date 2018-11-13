@@ -52,6 +52,15 @@
 <ion-content>
   <div class="screen">
     <div class="book">
+      <div class="time-sequence">
+        <div *ngFor="let timeSection of header" class="time-section">
+          <div [ngSwitch]="timeSection.type">
+            <div *ngSwitchCase="'rest'">
+              <div *ngFor="let timeStep of timeSection.extensions" class="time-step" [style.height]="NOTE_SEGMENT_HEIGHT + 'px'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div id="sheet" (scroll)="handleSheetScroll($event)" class="sheet">
         <div [ngClass]="'left-margin sequence'"></div>
         <div *ngFor="let sequence of sequences; let sequenceIndex = index"
