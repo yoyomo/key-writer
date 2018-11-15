@@ -19,9 +19,10 @@ export class HomePage {
 
   header: SequenceNote[];
   sequences: SequenceNote[][];
+  timedSequences: number[];
 
-  bpm: number = 120;
-  defaultExtension: number[] = [4];
+  bpm = 120;
+  defaultExtension = [4];
   pedal = false;
   infiniteLoop = true;
   isPlaying = false;
@@ -118,8 +119,12 @@ export class HomePage {
     this.scrollLeftFrameRequest = this.requestAnimationFrame(() => this.sheet.scrollLeft = e.target.scrollLeft);
   };
 
+  getDurationHeight = (duration: number) => {
+    return this.NOTE_SEGMENT_HEIGHT * (QUARTER_NOTE / duration);
+  };
+
   getSequenceNoteHeight = (sequenceNote: TimedSequenceNote) => {
-    return this.NOTE_SEGMENT_HEIGHT * (QUARTER_NOTE / MML.getDurationFromExtensions(sequenceNote));
+    return this.getDurationHeight(MML.getDurationFromExtensions(sequenceNote));
   };
 
   expect = (expected, actual) => {
@@ -135,9 +140,20 @@ export class HomePage {
           {type: 'header'},
           {type: 'tempo', tempo: this.bpm},
           {type: 'infinite-loop'},
+          {type: 'default-duration', extensions: this.defaultExtension},
           {type: 'rest', extensions: [1,1,1,1]}
           ];
     }
+    this.timedSequences = [];
+    this.header.map(h => {
+      if(h.type === "rest"){
+        let expandedExtensions = [];
+        h.extensions.map(ext => {
+          expandedExtensions = expandedExtensions.concat(new Array(this.defaultExtension[0]).fill(this.defaultExtension[0]*ext));
+        });
+        this.timedSequences = this.timedSequences.concat(expandedExtensions);
+      }
+    });
     this.sequences = MML.getNotesInQueue();
 
     this.notes.map(note => {
