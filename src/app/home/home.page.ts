@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {MML, NotesInterface, QUARTER_NOTE, SequenceNote, TimedSequenceNote} from '../../assets/utils/mml';
+import {MML, NotesInterface, QUARTER_NOTE, Rest, SequenceNote, TimedSequenceNote} from '../../assets/utils/mml';
 import {AlertController} from '@ionic/angular';
 import Timer = NodeJS.Timer;
 
@@ -19,7 +19,7 @@ export class HomePage {
 
   header: SequenceNote[];
   sequences: SequenceNote[][];
-  timedSequences: number[];
+  timedSequences: Rest[];
 
   bpm = 120;
   defaultExtension = [4];
@@ -147,18 +147,20 @@ export class HomePage {
     this.timedSequences = [];
     this.header.map(h => {
       if(h.type === "rest"){
-        let expandedExtensions = [];
+        let expandedExtensions: number[] = [];
         h.extensions.map(ext => {
           expandedExtensions = expandedExtensions.concat(new Array(this.defaultExtension[0]).fill(this.defaultExtension[0]*ext));
         });
-        this.timedSequences = this.timedSequences.concat(expandedExtensions);
+        let rests: Rest[] = expandedExtensions.map((ext):Rest => {return {type: "rest", extensions: [ext]} });
+        this.timedSequences = this.timedSequences.concat(rests);
       }
     });
     this.sequences = MML.getNotesInQueue();
 
     this.notes.map(note => {
       if(!(this.sequences[note.index] && this.sequences[note.index].filter(n=>{return n.type==="note" && n.index===note.index}).length)){
-        this.sequences.splice(note.index,0,[])
+        this.sequences.splice(note.index,0,[{type: "octave", octave: note.octave}]);
+        this.sequences[note.index].concat(this.timedSequences)
       }
     });
 
