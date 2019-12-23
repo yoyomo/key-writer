@@ -30,6 +30,7 @@
     "@ionic/ng-toolkit": "1.0.0",
     "@ionic/schematics-angular": "1.0.1",
     "core-js": "^2.5.3",
+    "express": "^4.17.1",
     "ng": "0.0.0",
     "rxjs": "6.2.2",
     "zone.js": "^0.8.26"
